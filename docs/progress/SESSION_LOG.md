@@ -186,7 +186,26 @@ All 11 functions are **100% implemented, production-ready, and support Dev Mock 
 
 ---
 
-## 5. Next Immediate Phase: Frontend Implementation
+## 6. Session Update: Web Map Strategy, 3D Tracking & Prototype Clarifications
+
+- **Documentation Accuracy & Prototype Delineation**:
+  - Corrected misleading descriptions of `prototype/Phone/` across all repository documentation (`README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `apps/web/README.md`, `apps/web/consumer/README.md`, `apps/consumer/ios/README.md`, `apps/consumer/android/README.md`, `docs/roadmap/README.md`, `prototype/Phone/README.md`).
+  - Explicitly established that `prototype/Phone/` is strictly an **Interactive Mobile Phone Prototype** (simulates smartphone viewport, bottom navigation bar, smartphone touch interactions, and camera/mic flows) serving as the **Smartphone UI & UX Golden Master** for native iOS and Android apps, NOT a desktop web app. Production web portals live in `apps/web/`.
+- **Map & Geolocation Architecture Division**:
+  - Authored comprehensive specification: [`docs/architecture/mapping-routing-and-vehicle-tracking.md`](file:///home/rahul/codes/Evrry/docs/architecture/mapping-routing-and-vehicle-tracking.md).
+  - **Zero-Cost Web Mapping**: `apps/web/consumer` uses **MapLibre GL and OpenStreetMap tiles** (100% open-source, WebGL accelerated, $0 cost with unlimited map loads) to avoid Google Maps JavaScript API fees ($7.00/1,000 loads).
+  - **Live Tracking Helper Banner**: Web order and ride tracking renders a lightweight route polyline alongside a persistent helper prompt:
+    > 📱 *"For real-time 3D vehicle tracking and turn-by-turn navigation, open in the Evrry Phone App"*
+  - **Mobile 3D Isometric Vehicle Tracking**: Native Android and iOS apps use Google Maps SDK (100% free unlimited loads on Android, high free tier on iOS) rendering smooth **3D isometric vehicle markers (Scooter, Motorcycle, and Cab/Car)** with dynamic 360° bearing rotation along OSRM road routes and realistic ground drop-shadows.
+  - **Shared Routing Layer**: Both web and mobile use the self-hosted OSRM engine via Supabase Edge Function `routing` (`EvrryWebRoutingClient` in `apps/web/common/routing.ts`).
+  - Added `VehicleType`, `VehicleTrackingState`, `calculateBearing` mathematical helper, and `WEB_LIVE_TRACKING_PROMPT` to `apps/web/common/routing.ts`.
+- **Platform Roadmap Phase Synchronization**:
+  - Marked Phase 1 (Shared Backend & Database Foundations) as **100% Complete** across all 20 SQL migrations, 11 Edge Functions, PostGIS, Storage, and pg_cron maintenance schedules in `docs/roadmap/README.md`.
+  - Updated Phase 2 to focus on Production Web Applications (`apps/web/admin`, `apps/web/common`, `apps/web/consumer`, `apps/web/partner`).
+
+---
+
+## 7. Next Immediate Phase: Frontend Implementation
 
 The backend is 100% complete and self-contained. The roadmap now transitions to the UI screens:
 1. **Superadmin Operations Console (`apps/web/admin`)**:
@@ -194,12 +213,15 @@ The backend is 100% complete and self-contained. The roadmap now transitions to 
    - Voucher Creation Wizard & Budget Tracker (`/admin/marketing/vouchers`).
    - Split-screen Partner KYC Document Review Queue (`/admin/compliance/kyc`).
    - Midnight Settlement Batch Approval & ConnectIPS Export (`/admin/finance/payouts`).
-   - Midnight Settlement Batch Approval & ConnectIPS Export Console.
    - User & Rider Moderation (Bans, Cash Reconciliation).
 2. **Partner Web Portal (`apps/web/partner`)**:
    - Restaurant Kitchen Display System (KDS) & Order Management.
    - Menu Management & Photo-to-Menu Vision OCR.
    - Hotel Room Availability Calendar & Rate Editor.
-3. **Native Consumer & Partner Mobile Apps (`apps/consumer/`, `apps/partner/`)**:
-   - Android: Jetpack Compose with Material 3.
-   - iOS: SwiftUI with Clean Architecture.
+3. **Responsive Consumer Web Portal (`apps/web/consumer`)**:
+   - Catalog browsing with zero-cost MapLibre GL map view.
+   - Live order tracking with mobile app handoff banner.
+4. **Native Consumer & Partner Mobile Apps (`apps/consumer/`, `apps/partner/`)**:
+   - Android: Jetpack Compose with Material 3, Google Maps SDK, and 3D vehicle models.
+   - iOS: SwiftUI with Clean Architecture, Google Maps SDK, 3D vehicles, and mandatory 44pt in-app back buttons.
+

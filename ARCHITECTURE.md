@@ -50,24 +50,27 @@ This document describes the comprehensive system architecture of the **evrry** S
 
 ## 2. Core Application Segments
 
-### A. Prototype — `prototype/Phone/`
+### A. Mobile Phone Prototype — `prototype/Phone/`
 - **Status**: Current, working interactive reference.
-- **Technology**: Next.js 16 (App Router), React 18, TypeScript, Tailwind CSS, Zustand, Vitest, Playwright.
-- **Purpose**: Implements the multi-vertical mock catalog, conversational voice AI concierge, E2EE chat, WebRTC calling, and order simulations. Serves as the interactive blueprint for all production client applications.
+- **Technology**: Next.js 16 (App Router), React 18, TypeScript, Tailwind CSS, Zustand, Vitest (97 tests passing), Playwright.
+- **Purpose**: Implements the multi-vertical mock catalog, conversational voice AI concierge, E2EE chat, WebRTC calling, and order simulations. Form-factor is specifically designed and styled for **mobile smartphone viewports**, acting as the **Smartphone UI & UX Golden Master** for native iOS and Android apps. It is **NOT** a desktop web app or the consumer web portal.
 
 ### B. Consumer Applications — `apps/consumer/`
-- **Android**: `apps/consumer/android/` (Kotlin + Jetpack Compose)
-- **iOS**: `apps/consumer/ios/` (Swift + SwiftUI)
-- **Web**: `apps/web/consumer/` (Next.js + React)
-- **Purpose**: Dedicated to customer discovery, voice ordering, cart management, payments, and real-time order tracking.
+- **Android**: `apps/consumer/android/` (Kotlin + Jetpack Compose + Google Maps SDK with 3D isometric vehicles)
+- **iOS**: `apps/consumer/ios/` (Swift + SwiftUI + Google Maps SDK with 44pt in-app back buttons)
+- **Web**: `apps/web/consumer/` (Next.js + React + MapLibre GL / OpenStreetMap for zero-cost web mapping)
+- **Purpose**: Dedicated to customer discovery, voice ordering, cart management, payments, and real-time order/ride tracking.
 
-### C. Partner Applications — `apps/partner/`
+### C. Partner & Operations Applications — `apps/partner/` & `apps/web/`
 - **Android**: `apps/partner/android/` (Kotlin + Jetpack Compose for KDS, POS, and Rider mode)
 - **iOS**: `apps/partner/ios/` (Swift + SwiftUI for iPad counter and merchant management)
-- **Web Dashboard**: `apps/web/partner/` (Next.js + React for desktop business operations)
-- **Purpose**: Dedicated to merchant onboarding, catalog & inventory management, order fulfillment, kitchen printing, earnings tracking, and staff role assignment.
+- **Partner Web Dashboard**: `apps/web/partner/` (Next.js + React for desktop business operations, KDS, inventory)
+- **Superadmin Web Console**: `apps/web/admin/` (Next.js for Elifsi staff: KYC queue, driver approval, midnight payouts)
+- **Shared Web Client SDK**: `apps/web/common/` (Shared TypeScript bridges for Auth, Routing, Payments, Payouts, AI)
+- **Purpose**: Dedicated to merchant onboarding, catalog & inventory management, order fulfillment, kitchen printing, earnings tracking, and administrative governance.
 
-### D. Shared Backend — `supabase/`
+### D. Centralized Shared Backend — `supabase/`
+- **Status**: ✅ **100% Implemented** (20 SQL Migrations, 11 Edge Functions, PostGIS, Storage, pg_cron).
 - Centralized shared backend providing PostgreSQL, Authentication, Row Level Security, Realtime channels, and Edge Functions for all production clients.
 
 ---

@@ -14,10 +14,10 @@ Closes #
 
 ## Component(s) affected
 
-- [ ] `prototype/Phone/` — Web prototype & reference implementation
+- [ ] `prototype/Phone/` — Mobile phone experience prototype & smartphone UI golden master
 - [ ] `apps/consumer/` — Consumer applications (Android / iOS)
 - [ ] `apps/partner/` — Partner applications (Android / iOS)
-- [ ] `apps/web/` — Production web applications (Consumer / Partner)
+- [ ] `apps/web/` — Production web applications (Consumer / Partner / Admin / Common)
 - [ ] `supabase/` — Shared backend (Migrations / Functions / RLS)
 - [ ] `docs/` — Architecture / Product / Development documentation
 - [ ] `.github/` or `scripts/` — CI / tooling

@@ -42,7 +42,9 @@
       // update state
   }
   ```
-- **Zero Google Directions Fees**: Free Google Maps SDK / MapKit for map viewport; polylines and turn-by-turn geometry fetched from self-hosted OSRM endpoints.
+- **Live 3D Vehicle Tracking**: Google Maps iOS SDK / MapKit renders high-fidelity **3D isometric vehicle markers (Scooter, Motorcycle, and Cab)** with smooth 360° heading rotation along OSRM road polylines and ground drop-shadows.
+- **Zero Google Directions Fees**: Free Google Maps SDK / MapKit for map viewport; polylines, ETAs, and turn-by-turn geometry fetched from self-hosted OSRM endpoints (`supabase/functions/routing`).
+- **Mandatory In-App Back Navigation**: Top-left back button (`44x44 pt` minimum tap target) on every nested screen to prevent iOS navigation traps (see [`docs/architecture/unified-mobile-ui-and-ios-navigation.md`](file:///home/rahul/codes/Evrry/docs/architecture/unified-mobile-ui-and-ios-navigation.md)).
 
 ---
 
@@ -56,6 +58,7 @@
 
 ## 4. Reference Prototype
 
-Refer to the working web prototype at [`prototype/Phone/`](../../../prototype/Phone/) for feature workflows, state machines, and UX specifications.
+Refer to the working interactive phone prototype at [`prototype/Phone/`](../../../prototype/Phone/) for mobile smartphone feature workflows, state machines, and UX specifications. Note: `prototype/Phone/` is strictly a **mobile phone UI/UX golden master**, not a desktop web app.
 
 > ⚠️ **Security Reminder**: Never place Supabase `service_role` keys, private gateway secrets, or merchant keys into Xcode configurations, `Info.plist`, or app bundles.
+

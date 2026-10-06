@@ -109,19 +109,26 @@
 - Data separation and multi-tenant security are guaranteed at the database layer via **PostgreSQL Row Level Security (RLS)**.
 - Client applications access the database directly via Supabase SDKs using public `anon` credentials, scoped strictly by JWT authentication tokens.
 
-### C. Zero-Fee Open Routing (OSRM)
-- Instead of paying high per-request fees to Google Maps Directions API, road polylines, navigation paths, and ETAs are calculated on self-hosted OSRM containers running the `nepal-latest.osm.pbf` dataset.
+### C. Zero-Fee Routing (OSRM) & Multi-Platform Map Strategy
+- **Road Routing (OSRM)**: Instead of paying high per-request fees to Google Maps Directions API, road polylines, navigation paths, distance, and ETAs are calculated on self-hosted OSRM containers running the `nepal-latest.osm.pbf` dataset via Supabase Edge Function `routing`.
+- **Native Phone Apps (Android & iOS)**: Use Google Maps SDK (100% free unlimited loads on Android, high free tier on iOS) rendering high-fidelity **3D isometric vehicle icons (Scooter, Motorcycle, and Cab/Car)** with smooth 360° heading rotation along the OSRM route.
+- **Production Web Portal (`apps/web/consumer/`)**: Uses **MapLibre GL / OpenStreetMap** vector tiles (100% free with unlimited map loads, eliminating expensive Google Maps JavaScript API per-load fees). The web tracking screen displays a helper banner: *"For real-time 3D vehicle tracking and turn-by-turn navigation, open in the Evrry Phone App"*.
 
-### D. Reference Prototype Delineation
-- [`prototype/Phone/`](../../prototype/Phone/) is the working Next.js interactive prototype and visual/functional reference (75 tests passing).
-- [`apps/`](../../apps/) contains the planned production native and web clients.
+### D. Mobile Phone Prototype Delineation
+- [`prototype/Phone/`](../../prototype/Phone/) is strictly the **Interactive Mobile Phone Prototype** (simulates smartphone dimensions, bottom navigation bar, smartphone tap interactions, and camera/mic flows; 97 tests passing across 15 test suites). It acts as the **Smartphone UI & UX Golden Master** for native iOS and Android apps, NOT a desktop web portal.
+- [`apps/`](../../apps/) contains the planned production native apps (`apps/consumer/`, `apps/partner/`) and production responsive web portals (`apps/web/`).
 
 ---
 
 ## 4. Key Reference Documents
 - [Super App Specification & Reference Matrix](./superapp-specification.md)
+- [Mapping, Routing & 3D Vehicle Tracking Specification](./mapping-routing-and-vehicle-tracking.md)
+- [Self-Hosting & Infrastructure Guide](./self-hosting-and-infrastructure-guide.md)
+- [Unified Mobile UI Architecture & iOS In-App Navigation](./unified-mobile-ui-and-ios-navigation.md)
 - [Master Dependencies Specification](./dependencies-master.md)
 - [Consumer Architecture](./consumer.md)
 - [Partner Architecture](./partner.md)
 - [Payment Architecture](./payments.md)
 - [Partner Payout & Financial Architecture](./payouts.md)
+- [Superadmin Control Center](./superadmin-panel-control-center.md)
+

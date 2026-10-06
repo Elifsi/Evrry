@@ -15,10 +15,12 @@
 > | What you are looking for | Directory / Document | Status | Description |
 > |---|---|---|---|
 > | **Super App Specification** | [`docs/architecture/superapp-specification.md`](./docs/architecture/superapp-specification.md) | 📐 **Architecture Blueprint** | Full multi-vertical specification, tech stack protocols, and official repository reference matrix. |
-> | **Working Reference Prototype** | [`prototype/Phone/`](./prototype/Phone/) | ✅ **Current & Runnable** | Complete working Next.js 16 prototype with catalog, voice AI concierge, encrypted chat, WebRTC, and ride/order simulations. |
-> | **Consumer Mobile Apps** | [`apps/consumer/`](./apps/consumer/) | 🔮 Planned | Production native apps: [Android (Kotlin/Compose)](./apps/consumer/android/) and [iOS (Swift/SwiftUI)](./apps/consumer/ios/). |
+> | **Mobile Phone Prototype** | [`prototype/Phone/`](./prototype/Phone/) | ✅ **Current & Runnable** | Mobile phone UX simulation & smartphone UI golden master (Next.js 16) with catalog, voice AI concierge, E2EE chat, WebRTC, and ride/order simulations. |
+> | **Consumer Mobile Apps** | [`apps/consumer/`](./apps/consumer/) | 🔮 Planned | Production native apps: [Android (Kotlin/Compose)](./apps/consumer/android/) and [iOS (Swift/SwiftUI)](./apps/consumer/ios/) with Google Maps SDK & 3D vehicle models. |
 > | **Partner / Merchant Apps** | [`apps/partner/`](./apps/partner/) | 🔮 Planned | Production business apps: [Android (KDS/POS)](./apps/partner/android/) and [iOS (Merchant)](./apps/partner/ios/). |
+> | **Production Web Portals** | [`apps/web/`](./apps/web/) | 🔮 Planned | Production responsive web apps: [Consumer](./apps/web/consumer/) (MapLibre GL maps), [Partner Ops](./apps/web/partner/), [Superadmin Console](./apps/web/admin/), and [Shared SDK](./apps/web/common/). |
 > | **Centralized Shared Backend** | [`supabase/`](./supabase/) | ✅ **100% Implemented** | Shared Supabase backend: [20 Migrations](./supabase/migrations/), [11 Edge Functions](./supabase/functions/), PostGIS, Storage, and pg_cron. |
+> | **Mapping & 3D Tracking** | [`docs/architecture/mapping-routing-and-vehicle-tracking.md`](./docs/architecture/mapping-routing-and-vehicle-tracking.md) | 📚 Complete | Google Maps SDK + 3D isometric vehicles on mobile; zero-cost MapLibre GL on web; self-hosted OSRM routing. |
 > | **Self-Hosting & Hardware Sizing** | [`docs/architecture/self-hosting-and-infrastructure-guide.md`](./docs/architecture/self-hosting-and-infrastructure-guide.md) | 📚 Complete | Docker architecture, resource sizing (RAM, CPU, NVMe), image storage, and backup disaster recovery. |
 > | **Unified Mobile UI & Navigation** | [`docs/architecture/unified-mobile-ui-and-ios-navigation.md`](./docs/architecture/unified-mobile-ui-and-ios-navigation.md) | 📚 Complete | Strict 1:1 UI parity between Android and iOS with mandatory iOS in-app back buttons. |
 > | **Architecture & Tech Specs** | [`docs/architecture/`](./docs/architecture/) | 📚 Complete | Detailed system, consumer, partner, payment, WhatsApp OTP, and payout architecture documents. |
@@ -63,19 +65,19 @@ The platform unifies multiple native and web clients around a single, centralize
 Evrry/
 │
 ├── prototype/
-│   └── Phone/                 ← 🟢 START HERE: Working Next.js reference prototype
+│   └── Phone/                 ← 🟢 MOBILE PHONE PROTOTYPE: Smartphone UI & UX Golden Master
 │       ├── app/               # 41 App Router routes (Home, Explore, Chat, Snap, Rides)
 │       ├── components/        # Reusable UI & feature components
 │       ├── lib/               # Zustand stores, mock catalog, AI logic, E2EE crypto
 │       ├── server/            # WebSocket relay for E2EE chat & WebRTC signaling
 │       ├── e2e/               # Playwright browser end-to-end tests
-│       └── README.md          # Prototype documentation & feature catalog
+│       └── README.md          # Mobile phone prototype documentation
 │
 ├── apps/                      ← 🔮 PRODUCTION CLIENT APPLICATIONS (Planned)
 │   │
 │   ├── consumer/              # Customer-facing applications
-│   │   ├── android/           # Native Android app (Kotlin + Jetpack Compose)
-│   │   ├── ios/               # Native iOS app (Swift + SwiftUI)
+│   │   ├── android/           # Native Android app (Kotlin + Compose + Google Maps SDK)
+│   │   ├── ios/               # Native iOS app (Swift + SwiftUI + Google Maps SDK)
 │   │   └── README.md          # Consumer architecture & requirements
 │   │
 │   ├── partner/               # Business & merchant applications
@@ -84,15 +86,17 @@ Evrry/
 │   │   └── README.md          # Partner capabilities & workflows
 │   │
 │   └── web/                   # Production web portals
-│       ├── consumer/          # Customer web portal (Next.js + React)
+│       ├── admin/             # Superadmin Operations Console (Next.js)
+│       ├── common/            # Shared TypeScript Web SDK (Auth, Routing, Payments)
+│       ├── consumer/          # Customer web portal (Next.js + MapLibre GL)
 │       ├── partner/           # Merchant web management dashboard (Next.js)
 │       └── README.md          # Web surfaces overview
 │
-├── supabase/                  ← 🔮 SHARED BACKEND INFRASTRUCTURE
+├── supabase/                  ← ✅ SHARED BACKEND INFRASTRUCTURE (100% Implemented)
 │   ├── config.toml            # Local Supabase CLI configuration
 │   ├── seed.sql               # Local development seed data
-│   ├── migrations/            # Version-controlled SQL schema & RLS policies
-│   └── functions/             # Server-side Edge Functions (payments, payouts, AI)
+│   ├── migrations/            # 20 version-controlled SQL migrations with strict RLS
+│   └── functions/             # 11 server-side Edge Functions (payments, payouts, AI, routing)
 │
 ├── docs/                      ← 📚 PLATFORM DOCUMENTATION
 │   ├── architecture/          # System, Consumer, Partner, Payments, Payouts
@@ -149,7 +153,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 cd prototype/Phone
 npm run lint         # ESLint check (0 errors)
 npx tsc --noEmit     # TypeScript typecheck (0 errors)
-npm run test         # Vitest unit & integration tests (75/75 passing)
+npm run test         # Vitest unit & integration tests (97/97 tests passing across 15 suites)
 npm run build        # Production Next.js Turbopack build (41 routes compiled)
 ```
 
@@ -159,12 +163,14 @@ npm run build        # Production Next.js Turbopack build (41 routes compiled)
 
 | If you are working on... | Put your code in... | Guidelines |
 |---|---|---|
-| **Adding a UI idea or exploring UX** | `prototype/Phone/` | Fast-paced browser prototype. Local state, no production DB required. |
-| **Building the Consumer Android App** | `apps/consumer/android/` | Kotlin + Jetpack Compose. Clean Architecture. Connect to Supabase. |
-| **Building the Consumer iOS App** | `apps/consumer/ios/` | Swift + SwiftUI. Connect to Supabase. |
-| **Building the Consumer Web Portal** | `apps/web/consumer/` | Production Next.js. Connect to Supabase Auth & PostgreSQL. |
+| **Adding a mobile UI idea or exploring UX** | `prototype/Phone/` | Fast-paced mobile phone simulation. Local state, no production DB required. |
+| **Building the Consumer Android App** | `apps/consumer/android/` | Kotlin + Jetpack Compose + Google Maps SDK + 3D isometric vehicle markers. |
+| **Building the Consumer iOS App** | `apps/consumer/ios/` | Swift + SwiftUI + Google Maps SDK + 44pt in-app back buttons. |
+| **Building the Consumer Web Portal** | `apps/web/consumer/` | Production Next.js + MapLibre GL / OpenStreetMap (zero Google JS costs). |
 | **Building the Partner Android App** | `apps/partner/android/` | Kotlin + Compose. Order receipt printing, KDS, rider dispatch. |
-| **Building the Partner Web Portal** | `apps/web/partner/` | Next.js desktop dashboard for inventory, analytics, and staff. |
+| **Building the Partner Web Portal** | `apps/web/partner/` | Next.js desktop dashboard for inventory, analytics, KDS, and staff. |
+| **Building the Superadmin Console** | `apps/web/admin/` | Next.js internal operations console: KYC queue, payouts, pricing configs. |
+| **Shared Web Client SDK** | `apps/web/common/` | Shared TypeScript bridges for Auth, Routing, Payments, Payouts, AI. |
 | **Database Schemas & RLS** | `supabase/migrations/` | Timestamped forward-only SQL migrations. RLS required on every table. |
 | **Payments, Payouts & Privileged Backend** | `supabase/functions/` | Deno/TypeScript Edge Functions. Private keys stay server-side. |
 

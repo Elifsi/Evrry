@@ -1,10 +1,12 @@
-# evrry — Web Prototype & Reference Implementation
+# Evrry — Mobile Phone Experience Prototype & Smartphone UI Golden Master
 
-> **Important**: This directory contains the original **evrry mobile prototype**, developed by **Elifsi Technologies Private Limited**.
-> It is an end-to-end interactive demo that serves as the **visual, UX, interaction, and functional reference** for the future production consumer applications (Android, iOS, Web) and partner applications.
+> **Important**: This directory contains the interactive **Evrry Mobile Phone Prototype**, developed by **Elifsi Technologies Private Limited**.
+> It is an end-to-end interactive smartphone simulation that serves as the **visual, UX, interaction, and functional golden master** for the upcoming native mobile phone applications (Android Jetpack Compose & iOS SwiftUI).
+>
+> ⚠️ **Form-Factor Clarity**: This prototype is specifically styled and structured for **mobile phone form-factors** (bottom navigation, mobile touch gestures, floating action buttons, smartphone camera/mic interactions). It is **NOT** the production desktop web portal (production web applications live in [`apps/web/`](../../apps/web/)).
 >
 > **Do NOT delete, rewrite, or replace this prototype with a stub.**
-> It is intentionally decoupled from production backend infrastructure to allow rapid visual and workflow experimentation.
+> It is intentionally decoupled from production database infrastructure to allow rapid visual, conversational voice, and workflow experimentation.
 
 ---
 
@@ -12,11 +14,12 @@
 
 | Directory | Purpose | Status |
 |---|---|---|
-| `prototype/Phone/` | Visual, functional, and UX reference for the entire platform | ✅ **Current & Working** |
-| `apps/consumer/` | Native Android and iOS consumer applications | 🔮 Planned |
-| `apps/partner/` | Native Android and iOS partner/merchant applications | 🔮 Planned |
-| `apps/web/` | Production consumer and partner web portals | 🔮 Planned |
-| `supabase/` | Centralized production backend (DB, Auth, RLS, Edge Functions) | 🔮 Planned |
+| `prototype/Phone/` | **Mobile Phone Experience Prototype** (Smartphone UI, UX & Interaction Master) | ✅ **Current & Working** |
+| `apps/consumer/` | Native Android & iOS consumer applications (Google Maps SDK + 3D isometric vehicles) | 🔮 Planned |
+| `apps/partner/` | Native Android & iOS partner/merchant applications (KDS, POS, Rider modes) | 🔮 Planned |
+| `apps/web/` | Production web applications (`consumer/`, `partner/`, `admin/`, shared `common/`) | 🔮 Planned |
+| `supabase/` | Centralized shared backend (20 Migrations, 11 Edge Functions, PostGIS, Storage, pg_cron) | ✅ **100% Implemented** |
+
 
 ---
 
@@ -98,9 +101,9 @@ This starts both the Next.js frontend (port 3000) and the WebSocket relay (port 
 cd prototype/Phone
 npm run lint         # ESLint check
 npx tsc --noEmit     # TypeScript typecheck
-npm run test         # Vitest unit + integration tests (75 tests)
+npm run test         # Vitest unit + integration tests (97 tests, 15 suites passing)
 npm run test:e2e     # Playwright browser end-to-end tests
-npm run build        # Production Next.js build
+npm run build        # Production Next.js build (41 routes compiled)
 ```
 
 ---

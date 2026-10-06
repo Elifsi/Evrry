@@ -8,16 +8,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-> **Monorepo note**: This repository contains the **evrry** Super App platform, developed by **Elifsi Technologies Private Limited**:
+> **Monorepo note**: This repository contains the **Evrry** Super App platform, developed by **Elifsi Technologies Private Limited**:
 >
 > | Path | Purpose | Status |
 > |------|---------|--------|
-> | `prototype/Phone/` | Working Next.js prototype (visual & functional reference) | ✅ Current |
-> | `apps/consumer/` | Native Android & iOS consumer applications | 🔮 Planned |
-> | `apps/partner/` | Native Android & iOS partner applications | 🔮 Planned |
-> | `apps/web/` | Production consumer & partner web applications | 🔮 Planned |
+> | `prototype/Phone/` | **Mobile Phone Experience Prototype** (Smartphone UI & Functional Reference — NOT desktop web) | ✅ Current |
+> | `apps/consumer/` | Native Android & iOS consumer applications (Google Maps SDK + 3D isometric vehicles) | 🔮 Planned |
+> | `apps/partner/` | Native Android & iOS partner applications (KDS, POS, Rider modes) | 🔮 Planned |
+> | `apps/web/` | Production web applications (`consumer/`, `partner/`, `admin/`, shared `common/`; MapLibre GL maps) | 🔮 Planned |
 > | `supabase/` | Centralized shared backend (20 Migrations, 11 Edge Functions, PostGIS, Storage, pg_cron) | ✅ 100% Implemented |
 >
-> **Running the Prototype**:
+> **Running the Mobile Phone Prototype**:
 > Run `next dev` (and all npm commands) from `prototype/Phone/`, not the repository root.
 > The `node_modules/next/` package is installed at `prototype/Phone/node_modules/next/`.
+

@@ -21,6 +21,7 @@ Welcome to the **evrry** Super App platform documentation, developed by **Elifsi
 - [Partner Architecture](./architecture/partner.md) — Partner clients, merchant workflows, and tenant isolation.
 - [Payment Gateways & Domestic Integration](./architecture/payment-gateways-nepal.md) — eSewa, Khalti, ConnectIPS, and Fonepay gateway architecture.
 - [Midnight Settlement & ConnectIPS](./architecture/midnight-settlement-connectips.md) — Automated merchant balance settlement and bank disbursements.
+- [Mapping, Routing & 3D Vehicle Tracking](./architecture/mapping-routing-and-vehicle-tracking.md) — Google Maps SDK vs. OSRM routing, zero-cost MapLibre GL web strategy, and 3D isometric vehicle tracking.
 - [UI/UX Design System](./design/UI_DESIGN_SYSTEM.md) — Brand, colors, typography, components, screens, tokens, and app-icon/asset size checklist.
 - [Partner Payout & Financial Architecture](./architecture/payouts.md) — Payout subsystem, financial data model, settlement cycles, and ledger principles.
 

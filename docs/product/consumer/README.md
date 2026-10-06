@@ -35,6 +35,7 @@ A voice-first, AI-native super-app where users can seamlessly discover, chat, or
 
 ## 3. Product Roadmap Status
 
-- **Visual & Interaction Prototype**: Complete and runnable at [`prototype/Phone/`](../../../prototype/Phone/).
-- **Native Android & iOS**: Planned.
-- **Production Web**: Planned.
+- **Mobile Phone Experience Prototype**: Complete and runnable at [`prototype/Phone/`](../../../prototype/Phone/) (interactive smartphone UI & functional golden master).
+- **Production Consumer Web**: Planned at [`apps/web/consumer/`](../../../apps/web/consumer/) (Next.js responsive web application with MapLibre GL zero-cost map viewer).
+- **Native Android & iOS Apps**: Planned at [`apps/consumer/android/`](../../../apps/consumer/android/) and [`apps/consumer/ios/`](../../../apps/consumer/ios/) (Google Maps SDK with 3D isometric vehicle models).
+

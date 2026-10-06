@@ -52,7 +52,8 @@ implementation("androidx.camera:camera-view:1.3.2")
 - **UI Framework**: 100% Jetpack Compose with Material 3 theming.
 - **Async Concurrency**: Kotlin Coroutines and reactive `StateFlow` / `SharedFlow`.
 - **Realtime Integration**: Supabase `postgresChangeFlow` for live order status and encrypted chat sync.
-- **Zero Google Directions Fees**: Free Google Maps SDK for base tiles; road polylines and ETAs rendered from self-hosted OSRM endpoints (`http://osrm.evrry.com.np:5000/route/v1/driving/...`).
+- **Live 3D Vehicle Tracking**: Google Maps Android SDK (100% free with unlimited map loads) renders high-fidelity **3D isometric vehicle markers (Scooter, Motorcycle, and Cab/Car)** with smooth 360° heading rotation along OSRM road polylines and ground drop-shadows.
+- **Zero Google Directions Fees**: Free Google Maps SDK for base tiles; road polylines and ETAs rendered from self-hosted OSRM endpoints (`supabase/functions/routing` or direct OSRM container).
 
 ---
 
@@ -67,6 +68,7 @@ implementation("androidx.camera:camera-view:1.3.2")
 
 ## 4. Reference Prototype
 
-Refer to the working web prototype at [`prototype/Phone/`](../../../prototype/Phone/) for feature workflows, state machines, and UX specifications.
+Refer to the working interactive phone prototype at [`prototype/Phone/`](../../../prototype/Phone/) for mobile smartphone feature workflows, state machines, and UX specifications. Note: `prototype/Phone/` is strictly a **mobile phone UI/UX golden master**, not a desktop web app.
 
 > ⚠️ **Security Reminder**: Never place Supabase `service_role` keys, private gateway secrets, or merchant keys into Android build configs, code, or assets.
+

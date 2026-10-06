@@ -136,4 +136,46 @@ export class EvrryWebRoutingClient {
     }
     return points;
   }
+
+  /**
+   * Computes the heading bearing (0° to 360°) from point A to point B.
+   * Used for smooth 360° rotation of 3D vehicle icons (Scooter, Motorcycle, Cab).
+   */
+  static calculateBearing(from: LatLng, to: LatLng): number {
+    const rad = Math.PI / 180;
+    const lat1 = from.lat * rad;
+    const lat2 = to.lat * rad;
+    const dLng = (to.lng - from.lng) * rad;
+    const y = Math.sin(dLng) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+    const bearing = (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
+    return Math.round(bearing);
+  }
 }
+
+/**
+ * 3D Isometric Vehicle Types supported across mobile apps & web tracking
+ */
+export type VehicleType = 'scooter' | 'motorcycle' | 'cab';
+
+export interface VehicleTrackingState {
+  orderId: string;
+  driverId: string;
+  vehicleType: VehicleType;
+  position: LatLng;
+  bearingDegrees: number; // 0 to 360 degrees
+  speedKmh?: number;
+  etaMinutes: number;
+}
+
+/**
+ * Constant prompt banner displayed on web order/ride tracking views
+ */
+export const WEB_LIVE_TRACKING_PROMPT = {
+  bannerTitle: 'For real-time 3D vehicle tracking and turn-by-turn navigation, open in the Evrry Phone App',
+  ctaText: 'Open in App',
+  deepLinkScheme: 'evrry://order-tracking',
+  mapProviderWeb: 'maplibre-gl',
+  mapTileSource: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+} as const;
+
