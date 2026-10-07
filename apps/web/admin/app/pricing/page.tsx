@@ -14,21 +14,35 @@ import {
   TrendingUp,
   Receipt,
   HelpCircle,
-  Layers,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
 } from "lucide-react";
 import { fetchPricingSettings, updatePricingSettings } from "@/lib/admin/api";
 import { PlatformPricingSettings } from "@/lib/admin/types";
 import { initialPricingSettings } from "@/lib/admin/mockData";
 
-type PricingCategoryTab = "delivery" | "platform" | "rider" | "commissions";
-
 export default function PricingControlPage() {
   const [settings, setSettings] = useState<PlatformPricingSettings>(initialPricingSettings);
-  const [activeTab, setActiveTab] = useState<PricingCategoryTab>("delivery");
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
-  const [adminNote, setAdminNote] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Deploy Confirmation Modal
+  const [showDeployModal, setShowDeployModal] = useState(false);
+  const [deployAuditNote, setDeployAuditNote] = useState("");
+  const [isDeploying, setIsDeploying] = useState(false);
+
+  // Section Accordion State
+  const [expandedSections, setExpandedSections] = useState({
+    delivery: true,
+    platform: true,
+    splits: true,
+  });
+
+  const toggleSection = (sec: "delivery" | "platform" | "splits") => {
+    setExpandedSections((prev) => ({ ...prev, [sec]: !prev[sec] }));
+  };
 
   const loadSettings = async () => {
     setIsRefreshing(true);
@@ -41,37 +55,52 @@ export default function PricingControlPage() {
     loadSettings();
   }, []);
 
-  const handleSave = async () => {
-    const res = await updatePricingSettings(settings, "suman@evrry.com.np");
-    setSavedMessage(res.message);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 5000);
-  };
-
   const handleReset = () => {
     setSettings(initialPricingSettings);
   };
 
-  // Interactive Live Financial Simulation State
+  const handleConfirmDeploy = async () => {
+    if (!deployAuditNote.trim()) return;
+    setIsDeploying(true);
+    const res = await updatePricingSettings(settings, "suman@evrry.com.np");
+    setIsDeploying(false);
+    setShowDeployModal(false);
+    setSavedMessage(res.message);
+    setSavedSuccess(true);
+    setDeployAuditNote("");
+    setTimeout(() => setSavedSuccess(false), 5000);
+  };
+
+  // Interactive Live Pre-Flight Simulator State
   const [simDistanceKm, setSimDistanceKm] = useState(5);
   const [simOrderAmountNpr, setSimOrderAmountNpr] = useState(800);
 
-  // Dynamic Economic Calculations
+  // Unit Economics Calculations matching Prompt Specifications
   const baseRadiusKm = settings.baseDeliveryRadiusMeters / 1000;
   const extraKm = Math.max(0, simDistanceKm - baseRadiusKm);
   const extraFeePaisa = extraKm * settings.extraDistanceFeePerKmPaisa;
   const standardDeliveryPaisa = settings.baseDeliveryFeePaisa + extraFeePaisa;
   const isFreeDelivery = simOrderAmountNpr * 100 >= settings.freeDeliveryThresholdPaisa;
   const customerChargedDeliveryPaisa = isFreeDelivery ? 0 : standardDeliveryPaisa;
+
   const driverExtraCutPaisa = (extraFeePaisa * settings.driverExtraDistanceShareBps) / 10000;
   const totalDriverPayoutPaisa = settings.driverBaseSharePaisa + driverExtraCutPaisa;
+
   const platformFeePaisa = settings.platformFeeWaiver ? 0 : settings.platformFeePaisa;
   const merchantCommissionPaisa = (simOrderAmountNpr * 100 * settings.commissions.foodBps) / 10000;
+  const vatPaisa = Math.round((platformFeePaisa * settings.vatBps) / 10000);
+
+  // Customer Pays = Basket + Delivery Fee + Platform Fee + VAT
+  const totalCustomerPaysPaisa =
+    simOrderAmountNpr * 100 + customerChargedDeliveryPaisa + platformFeePaisa + vatPaisa;
+
+  // Net EVRRY Revenue = Platform Fee + Merchant Commission + Delivery Margin
   const platformDeliveryMarginPaisa = customerChargedDeliveryPaisa - totalDriverPayoutPaisa;
-  const totalPlatformNetRevenuePaisa = platformFeePaisa + merchantCommissionPaisa + platformDeliveryMarginPaisa;
+  const totalPlatformNetRevenuePaisa =
+    platformFeePaisa + merchantCommissionPaisa + platformDeliveryMarginPaisa;
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col h-screen overflow-y-auto bg-slate-50/75">
       <AdminHeader
         title="Dynamic Fee & Pricing Control Matrix"
         subtitle="Zero-SQL Live Governance • Instant Client-Side Reactive Updates"
@@ -82,135 +111,77 @@ export default function PricingControlPage() {
       <div className="p-6 md:p-8 space-y-6 flex-1 max-w-[1500px] w-full mx-auto">
         {/* Success Alert */}
         {savedSuccess && (
-          <div className="bg-brand-50 border border-brand-200 p-4 rounded-2xl text-brand-900 text-xs flex items-center justify-between shadow-sm">
+          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-800 text-xs flex items-center justify-between shadow-sm animate-fade-in">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-brand-600 shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
               <span className="font-semibold">{savedMessage}</span>
             </div>
-            <span className="text-[11px] font-mono text-brand-700 bg-white px-2.5 py-1 rounded-md border border-brand-200">
-              Database: platform_settings (Live Synced)
+            <span className="text-[11px] font-mono text-emerald-700 bg-white px-2.5 py-1 rounded-md border border-emerald-200">
+              Live in Database
             </span>
           </div>
         )}
 
         {/* Action Header Card */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-border shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
           <div>
-            <h2 className="text-base font-bold text-ink tracking-tight flex items-center gap-2">
-              <Percent className="w-5 h-5 text-brand-600" />
+            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Percent className="w-5 h-5 text-teal-600" />
               Platform Pricing & Take-Rate Governance
             </h2>
-            <p className="text-xs text-ink-muted mt-0.5">
-              Parameters apply dynamically across Kathmandu Valley and nationwide operations. Updates logged to audit trail.
+            <p className="text-xs text-slate-500 mt-0.5">
+              Parameters apply dynamically across Kathmandu Valley and nationwide operations. Updates permanently logged.
             </p>
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
             <button
               onClick={handleReset}
-              className="px-4 py-2 border border-border hover:bg-slate-50 text-ink-muted hover:text-ink text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset Defaults
             </button>
             <button
-              onClick={handleSave}
-              className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-brand-900/20"
+              onClick={() => setShowDeployModal(true)}
+              className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
             >
               <Save className="w-3.5 h-3.5" />
-              Save & Apply Parameters
+              Deploy Pricing Version
             </button>
           </div>
         </div>
 
         {/* Main Grid: Parameters Workspace (Left) & Simulator Desk (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Segmented Parameters Form Desk (7 cols) */}
+          {/* Left Column: Expandable Parameter Sections (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
-            {/* Segmented Category Navigation */}
-            <div className="bg-white p-2 rounded-2xl border border-border shadow-sm flex items-center gap-1.5 overflow-x-auto">
-              {[
-                {
-                  id: "delivery" as PricingCategoryTab,
-                  label: "Delivery Distance",
-                  icon: Truck,
-                },
-                {
-                  id: "platform" as PricingCategoryTab,
-                  label: "Platform Fees & VAT",
-                  icon: DollarSign,
-                },
-                {
-                  id: "rider" as PricingCategoryTab,
-                  label: "Rider Payout Share",
-                  icon: Bike,
-                },
-                {
-                  id: "commissions" as PricingCategoryTab,
-                  label: "Vertical Take-Rates",
-                  icon: Sparkles,
-                },
-              ].map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
-                      isActive
-                        ? "bg-brand-600 text-white shadow-sm"
-                        : "bg-surface-subtle text-ink-muted hover:text-ink hover:bg-slate-100"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* TAB CONTENT 1: Delivery Distance & Free Delivery */}
-            {activeTab === "delivery" && (
-              <div className="bg-white p-6 rounded-2xl border border-border shadow-sm space-y-5 animate-fade-in">
-                <div className="border-b border-border pb-3">
-                  <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-brand-600" />
-                    Delivery Distance Bands & Basket Thresholds
-                  </h3>
-                  <p className="text-xs text-ink-muted mt-0.5">
-                    Controls customer delivery tariffs, base service radius, and free delivery qualification.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border">
-                    <label className="block text-xs font-bold text-ink mb-1">
-                      Base Delivery Fee (NPR)
-                    </label>
-                    <div className="relative mt-1">
-                      <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-bold">
-                        Rs
-                      </span>
-                      <input
-                        type="number"
-                        step="5"
-                        value={settings.baseDeliveryFeePaisa / 100}
-                        onChange={(e) =>
-                          setSettings({
-                            ...settings,
-                            baseDeliveryFeePaisa: Math.round(Number(e.target.value) * 100),
-                          })
-                        }
-                        className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 font-bold text-ink"
-                      />
-                    </div>
-                    <p className="text-[11px] text-ink-muted mt-1.5">
-                      Standard delivery flat rate within the initial base radius.
-                    </p>
+            {/* 1. Delivery Fee Engine */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => toggleSection("delivery")}
+                className="w-full p-4 flex items-center justify-between bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <Truck className="w-4 h-4" />
                   </div>
+                  <div className="text-left">
+                    <h3 className="text-sm font-bold text-slate-900">Delivery Fee Engine</h3>
+                    <p className="text-[11px] text-slate-500">Base radius, delivery fees, and free delivery thresholds</p>
+                  </div>
+                </div>
+                {expandedSections.delivery ? (
+                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                )}
+              </button>
 
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border">
-                    <label className="block text-xs font-bold text-ink mb-1">
+              {expandedSections.delivery && (
+                <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
                       Base Delivery Radius (Kilometers)
                     </label>
                     <div className="relative mt-1">
@@ -224,25 +195,41 @@ export default function PricingControlPage() {
                             baseDeliveryRadiusMeters: Math.round(Number(e.target.value) * 1000),
                           })
                         }
-                        className="w-full px-3 py-2 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 font-bold text-ink"
+                        className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-ink-muted font-bold">
-                        km
-                      </span>
+                      <span className="absolute right-3 top-2 text-xs text-slate-400 font-bold">km</span>
                     </div>
-                    <p className="text-[11px] text-ink-muted mt-1.5">
-                      Distance covered by base fee (Default: 3.0 km).
-                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">Distance covered by base fee (Default: 3 km).</p>
                   </div>
 
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border">
-                    <label className="block text-xs font-bold text-ink mb-1">
-                      Extra Distance Tariff (NPR per km)
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Base Delivery Fee (NPR within radius)
                     </label>
                     <div className="relative mt-1">
-                      <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-bold">
-                        Rs
-                      </span>
+                      <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">Rs</span>
+                      <input
+                        type="number"
+                        step="5"
+                        value={settings.baseDeliveryFeePaisa / 100}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            baseDeliveryFeePaisa: Math.round(Number(e.target.value) * 100),
+                          })
+                        }
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1">Standard rate charged within base radius (Default: Rs 50).</p>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Incremental Distance Rate (NPR per km)
+                    </label>
+                    <div className="relative mt-1">
+                      <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">Rs</span>
                       <input
                         type="number"
                         step="1"
@@ -253,25 +240,19 @@ export default function PricingControlPage() {
                             extraDistanceFeePerKmPaisa: Math.round(Number(e.target.value) * 100),
                           })
                         }
-                        className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 font-bold text-ink"
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-ink-muted font-bold">
-                        / km
-                      </span>
+                      <span className="absolute right-3 top-2 text-xs text-slate-400 font-bold">/km</span>
                     </div>
-                    <p className="text-[11px] text-ink-muted mt-1.5">
-                      Incremental surcharge per km beyond the 3 km base.
-                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">Added per km beyond base radius (Default: Rs 15/km).</p>
                   </div>
 
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border">
-                    <label className="block text-xs font-bold text-ink mb-1">
-                      Free Delivery Cart Minimum (NPR)
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Free Delivery Threshold (NPR Basket)
                     </label>
                     <div className="relative mt-1">
-                      <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-bold">
-                        Rs
-                      </span>
+                      <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">Rs</span>
                       <input
                         type="number"
                         step="50"
@@ -282,39 +263,46 @@ export default function PricingControlPage() {
                             freeDeliveryThresholdPaisa: Math.round(Number(e.target.value) * 100),
                           })
                         }
-                        className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 font-bold text-ink"
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
                       />
                     </div>
-                    <p className="text-[11px] text-ink-muted mt-1.5">
-                      Baskets equal or exceeding this qualify for 100% free delivery.
-                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">Baskets &ge; this receive 100% free delivery (Default: Rs 1,200).</p>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* TAB CONTENT 2: Platform Fee & VAT */}
-            {activeTab === "platform" && (
-              <div className="bg-white p-6 rounded-2xl border border-border shadow-sm space-y-5 animate-fade-in">
-                <div className="border-b border-border pb-3">
-                  <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-brand-600" />
-                    Platform Fee & Tax Governance
-                  </h3>
-                  <p className="text-xs text-ink-muted mt-0.5">
-                    Order handling fee per checkout and Nepal IRD VAT compliance parameters.
-                  </p>
+            {/* 2. Platform Fees & Taxes */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => toggleSection("platform")}
+                className="w-full p-4 flex items-center justify-between bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-sm font-bold text-slate-900">Platform Fees & Taxes</h3>
+                    <p className="text-[11px] text-slate-500">Fixed checkout fee, promotional waivers, and statutory VAT</p>
+                  </div>
                 </div>
+                {expandedSections.platform ? (
+                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                )}
+              </button>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border">
-                    <label className="block text-xs font-bold text-ink mb-1">
-                      Per-Order Platform Fee (NPR)
+              {expandedSections.platform && (
+                <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Fixed Order Platform Fee (NPR)
                     </label>
                     <div className="relative mt-1">
-                      <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-bold">
-                        Rs
-                      </span>
+                      <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">Rs</span>
                       <input
                         type="number"
                         step="1"
@@ -325,24 +313,20 @@ export default function PricingControlPage() {
                             platformFeePaisa: Math.round(Number(e.target.value) * 100),
                           })
                         }
-                        className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 font-bold text-ink"
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
                       />
                     </div>
-                    <p className="text-[11px] text-ink-muted mt-1.5">
-                      Standard fee applied per completed order across Food, Mart, and Parcel checkout.
-                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">Charged on every food, mart, and parcel checkout (Default: Rs 10).</p>
                   </div>
 
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border flex flex-col justify-between">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 flex flex-col justify-between">
                     <div>
-                      <label className="block text-xs font-bold text-ink mb-1">
-                        Promotional Fee Waiver
+                      <label className="block text-xs font-bold text-slate-800 mb-0.5">
+                        Promotional Fee Waiver Switch
                       </label>
-                      <p className="text-[11px] text-ink-muted">
-                        Instantly waives the platform fee for all consumer apps during festive promotions.
-                      </p>
+                      <p className="text-[10px] text-slate-500">Instantly waives the platform fee across mobile apps.</p>
                     </div>
-                    <div className="pt-3 flex items-center gap-3">
+                    <div className="pt-2 flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() =>
@@ -352,7 +336,7 @@ export default function PricingControlPage() {
                           })
                         }
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          settings.platformFeeWaiver ? "bg-brand-600" : "bg-slate-200"
+                          settings.platformFeeWaiver ? "bg-teal-600" : "bg-slate-300"
                         }`}
                       >
                         <span
@@ -361,378 +345,360 @@ export default function PricingControlPage() {
                           }`}
                         />
                       </button>
-                      <span className="text-xs font-bold text-ink">
-                        {settings.platformFeeWaiver ? "Waiver Active (Rs 0 Fee)" : "Standard Fee Active"}
+                      <span className="text-xs font-bold text-slate-800">
+                        {settings.platformFeeWaiver ? "Waiver Active (Rs 0)" : "Standard Fee Active"}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border col-span-1 sm:col-span-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="block text-xs font-bold text-ink">
-                          Inland Revenue Dept (IRD) Value Added Tax (VAT)
-                        </label>
-                        <p className="text-[11px] text-ink-muted mt-0.5">
-                          Statutory VAT percentage applied to taxable commissions and digital platform fees.
-                        </p>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 col-span-1 sm:col-span-2 flex items-center justify-between">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800">
+                        Nepal IRD Value Added Tax (VAT)
+                      </label>
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        Statutory VAT itemized on taxable digital platform revenue.
+                      </p>
+                    </div>
+                    <span className="font-mono font-bold text-xs bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200/70">
+                      {(settings.vatBps / 100).toFixed(1)}% (1300 bps)
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Take-Rate Splits & Commissions */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => toggleSection("splits")}
+                className="w-full p-4 flex items-center justify-between bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-sm font-bold text-slate-900">Take-Rate Splits & Vertical Commissions</h3>
+                    <p className="text-[11px] text-slate-500">Rider distance share and merchant commission percentages</p>
+                  </div>
+                </div>
+                {expandedSections.splits ? (
+                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                )}
+              </button>
+
+              {expandedSections.splits && (
+                <div className="p-5 space-y-4 animate-fade-in">
+                  {/* Rider Split */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-slate-100">
+                    <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                      <label className="block text-xs font-bold text-slate-800 mb-1">
+                        Base Rider Pay (0-3 km)
+                      </label>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">Rs</span>
+                        <input
+                          type="number"
+                          step="5"
+                          value={settings.driverBaseSharePaisa / 100}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              driverBaseSharePaisa: Math.round(Number(e.target.value) * 100),
+                            })
+                          }
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                        />
                       </div>
-                      <span className="font-mono font-bold text-brand-600 text-sm bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-200">
-                        {(settings.vatBps / 100).toFixed(1)}% (Statutory)
-                      </span>
+                      <p className="text-[10px] text-slate-500 mt-1">Guaranteed rider pay per completed drop (Default: Rs 40).</p>
                     </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* TAB CONTENT 3: Rider & Driver Earnings Share */}
-            {activeTab === "rider" && (
-              <div className="bg-white p-6 rounded-2xl border border-border shadow-sm space-y-5 animate-fade-in">
-                <div className="border-b border-border pb-3">
-                  <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-                    <Bike className="w-4 h-4 text-brand-600" />
-                    Delivery Rider & Driver Split Model
-                  </h3>
-                  <p className="text-xs text-ink-muted mt-0.5">
-                    Guaranteed delivery payout per drop and extra distance revenue pass-through.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border">
-                    <label className="block text-xs font-bold text-ink mb-1">
-                      Base Guaranteed Rider Payout (0–3 km)
-                    </label>
-                    <div className="relative mt-1">
-                      <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-bold">
-                        Rs
-                      </span>
-                      <input
-                        type="number"
-                        step="5"
-                        value={settings.driverBaseSharePaisa / 100}
-                        onChange={(e) =>
-                          setSettings({
-                            ...settings,
-                            driverBaseSharePaisa: Math.round(Number(e.target.value) * 100),
-                          })
-                        }
-                        className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 font-bold text-ink"
-                      />
-                    </div>
-                    <p className="text-[11px] text-ink-muted mt-1.5">
-                      Guaranteed minimum earnings per completed order in hand.
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-surface-subtle rounded-xl border border-border">
-                    <label className="block text-xs font-bold text-ink mb-1">
-                      Extra Distance Pass-Through Share (%)
-                    </label>
-                    <div className="relative mt-1">
-                      <input
-                        type="number"
-                        step="5"
-                        min="50"
-                        max="100"
-                        value={settings.driverExtraDistanceShareBps / 100}
-                        onChange={(e) =>
-                          setSettings({
-                            ...settings,
-                            driverExtraDistanceShareBps: Math.round(Number(e.target.value) * 100),
-                          })
-                        }
-                        className="w-full px-3 py-2 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 font-bold text-ink"
-                      />
-                      <span className="absolute right-3 top-2.5 text-xs text-ink-muted font-bold">
-                        %
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-ink-muted mt-1.5">
-                      Percentage of the extra km fee paid directly to the delivery rider.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB CONTENT 4: Vertical Take-Rates */}
-            {activeTab === "commissions" && (
-              <div className="bg-white p-6 rounded-2xl border border-border shadow-sm space-y-5 animate-fade-in">
-                <div className="border-b border-border pb-3">
-                  <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-brand-600" />
-                    Vertical Commission Rates (Take-Rates)
-                  </h3>
-                  <p className="text-xs text-ink-muted mt-0.5">
-                    Platform take-rate deducted from merchant and service earnings during midnight settlement.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    {
-                      name: "Restaurants & Dining",
-                      key: "foodBps" as const,
-                      val: settings.commissions.foodBps,
-                      max: 3000,
-                    },
-                    {
-                      name: "Grocery & Kirana Marts",
-                      key: "groceryBps" as const,
-                      val: settings.commissions.groceryBps,
-                      max: 2000,
-                    },
-                    {
-                      name: "Bike-Taxi Rides",
-                      key: "bikeTaxiBps" as const,
-                      val: settings.commissions.bikeTaxiBps,
-                      max: 2500,
-                    },
-                    {
-                      name: "Cab & Car Taxi Rides",
-                      key: "cabTaxiBps" as const,
-                      val: settings.commissions.cabTaxiBps,
-                      max: 2500,
-                    },
-                    {
-                      name: "Hotels & Stays",
-                      key: "hotelBps" as const,
-                      val: settings.commissions.hotelBps,
-                      max: 2500,
-                    },
-                    {
-                      name: "Room Rentals (Long-term)",
-                      key: "rentalBps" as const,
-                      val: settings.commissions.rentalBps,
-                      max: 1500,
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.key}
-                      className="p-4 bg-surface-subtle rounded-xl border border-border space-y-2"
-                    >
-                      <div className="flex items-center justify-between text-xs font-bold">
-                        <span className="text-ink">{item.name}</span>
-                        <span className="text-brand-600 font-mono text-xs bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
-                          {(item.val / 100).toFixed(1)}%
-                        </span>
+                    <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                      <label className="block text-xs font-bold text-slate-800 mb-1">
+                        Rider Distance Share (%)
+                      </label>
+                      <div className="relative mt-1">
+                        <input
+                          type="number"
+                          step="5"
+                          min="50"
+                          max="100"
+                          value={settings.driverExtraDistanceShareBps / 100}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              driverExtraDistanceShareBps: Math.round(Number(e.target.value) * 100),
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                        />
+                        <span className="absolute right-3 top-2 text-xs text-slate-400 font-bold">%</span>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max={item.max}
-                        step="50"
-                        value={item.val}
-                        onChange={(e) =>
-                          setSettings({
-                            ...settings,
-                            commissions: {
-                              ...settings.commissions,
-                              [item.key]: Number(e.target.value),
-                            },
-                          })
-                        }
-                        className="w-full accent-brand-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
-                      />
-                      <div className="flex justify-between text-[10px] text-ink-subtle font-mono">
-                        <span>0%</span>
-                        <span>{item.val} bps</span>
-                        <span>{item.max / 100}%</span>
-                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">Extra distance tariff passed directly to rider (Default: 80%).</p>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Vertical Commissions Sliders */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {[
+                      { name: "Restaurant Commission", key: "foodBps" as const, val: settings.commissions.foodBps, max: 3000 },
+                      { name: "Grocery Mart Commission", key: "groceryBps" as const, val: settings.commissions.groceryBps, max: 2000 },
+                      { name: "Bike-Taxi Rides", key: "bikeTaxiBps" as const, val: settings.commissions.bikeTaxiBps, max: 2500 },
+                      { name: "Cab & Taxi Rides", key: "cabTaxiBps" as const, val: settings.commissions.cabTaxiBps, max: 2500 },
+                      { name: "Hotels & Stays", key: "hotelBps" as const, val: settings.commissions.hotelBps, max: 2500 },
+                      { name: "Room Rentals", key: "rentalBps" as const, val: settings.commissions.rentalBps, max: 1500 },
+                    ].map((item) => (
+                      <div key={item.key} className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-slate-800">{item.name}</span>
+                          <span className="text-teal-700 font-mono text-[11px] bg-teal-50 px-2 py-0.5 rounded border border-teal-200/60">
+                            {(item.val / 100).toFixed(1)}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max={item.max}
+                          step="50"
+                          value={item.val}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              commissions: {
+                                ...settings.commissions,
+                                [item.key]: Number(e.target.value),
+                              },
+                            })
+                          }
+                          className="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Right Column: Live Financial Simulator Desk (5 cols - Clean Light Surface) */}
+          {/* Right Column: Live Pre-Flight Unit Economics Simulator (5 cols) */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="bg-white p-6 rounded-2xl border border-border shadow-sm space-y-5 sticky top-24">
-              {/* Simulator Header */}
-              <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5 sticky top-20">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
                     <TrendingUp className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-ink">Live Financial Simulator</h3>
-                    <p className="text-[11px] text-ink-muted">Pre-flight unit economics validator</p>
+                    <h3 className="text-sm font-bold text-slate-900">Pre-Flight Unit Economics Simulator</h3>
+                    <p className="text-[11px] text-slate-500">Live parametric formula validator</p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-brand-50 text-brand-700 border border-brand-200 px-2 py-0.5 rounded-full font-bold">
-                  Interactive
+                <span className="text-[10px] bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full font-bold">
+                  Live
                 </span>
               </div>
 
-              {/* Explanatory note */}
-              <div className="text-[11px] text-ink-muted bg-surface-subtle p-3 rounded-xl border border-border flex items-start gap-2">
-                <HelpCircle className="w-3.5 h-3.5 text-brand-600 shrink-0 mt-0.5" />
-                <span>
-                  Simulates customer delivery fees, rider payout, and platform net margin based on distance and basket size before saving changes.
-                </span>
-              </div>
-
-              {/* Interactive Scenario Controls */}
-              <div className="space-y-3 text-xs">
-                <div>
-                  <div className="flex justify-between text-[11px] text-ink-muted mb-1.5 font-medium">
-                    <span>Simulated Distance:</span>
-                    <span className="font-mono font-bold text-ink">{simDistanceKm} km</span>
+              {/* Dynamic Sliders */}
+              <div className="space-y-4 text-xs">
+                {/* Distance Slider */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between font-semibold">
+                    <span className="text-slate-700">Distance Slider:</span>
+                    <span className="font-mono font-bold text-teal-700">{simDistanceKm} km</span>
                   </div>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {[3, 5, 8, 12].map((km) => (
-                      <button
-                        key={km}
-                        type="button"
-                        onClick={() => setSimDistanceKm(km)}
-                        className={`py-1.5 rounded-xl text-xs font-semibold transition-all border ${
-                          simDistanceKm === km
-                            ? "bg-brand-600 text-white border-brand-600 shadow-sm"
-                            : "bg-surface-subtle text-ink-muted border-border hover:bg-slate-100"
-                        }`}
-                      >
-                        {km} km
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] text-ink-muted mb-1.5 font-medium">
-                    <span>Order Basket (Food / Mart):</span>
-                    <span className="font-mono font-bold text-ink">Rs {simOrderAmountNpr}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {[
-                      { label: "Rs 600 (Normal)", val: 600 },
-                      { label: "Rs 1,200 (Free Deliv)", val: 1200 },
-                    ].map((opt) => (
-                      <button
-                        key={opt.val}
-                        type="button"
-                        onClick={() => setSimOrderAmountNpr(opt.val)}
-                        className={`py-1.5 px-2 rounded-xl text-xs font-semibold transition-all border text-center ${
-                          simOrderAmountNpr === opt.val
-                            ? "bg-brand-600 text-white border-brand-600 shadow-sm"
-                            : "bg-surface-subtle text-ink-muted border-border hover:bg-slate-100"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Economic Calculation Breakdown */}
-              <div className="p-4 bg-surface-subtle rounded-xl border border-border space-y-2.5 text-xs">
-                <div className="flex justify-between py-1 border-b border-slate-200 text-ink-muted">
-                  <span>Platform Fee (Checkout):</span>
-                  <span className="font-mono font-bold text-ink">
-                    Rs {(platformFeePaisa / 100).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-1 border-b border-slate-200 text-ink-muted">
-                  <span>
-                    Delivery ({simDistanceKm} km):
-                  </span>
-                  <span className="font-mono font-bold text-ink">
-                    Rs {(standardDeliveryPaisa / 100).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg border border-border items-center">
-                  <div>
-                    <div className="font-bold text-ink">Customer Charged Delivery</div>
-                    {isFreeDelivery && (
-                      <span className="text-[10px] text-emerald-700 font-medium">
-                        100% Free Delivery Promotion Applied
-                      </span>
-                    )}
-                  </div>
-                  <span
-                    className={`text-xs font-bold font-mono ${
-                      isFreeDelivery ? "text-slate-400 line-through" : "text-brand-700"
-                    }`}
-                  >
-                    Rs {(customerChargedDeliveryPaisa / 100).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-1 border-b border-slate-200 text-ink-muted">
-                  <span>Driver Payout (Base + Extra):</span>
-                  <span className="font-mono font-bold text-ink">
-                    Rs {(totalDriverPayoutPaisa / 100).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-1 border-b border-slate-200 text-ink-muted">
-                  <span>Merchant Take-Rate ({settings.commissions.foodBps / 100}%):</span>
-                  <span className="font-mono font-bold text-ink">
-                    +Rs {(merchantCommissionPaisa / 100).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-1 border-b border-slate-200 text-ink-muted">
-                  <span>Delivery Margin (Fee - Payout):</span>
-                  <span
-                    className={`font-mono font-bold ${
-                      platformDeliveryMarginPaisa >= 0 ? "text-emerald-700" : "text-rose-700"
-                    }`}
-                  >
-                    {platformDeliveryMarginPaisa >= 0 ? "+" : ""}Rs {(platformDeliveryMarginPaisa / 100).toFixed(2)}
-                  </span>
-                </div>
-
-                {/* Net Unit Economics Card */}
-                <div className="p-3 rounded-xl border bg-brand-50 border-brand-200 flex items-center justify-between text-brand-950 mt-2">
-                  <div>
-                    <div className="text-[10px] uppercase font-bold text-brand-800">
-                      Platform Net Revenue
-                    </div>
-                    <div className="text-[10px] text-brand-700">Fee + Commission + Margin</div>
-                  </div>
-                  <div
-                    className={`text-base font-bold font-mono ${
-                      totalPlatformNetRevenuePaisa >= 0 ? "text-brand-900" : "text-rose-700"
-                    }`}
-                  >
-                    Rs {(totalPlatformNetRevenuePaisa / 100).toFixed(2)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Approval Note & Commit Action */}
-              <div className="space-y-3 pt-1">
-                <div>
-                  <label className="block text-[11px] font-bold text-ink mb-1">
-                    Audit Note / Governance Reference
-                  </label>
                   <input
-                    type="text"
-                    placeholder="e.g. Approved seasonal delivery adjustments"
-                    value={adminNote}
-                    onChange={(e) => setAdminNote(e.target.value)}
-                    className="w-full bg-surface-subtle border border-border rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600"
+                    type="range"
+                    min="1"
+                    max="15"
+                    step="1"
+                    value={simDistanceKm}
+                    onChange={(e) => setSimDistanceKm(Number(e.target.value))}
+                    className="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                   />
+                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                    <span>1 km</span>
+                    <span>5 km</span>
+                    <span>10 km</span>
+                    <span>15 km</span>
+                  </div>
                 </div>
 
-                <button
-                  onClick={handleSave}
-                  className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-900/20 transition-all flex items-center justify-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Commit Changes to Platform Database
-                </button>
+                {/* Cart Basket Slider */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between font-semibold">
+                    <span className="text-slate-700">Cart Basket Size:</span>
+                    <span className="font-mono font-bold text-teal-700">Rs {simOrderAmountNpr.toLocaleString()}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="300"
+                    max="5000"
+                    step="100"
+                    value={simOrderAmountNpr}
+                    onChange={(e) => setSimOrderAmountNpr(Number(e.target.value))}
+                    className="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                    <span>Rs 300</span>
+                    <span>Rs 1,200 (Threshold)</span>
+                    <span>Rs 5,000</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Specification Formulas Output Table */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-3 text-xs">
+                {/* 1. Customer Pays Formula */}
+                <div className="space-y-1 pb-2 border-b border-slate-200/80">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    1. Customer Pays Breakdown
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Basket + Delivery ({simDistanceKm} km):</span>
+                    <span className="font-mono">
+                      Rs {simOrderAmountNpr} + Rs {(customerChargedDeliveryPaisa / 100).toFixed(0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Platform Fee + VAT ({settings.vatBps / 100}%):</span>
+                    <span className="font-mono">
+                      Rs {(platformFeePaisa / 100).toFixed(0)} + Rs {(vatPaisa / 100).toFixed(0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pt-1">
+                    <span>Total Customer Pays:</span>
+                    <span className="font-mono text-sm text-teal-700">
+                      Rs {(totalCustomerPaysPaisa / 100).toFixed(0)}
+                    </span>
+                  </div>
+                  {isFreeDelivery && (
+                    <div className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      ✓ Free delivery qualified (&ge; Rs {settings.freeDeliveryThresholdPaisa / 100})
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Driver Take-Home Formula */}
+                <div className="space-y-1 pb-2 border-b border-slate-200/80">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    2. Driver Take-Home Formula
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Base Cut (0-3 km):</span>
+                    <span className="font-mono">Rs {(settings.driverBaseSharePaisa / 100).toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Distance Share ({settings.driverExtraDistanceShareBps / 100}% of {extraKm} km):</span>
+                    <span className="font-mono">+Rs {(driverExtraCutPaisa / 100).toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pt-1">
+                    <span>Total Driver Take-Home:</span>
+                    <span className="font-mono text-sm text-emerald-700">
+                      Rs {(totalDriverPayoutPaisa / 100).toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. Net EVRRY Revenue Formula */}
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    3. Net EVRRY Revenue Formula
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Platform Fee:</span>
+                    <span className="font-mono">+Rs {(platformFeePaisa / 100).toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Merchant Commission ({settings.commissions.foodBps / 100}%):</span>
+                    <span className="font-mono">+Rs {(merchantCommissionPaisa / 100).toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Delivery Margin (Fee - Driver):</span>
+                    <span className={`font-mono ${platformDeliveryMarginPaisa >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
+                      {platformDeliveryMarginPaisa >= 0 ? "+" : ""}Rs {(platformDeliveryMarginPaisa / 100).toFixed(0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-900 pt-1 bg-white p-2 rounded-lg border border-slate-200">
+                    <span>Net EVRRY Revenue:</span>
+                    <span className="font-mono text-sm text-teal-800 font-extrabold">
+                      Rs {(totalPlatformNetRevenuePaisa / 100).toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Primary Action Button */}
+              <button
+                onClick={() => setShowDeployModal(true)}
+                className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                Deploy Pricing Version
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Deploy Confirmation Modal */}
+      {showDeployModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+                <h3 className="text-sm font-bold text-slate-900">
+                  Deploy Pricing Version to Production
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowDeployModal(false)}
+                className="text-slate-400 hover:text-slate-700 text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500">
+              This action updates platform settings and invalidates client fee cache immediately across all consumer and rider apps in Nepal.
+            </p>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-800 mb-1">
+                Audit Reason & Reference (Required):
+              </label>
+              <textarea
+                rows={2}
+                required
+                value={deployAuditNote}
+                onChange={(e) => setDeployAuditNote(e.target.value)}
+                placeholder="e.g. Revised monsoon delivery tariffs approved by VP Operations"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setShowDeployModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDeploy}
+                disabled={!deployAuditNote.trim() || isDeploying}
+                className="px-5 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-sm disabled:opacity-50"
+              >
+                {isDeploying ? "Deploying..." : "Confirm & Deploy"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

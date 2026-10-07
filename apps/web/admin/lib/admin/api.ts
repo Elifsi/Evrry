@@ -469,6 +469,38 @@ export async function toggleRiderCodLock(riderId: string): Promise<RiderCodBalan
   return updated;
 }
 
+export async function recordRiderCashHandover(
+  riderId: string,
+  amountPaisa: number,
+  receiptRef: string = "BANK-DEPOSIT-CASH"
+): Promise<{ success: boolean; rider?: RiderCodBalance }> {
+  const index = cachedRiders.findIndex((r) => r.riderId === riderId);
+  if (index === -1) return { success: false };
+
+  const current = cachedRiders[index];
+  const newBalance = Math.max(0, current.cashInHandPaisa - amountPaisa);
+  const newSafetyStatus: RiderCodBalance["safetyStatus"] =
+    newBalance >= 500000 ? "hard_locked" : newBalance >= 350000 ? "soft_warning" : "normal";
+
+  const updated: RiderCodBalance = {
+    ...current,
+    cashInHandPaisa: newBalance,
+    safetyStatus: newSafetyStatus,
+    lastDepositTime: "Just now",
+  };
+  cachedRiders[index] = updated;
+
+  await recordAdminAuditLog({
+    adminName: "Suman Adhikari (VP Operations)",
+    adminEmail: "suman@evrry.com.np",
+    actionType: "RIDER_COD_HANDOVER_RECORDED",
+    details: `Recorded cash handover of Rs ${(amountPaisa / 100).toLocaleString()} for ${current.riderName}. Remaining float: Rs ${(newBalance / 100).toLocaleString()}. Ref: ${receiptRef}`,
+    ipAddress: "103.10.29.14 (Kathmandu)",
+  });
+
+  return { success: true, rider: updated };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 5. AUDIT TRAIL LOGGING (public.admin_audit_logs)
 // ─────────────────────────────────────────────────────────────────────────────

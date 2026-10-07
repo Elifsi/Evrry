@@ -116,7 +116,7 @@ export interface AdminUserItem {
   id: string;
   name: string;
   phone: string;
-  role: "consumer" | "driver" | "merchant" | "admin" | "superadmin";
+  role: "consumer" | "driver" | "rider" | "merchant" | "admin" | "superadmin";
   status: "active" | "suspended" | "banned" | "cod_disabled";
   registeredDate: string;
   deviceUuid: string;

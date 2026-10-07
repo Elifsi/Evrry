@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,13 +9,13 @@ import {
   FileCheck2,
   Wallet,
   Ticket,
-  ShieldAlert,
-  ChevronRight,
   ShieldCheck,
   Users,
   HelpCircle,
   LogOut,
-  UserCheck,
+  ChevronLeft,
+  ChevronRight,
+  ShieldAlert,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAdminAuth } from "@/lib/admin/auth";
@@ -24,49 +25,63 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
-  badgeVariant?: "warning" | "brand" | "neutral";
+  badgeVariant?: "warning" | "brand" | "neutral" | "success";
 }
 
-const navSections: Array<{ title: string; items: NavItem[] }> = [
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
   {
-    title: "OPERATIONS CORE",
+    title: "Core Operations",
     items: [
       { name: "Overview Dashboard", href: "/", icon: LayoutDashboard },
-      { name: "Dynamic Pricing & Fees", href: "/pricing", icon: Percent },
       {
-        name: "Partner KYC Queue",
+        name: "KYC & Compliance",
         href: "/compliance/kyc",
         icon: FileCheck2,
-        badge: "Pending",
+        badge: "Review",
         badgeVariant: "warning",
       },
-      { name: "User & Driver Moderation", href: "/users", icon: Users },
-    ],
-  },
-  {
-    title: "FINANCE & GROWTH",
-    items: [
       {
-        name: "Midnight Payouts & COD",
-        href: "/finance/payouts",
-        icon: Wallet,
-        badge: "pg_cron",
-        badgeVariant: "brand",
-      },
-      {
-        name: "Disputes & Refunds",
+        name: "Customer Disputes",
         href: "/disputes",
         icon: HelpCircle,
         badge: "Open",
         badgeVariant: "warning",
       },
-      { name: "Vouchers & Promotions", href: "/marketing/vouchers", icon: Ticket },
     ],
   },
   {
-    title: "SYSTEM GOVERNANCE",
+    title: "Financials",
     items: [
-      { name: "Compliance & VAT", href: "/settings/governance", icon: ShieldAlert },
+      {
+        name: "Payouts & Settlement",
+        href: "/finance/payouts",
+        icon: Wallet,
+        badge: "ConnectIPS",
+        badgeVariant: "brand",
+      },
+      { name: "Dynamic Pricing", href: "/pricing", icon: Percent },
+    ],
+  },
+  {
+    title: "Platform Growth",
+    items: [
+      { name: "Users & Partners", href: "/users", icon: Users },
+      { name: "Marketing Vouchers", href: "/marketing/vouchers", icon: Ticket },
+    ],
+  },
+  {
+    title: "Governance",
+    items: [
+      {
+        name: "Audit Trail & Settings",
+        href: "/settings/governance",
+        icon: ShieldAlert,
+      },
     ],
   },
 ];
@@ -74,6 +89,7 @@ const navSections: Array<{ title: string; items: NavItem[] }> = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const { admin, logout } = useAdminAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // If on login route, sidebar is hidden
   if (pathname === "/login") {
@@ -81,32 +97,49 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="w-64 h-screen flex flex-col shrink-0 bg-white border-r border-border sticky top-0 z-30 select-none shadow-sm">
+    <aside
+      className={clsx(
+        "h-screen flex flex-col shrink-0 bg-white border-r border-slate-200/80 sticky top-0 z-30 select-none shadow-sm transition-all duration-200 ease-in-out",
+        isCollapsed ? "w-20" : "w-64"
+      )}
+    >
       {/* Brand Header */}
-      <div className="shrink-0 p-5 border-b border-border flex items-center justify-between bg-white">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-brand-900/30 group-hover:bg-brand-700 transition-colors">
+      <div className="shrink-0 p-4 border-b border-slate-100 flex items-center justify-between bg-white h-16">
+        <Link
+          href="/"
+          className={clsx(
+            "flex items-center gap-3 group overflow-hidden",
+            isCollapsed && "justify-center w-full"
+          )}
+        >
+          <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white font-bold text-base shadow-sm shrink-0 group-hover:bg-teal-700 transition-colors">
             E
           </div>
-          <div>
-            <div className="text-ink font-bold text-base tracking-tight flex items-center gap-1.5">
-              EVRRY
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 border border-brand-200">
-                Admin
-              </span>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <div className="text-slate-900 font-bold text-sm tracking-tight flex items-center gap-1.5 truncate">
+                EVRRY
+                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-teal-50 text-teal-700 border border-teal-200/60">
+                  Admin
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-500 font-medium truncate">
+                Operator Workspace
+              </div>
             </div>
-            <div className="text-[11px] text-ink-muted font-medium">Operations Console</div>
-          </div>
+          )}
         </Link>
       </div>
 
-      {/* Navigation Sections (Independent Scrollable Area) */}
+      {/* Navigation Sections */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {navSections.map((section) => (
           <div key={section.title}>
-            <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-ink-subtle uppercase">
-              {section.title}
-            </div>
+            {!isCollapsed && (
+              <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                {section.title}
+              </div>
+            )}
             <div className="space-y-1">
               {section.items.map((item) => {
                 const isActive = pathname === item.href;
@@ -115,44 +148,43 @@ export function AdminSidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    title={isCollapsed ? item.name : undefined}
                     className={clsx(
-                      "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group",
+                      "flex items-center rounded-xl text-xs font-semibold transition-all group",
+                      isCollapsed
+                        ? "justify-center p-2.5"
+                        : "justify-between px-3 py-2.5",
                       isActive
-                        ? "bg-brand-600 text-white shadow-md shadow-brand-900/30"
-                        : "text-slate-600 hover:text-ink hover:bg-slate-50"
+                        ? "bg-teal-50 text-teal-800 shadow-sm border border-teal-200/60"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     )}
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
                         className={clsx(
-                          "w-4 h-4 transition-colors",
-                          isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
+                          "w-4 h-4 shrink-0 transition-colors",
+                          isActive
+                            ? "text-teal-600 font-bold"
+                            : "text-slate-400 group-hover:text-slate-600"
                         )}
                       />
-                      <span>{item.name}</span>
+                      {!isCollapsed && <span className="truncate">{item.name}</span>}
                     </div>
-                    {item.badge ? (
+                    {!isCollapsed && item.badge && (
                       <span
                         className={clsx(
-                          "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                          "text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0",
                           isActive
-                            ? "bg-white/20 text-white border-white/30"
+                            ? "bg-teal-600 text-white border-teal-600"
                             : item.badgeVariant === "warning"
-                            ? "bg-amber-50 text-amber-800 border-amber-200"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
                             : item.badgeVariant === "brand"
-                            ? "bg-brand-50 text-brand-800 border-brand-200"
-                            : "bg-slate-100 text-slate-700 border-slate-200"
+                            ? "bg-teal-50 text-teal-700 border-teal-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
                         )}
                       >
                         {item.badge}
                       </span>
-                    ) : (
-                      <ChevronRight
-                        className={clsx(
-                          "w-3.5 h-3.5 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0",
-                          isActive && "opacity-100 translate-x-0 text-white"
-                        )}
-                      />
                     )}
                   </Link>
                 );
@@ -162,41 +194,57 @@ export function AdminSidebar() {
         ))}
       </nav>
 
-      {/* Pinned Bottom Profile & Security Footer (Always Visible Without Scrolling) */}
-      <div className="shrink-0 p-4 border-t border-border bg-slate-50/80">
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>MFA Protected</span>
-          </div>
-          <span className="text-[10px] font-mono text-ink-muted bg-white px-1.5 py-0.5 rounded border border-border">
-            KTM-DC-01
-          </span>
-        </div>
+      {/* Collapse Toggle & Operator Profile Footer */}
+      <div className="shrink-0 p-3 border-t border-slate-100 bg-white space-y-2">
+        <button
+          type="button"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={clsx(
+            "w-full flex items-center text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 p-2 rounded-lg transition-colors",
+            isCollapsed ? "justify-center" : "justify-between"
+          )}
+          title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          {!isCollapsed && <span>Collapse Sidebar</span>}
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
+        </button>
 
-        <div className="flex items-center justify-between pt-2.5 border-t border-border/80">
+        {/* User Card */}
+        <div
+          className={clsx(
+            "flex items-center rounded-xl bg-slate-50/80 border border-slate-200/80 p-2",
+            isCollapsed ? "justify-center" : "justify-between"
+          )}
+        >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-brand-100 border border-brand-200 flex items-center justify-center text-xs font-bold text-brand-700 shrink-0">
-              {admin?.displayName ? admin.displayName.substring(0, 2).toUpperCase() : "SA"}
+            <div className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+              {admin?.displayName ? admin.displayName.charAt(0) : "S"}
             </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-ink truncate">
-                {admin?.displayName || "Suman Adhikari"}
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-900 truncate">
+                  {admin?.displayName || "Suman Adhikari"}
+                </div>
+                <div className="text-[10px] text-teal-700 font-semibold truncate uppercase">
+                  {admin?.role || "superadmin"}
+                </div>
               </div>
-              <div className="text-[10px] text-ink-muted truncate capitalize">
-                {admin?.role ? `${admin.role} (Operator)` : "VP Operations"}
-              </div>
-            </div>
+            )}
           </div>
 
-          <button
-            onClick={() => logout()}
-            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-1 shrink-0"
-            title="Sign out of administrator session"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          {!isCollapsed && (
+            <button
+              onClick={logout}
+              title="Sign Out"
+              className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </aside>

@@ -15,12 +15,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-surface-subtle text-ink h-screen overflow-hidden flex antialiased">
+      <body className="bg-slate-50/75 text-slate-900 h-screen overflow-hidden flex antialiased">
         <AdminAuthProvider>
           <AdminSidebar />
-          <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+          <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
             {children}
-          </main>
+          </div>
         </AdminAuthProvider>
       </body>
     </html>

@@ -86,7 +86,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-subtle flex flex-col justify-center items-center p-4 antialiased">
+    <div className="h-screen overflow-y-auto bg-slate-50/75 flex flex-col justify-center items-center p-4 antialiased">
       <div className="max-w-md w-full space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">

@@ -16,6 +16,10 @@ import {
   Activity,
   Layers,
   Database,
+  Users,
+  Ticket,
+  HelpCircle,
+  ShieldAlert,
 } from "lucide-react";
 import {
   fetchPricingSettings,
@@ -63,45 +67,45 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col h-screen overflow-y-auto bg-slate-50/75">
       <AdminHeader
-        title="Superadmin Operations Console"
+        title="Executive Operations Console"
         subtitle="Zero-SQL Administrative Governance Platform • Live Metrics & Real-Time Controls"
         onRefresh={loadDashboardData}
         isRefreshing={isRefreshing}
       />
 
-      <div className="p-8 space-y-8 flex-1">
+      <div className="p-6 md:p-8 space-y-6 flex-1 max-w-[1500px] w-full mx-auto">
         {/* Banner Alert for Midnight Payout & pg_cron Status */}
-        <div className="bg-white rounded-2xl p-6 text-ink shadow-sm border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-brand-50 border border-brand-200 rounded-xl text-brand-600 shrink-0">
-              <Zap className="w-6 h-6 text-brand-600" />
+        <div className="bg-white rounded-2xl p-5 text-slate-900 shadow-sm border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 bg-teal-50 border border-teal-200/60 rounded-xl text-teal-600 shrink-0">
+              <Zap className="w-5 h-5 text-teal-600" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-ink tracking-tight">
+                <h2 className="text-sm font-bold text-slate-900 tracking-tight">
                   Midnight Settlement Batch Ready for Review
                 </h2>
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-50 text-brand-700 rounded border border-brand-200 uppercase">
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-teal-50 text-teal-700 rounded-full border border-teal-200 uppercase">
                   Automated pg_cron
                 </span>
                 {metrics.liveDbConnected && (
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded border border-emerald-200 uppercase flex items-center gap-1">
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200 uppercase flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Live Supabase
+                    Supabase Live
                   </span>
                 )}
               </div>
-              <p className="text-xs text-ink-muted mt-1">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Aggregated daily volume of NPR {metrics.midnightPayoutTotalNpr.toLocaleString()} across {metrics.merchantPayoutCount} verified merchants and {metrics.riderPayoutCount} riders.
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             <Link
               href="/finance/payouts"
-              className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-brand-900/20"
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
             >
               Review Payouts
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -109,201 +113,186 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Core KPI Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-2xl border border-border shadow-card">
-            <div className="flex items-center justify-between text-xs text-ink-muted font-medium">
+        {/* Core KPI Widgets (4 Cards) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Today GMV */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
               <span>Today&apos;s Gross Volume (GMV)</span>
-              <TrendingUp className="w-4 h-4 text-brand-600" />
+              <TrendingUp className="w-4 h-4 text-teal-600" />
             </div>
-            <div className="mt-3 text-2xl font-bold text-ink tracking-tight">
+            <div className="mt-2.5 text-2xl font-bold text-slate-900 tracking-tight">
               NPR {metrics.todayGmvNpr.toLocaleString()}
             </div>
-            <div className="mt-1 flex items-center gap-1 text-[11px] text-emerald-600 font-semibold">
-              <span>+{metrics.gmvGrowthPercent}%</span>
-              <span className="text-ink-muted font-normal">({metrics.todayOrdersCount} orders today)</span>
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-emerald-700 font-semibold">
+              <span>+{metrics.gmvGrowthPercent}% vs yesterday</span>
+              <span className="text-slate-400 font-normal">({metrics.todayOrdersCount} orders)</span>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-border shadow-card">
-            <div className="flex items-center justify-between text-xs text-ink-muted font-medium">
-              <span>Standard Platform Fee</span>
-              <Percent className="w-4 h-4 text-brand-600" />
+          {/* Card 2: Platform Fee Revenue */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+              <span>Platform Take & Fees</span>
+              <Percent className="w-4 h-4 text-teal-600" />
             </div>
-            <div className="mt-3 text-2xl font-bold text-ink tracking-tight">
-              Rs {(pricing.platformFeePaisa / 100).toFixed(2)}
+            <div className="mt-2.5 text-2xl font-bold text-slate-900 tracking-tight">
+              Rs {(metrics.todayOrdersCount * metrics.platformFeeNpr).toLocaleString()}
             </div>
-            <div className="mt-1 flex items-center gap-1.5 text-[11px]">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-ink-muted font-medium">Active on checkout</span>
-              <Link href="/pricing" className="text-brand-600 hover:underline ml-auto font-semibold">
-                Edit
-              </Link>
+            <div className="mt-1 text-[11px] text-slate-500 font-medium">
+              Standard order tariff: Rs {metrics.platformFeeNpr} / checkout
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-border shadow-card">
-            <div className="flex items-center justify-between text-xs text-ink-muted font-medium">
+          {/* Card 3: Pending KYC Verification */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
               <span>Pending Partner KYC</span>
-              <FileCheck2 className="w-4 h-4 text-amber-500" />
+              <FileCheck2 className="w-4 h-4 text-amber-600" />
             </div>
-            <div className="mt-3 text-2xl font-bold text-ink tracking-tight flex items-center gap-2">
-              <span>{metrics.pendingKycCount}</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                Awaiting Review
-              </span>
+            <div className="mt-2.5 text-2xl font-bold text-amber-700 tracking-tight">
+              {metrics.pendingKycCount} Applicants
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px]">
-              <span className="text-amber-700 font-medium">Action required</span>
-              <Link
-                href="/compliance/kyc"
-                className="text-brand-600 hover:underline font-semibold"
-              >
-                Inspect Queue &rarr;
+            <div className="mt-1 flex items-center gap-1.5 text-[11px] text-amber-800 font-semibold">
+              <Link href="/compliance/kyc" className="hover:underline flex items-center gap-0.5">
+                Audit Government Docs &rarr;
               </Link>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-border shadow-card">
-            <div className="flex items-center justify-between text-xs text-ink-muted font-medium">
-              <span>Midnight Payout Batch</span>
-              <Wallet className="w-4 h-4 text-brand-600" />
+          {/* Card 4: Midnight Disbursal Pool */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+              <span>Midnight ConnectIPS Pool</span>
+              <Wallet className="w-4 h-4 text-teal-600" />
             </div>
-            <div className="mt-3 text-2xl font-bold text-ink tracking-tight">
+            <div className="mt-2.5 text-2xl font-bold text-slate-900 tracking-tight">
               NPR {metrics.midnightPayoutTotalNpr.toLocaleString()}
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px]">
-              <span className="text-ink-muted">
-                {metrics.merchantPayoutCount} Venues • {metrics.riderPayoutCount} Riders
-              </span>
+            <div className="mt-1 text-[11px] text-slate-500 font-medium">
+              {metrics.merchantPayoutCount} merchants • {metrics.riderPayoutCount} riders
             </div>
           </div>
         </div>
 
-        {/* Live Operational Grids */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Quick Control Hub */}
-          <div className="lg:col-span-1 bg-white p-6 rounded-2xl border border-border shadow-card space-y-4">
-            <h3 className="text-sm font-bold text-ink tracking-tight flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-brand-600" />
-              Zero-SQL Operational Controls
-            </h3>
-            <p className="text-xs text-ink-muted">
-              Configure live business rules, fees, and safety parameters instantly without deploying new code.
-            </p>
+        {/* Main Grid: Quick Operational Navigation Hub & Audit Trail Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Quick Operations Navigation Hub (1 col) */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Operational Desks
+              </h3>
+              <span className="text-[10px] text-slate-400 font-mono">Zero-SQL</span>
+            </div>
 
-            <div className="space-y-2.5 pt-2">
-              <Link
-                href="/pricing"
-                className="flex items-center justify-between p-3.5 rounded-xl border border-border hover:border-brand-300 hover:bg-brand-50/50 transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-semibold text-ink group-hover:text-brand-700">
-                    Pricing & Delivery Matrices
-                  </div>
-                  <div className="text-[11px] text-ink-muted">
-                    Rs {(pricing.platformFeePaisa / 100).toFixed(0)} fee • Rs {(pricing.freeDeliveryThresholdPaisa / 100).toLocaleString()} free delivery
-                  </div>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-brand-600" />
-              </Link>
-
-              <Link
-                href="/compliance/kyc"
-                className="flex items-center justify-between p-3.5 rounded-xl border border-border hover:border-amber-300 hover:bg-amber-50/50 transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-semibold text-ink group-hover:text-amber-800">
-                    Partner Document Review
-                  </div>
-                  <div className="text-[11px] text-ink-muted">
-                    Smart driving licenses, Blue Books, IRD PAN
-                  </div>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-amber-700" />
-              </Link>
-
-              <Link
-                href="/finance/payouts"
-                className="flex items-center justify-between p-3.5 rounded-xl border border-border hover:border-brand-300 hover:bg-brand-50/50 transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-semibold text-ink group-hover:text-brand-700">
-                    Midnight Settlement Payouts
-                  </div>
-                  <div className="text-[11px] text-ink-muted">
-                    ConnectIPS batch release & Rider COD safety locks
-                  </div>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-brand-600" />
-              </Link>
-
-              <Link
-                href="/marketing/vouchers"
-                className="flex items-center justify-between p-3.5 rounded-xl border border-border hover:border-brand-300 hover:bg-brand-50/50 transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-semibold text-ink group-hover:text-brand-700">
-                    Voucher & Promotion Engine
-                  </div>
-                  <div className="text-[11px] text-ink-muted">
-                    Budget caps, flat vs % discounts, usage limits
-                  </div>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-brand-600" />
-              </Link>
-
-              <Link
-                href="/settings/governance"
-                className="flex items-center justify-between p-3.5 rounded-xl border border-border hover:border-rose-300 hover:bg-rose-50/50 transition-all group"
-              >
-                <div>
-                  <div className="text-xs font-semibold text-ink group-hover:text-rose-800">
-                    Compliance & Ward Kill-Switches
-                  </div>
-                  <div className="text-[11px] text-ink-muted">
-                    13% VAT toggle & Kathmandu emergency switches
-                  </div>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-rose-700" />
-              </Link>
+            <div className="space-y-1.5">
+              {[
+                {
+                  title: "Partner KYC & Compliance Desk",
+                  desc: "Driving licenses, bluebooks, and tax tokens",
+                  href: "/compliance/kyc",
+                  icon: FileCheck2,
+                  badge: "Audit",
+                },
+                {
+                  title: "Dynamic Fee & Pricing Matrix",
+                  desc: "Delivery tariffs, platform fees & take-rates",
+                  href: "/pricing",
+                  icon: Percent,
+                },
+                {
+                  title: "Customer Dispute & Refund Desk",
+                  desc: "Photo evidence and 1-click gateway refunds",
+                  href: "/disputes",
+                  icon: HelpCircle,
+                },
+                {
+                  title: "Midnight Payouts & ConnectIPS",
+                  desc: "NCHL-128 export and rider COD safety locks",
+                  href: "/finance/payouts",
+                  icon: Wallet,
+                },
+                {
+                  title: "User & Partner Moderation",
+                  desc: "COD privilege toggles & device blacklisting",
+                  href: "/users",
+                  icon: Users,
+                },
+                {
+                  title: "Marketing Vouchers & Burn",
+                  desc: "Budget burn tracker & promotional codes",
+                  href: "/marketing/vouchers",
+                  icon: Ticket,
+                },
+                {
+                  title: "Governance & Ward Kill-Switches",
+                  desc: "13% VAT activation & emergency stops",
+                  href: "/settings/governance",
+                  icon: ShieldAlert,
+                },
+              ].map((desk) => {
+                const Icon = desk.icon;
+                return (
+                  <Link
+                    key={desk.href}
+                    href={desk.href}
+                    className="flex items-center justify-between p-3 rounded-xl border border-slate-200/70 hover:border-teal-300 hover:bg-teal-50/40 transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-teal-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 truncate group-hover:text-teal-900">
+                          {desk.title}
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                          {desk.desc}
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 shrink-0 ml-1" />
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
-          {/* Real-Time Audit Log Feed */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-border shadow-card space-y-4">
-            <div className="flex items-center justify-between">
+          {/* Real-Time Immutable Audit Trail Feed (2 cols) */}
+          <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-ink tracking-tight flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-brand-600" />
-                  Live Operational Audit Trail
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-teal-600" />
+                  Immutable Administrative Audit Trail
                 </h3>
-                <p className="text-xs text-ink-muted">
-                  Immutable administrative actions logged in PostgreSQL with IP & actor identity.
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Logged in PostgreSQL public.admin_audit_logs with operator identity and IP.
                 </p>
               </div>
-              <span className="text-[10px] font-mono text-ink-muted bg-surface-subtle px-2 py-1 rounded border border-border">
+              <span className="text-[10px] font-mono text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
                 Asia/Kathmandu (UTC+5:45)
               </span>
             </div>
 
-            <div className="divide-y divide-border pt-1">
-              {auditLogs.slice(0, 5).map((log) => (
-                <div key={log.id} className="py-3.5 first:pt-2 last:pb-0 flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-brand-600 mt-1.5 shrink-0" />
+            <div className="divide-y divide-slate-100">
+              {auditLogs.slice(0, 6).map((log) => (
+                <div key={log.id} className="py-3 first:pt-1 last:pb-0 flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-teal-600 mt-1.5 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-bold text-ink truncate">
+                      <span className="text-xs font-bold text-slate-900 truncate">
                         {log.actionType}
                       </span>
-                      <span className="text-[11px] text-ink-muted shrink-0 font-mono">
+                      <span className="text-[10px] text-slate-400 font-mono shrink-0">
                         {log.timestamp}
                       </span>
                     </div>
-                    <p className="text-xs text-ink-muted mt-0.5 line-clamp-2">
+                    <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
                       {log.details}
                     </p>
-                    <div className="mt-1 flex items-center gap-2 text-[10px] text-ink-subtle font-mono">
+                    <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400 font-mono">
                       <span>{log.adminName}</span>
                       <span>•</span>
                       <span>{log.ipAddress}</span>

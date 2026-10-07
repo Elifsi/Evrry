@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   Activity,
@@ -13,8 +14,11 @@ import {
   FileText,
   X,
   Send,
-  Check,
   Radio,
+  Search,
+  Command,
+  ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import {
   fetchAdminNotifications,
@@ -31,53 +35,86 @@ interface AdminHeaderProps {
   isRefreshing?: boolean;
 }
 
+const COMMAND_ROUTES = [
+  { name: "Overview Dashboard", href: "/", category: "Core Operations" },
+  { name: "Partner KYC Verification Desk", href: "/compliance/kyc", category: "Core Operations" },
+  { name: "Customer Dispute & Refund Review", href: "/disputes", category: "Core Operations" },
+  { name: "Midnight Settlement & ConnectIPS Payouts", href: "/finance/payouts", category: "Financials" },
+  { name: "Dynamic Fee & Pricing Control Matrix", href: "/pricing", category: "Financials" },
+  { name: "User & Driver Moderation Directory", href: "/users", category: "Platform Growth" },
+  { name: "Marketing Vouchers & Promotions", href: "/marketing/vouchers", category: "Platform Growth" },
+  { name: "Compliance, Taxation & VAT Settings", href: "/settings/governance", category: "Governance" },
+];
+
 export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminHeaderProps) {
+  const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   const [broadcastTitle, setBroadcastTitle] = useState("");
   const [broadcastBody, setBroadcastBody] = useState("");
   const [broadcastTarget, setBroadcastTarget] = useState<"consumer" | "partner" | "admin">("consumer");
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [broadcastSuccess, setBroadcastSuccess] = useState<string | null>(null);
+
+  // Command Palette State
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchAdminNotifications().then(setNotifications);
   }, []);
 
-  // Close dropdown on click outside
+  // Keyboard shortcut listener for Cmd+K / Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        setShowCommandPalette(false);
+        setShowNotifications(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Close notifications on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
       }
     }
-    if (showNotifications) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showNotifications]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = async (id: string) => {
+  const handleMarkRead = async (id: string) => {
     await markAdminNotificationRead(id);
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
   };
 
-  const handleMarkAllAsRead = async () => {
+  const handleMarkAllRead = async () => {
     await markAllAdminNotificationsRead();
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const handleSendBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!broadcastTitle || !broadcastBody) return;
+    if (!broadcastTitle.trim() || !broadcastBody.trim()) return;
+
+    setIsBroadcasting(true);
     const res = await dispatchAdminPushBroadcast(broadcastTitle, broadcastBody, broadcastTarget);
+    setIsBroadcasting(false);
     setBroadcastSuccess(res.message);
     setBroadcastTitle("");
     setBroadcastBody("");
@@ -87,25 +124,45 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
     }, 2500);
   };
 
+  const filteredCommands = COMMAND_ROUTES.filter((r) =>
+    r.name.toLowerCase().includes(commandQuery.toLowerCase()) ||
+    r.category.toLowerCase().includes(commandQuery.toLowerCase())
+  );
+
   return (
-    <header className="h-16 bg-white border-b border-border px-8 flex items-center justify-between sticky top-0 z-20">
-      <div>
-        <h1 className="text-lg font-bold text-ink tracking-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-ink-muted font-medium">{subtitle}</p>}
+    <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-20 shrink-0">
+      <div className="flex items-center gap-4">
+        <div>
+          <h1 className="text-base font-bold text-slate-900 tracking-tight">{title}</h1>
+          {subtitle && <p className="text-xs text-slate-500 font-medium truncate max-w-xl">{subtitle}</p>}
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* System Health Status Pills */}
-        <div className="hidden lg:flex items-center gap-2 bg-surface-subtle border border-border px-3 py-1.5 rounded-full text-xs">
-          <div className="flex items-center gap-1.5 text-brand-700 font-medium">
-            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
-            <Activity className="w-3.5 h-3.5 text-brand-600" />
-            <span>OCI Core Cluster</span>
+      <div className="flex items-center gap-3">
+        {/* Global Search Command Trigger Button */}
+        <button
+          type="button"
+          onClick={() => setShowCommandPalette(true)}
+          className="hidden md:flex items-center gap-2.5 px-3 py-1.5 text-xs text-slate-400 bg-slate-50 hover:bg-slate-100 hover:text-slate-600 border border-slate-200/80 rounded-xl transition-colors"
+        >
+          <Search className="w-3.5 h-3.5 text-slate-400" />
+          <span>Quick actions & desks...</span>
+          <kbd className="text-[10px] bg-white border border-slate-200 text-slate-500 font-mono px-1.5 py-0.5 rounded shadow-2xs">
+            ⌘K
+          </kbd>
+        </button>
+
+        {/* System Cluster Status */}
+        <div className="hidden lg:flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full text-xs">
+          <div className="flex items-center gap-1.5 text-teal-700 font-semibold">
+            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+            <Activity className="w-3.5 h-3.5 text-teal-600" />
+            <span>Cluster Live</span>
           </div>
           <span className="text-slate-300">|</span>
-          <div className="flex items-center gap-1.5 text-ink-muted font-medium">
-            <Database className="w-3.5 h-3.5 text-slate-500" />
-            <span>Postgres 16 RLS (20 Migrations)</span>
+          <div className="flex items-center gap-1.5 text-slate-500 font-medium">
+            <Database className="w-3.5 h-3.5 text-slate-400" />
+            <span>Postgres 16 RLS</span>
           </div>
         </div>
 
@@ -113,26 +170,38 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
         {onRefresh && (
           <button
             onClick={onRefresh}
+            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200/60"
+            title="Refresh Data"
             disabled={isRefreshing}
-            className="p-2 text-ink-muted hover:text-ink hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
-            title="Refresh live data"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-brand-600" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-teal-600" : ""}`} />
           </button>
         )}
 
-        {/* Notifications Popover */}
+        {/* Push Broadcast Console Button */}
+        <button
+          onClick={() => setShowBroadcastModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 rounded-xl transition-colors"
+          title="Dispatch Push Broadcast via Edge Function"
+        >
+          <Radio className="w-3.5 h-3.5 text-teal-600" />
+          <span className="hidden sm:inline">Push Broadcast</span>
+        </button>
+
+        {/* Operational Notifications Popover */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`p-2 rounded-lg transition-colors relative ${
-              showNotifications ? "bg-slate-100 text-brand-600" : "text-ink-muted hover:text-ink hover:bg-slate-100"
+            className={`p-2 rounded-xl transition-colors relative border ${
+              showNotifications
+                ? "bg-slate-100 text-teal-700 border-slate-300"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-slate-200/60"
             }`}
-            title="Operational Notifications"
+            title="Operational Alerts"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white shadow-xs">
                 {unreadCount}
               </span>
             )}
@@ -140,157 +209,188 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
 
           {/* Flyout Popover */}
           {showNotifications && (
-            <div className="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-2xl border border-border z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="p-4 border-b border-border flex items-center justify-between bg-surface-subtle">
+            <div className="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/75">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-ink">Operational Alerts</span>
+                  <span className="text-xs font-bold text-slate-900">Operational Alerts</span>
                   {unreadCount > 0 && (
-                    <span className="bg-brand-50 text-brand-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-brand-200">
-                      {unreadCount} new
+                    <span className="bg-amber-50 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200">
+                      {unreadCount} active
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  {unreadCount > 0 && (
-                    <button
-                      onClick={handleMarkAllAsRead}
-                      className="text-[11px] text-brand-600 hover:text-brand-800 font-semibold transition-colors"
-                    >
-                      Mark all read
-                    </button>
-                  )}
+                {unreadCount > 0 && (
                   <button
-                    onClick={() => setShowNotifications(false)}
-                    className="text-slate-400 hover:text-ink p-1 rounded-md"
+                    onClick={handleMarkAllRead}
+                    className="text-[11px] text-teal-700 hover:text-teal-800 font-semibold"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    Mark all read
                   </button>
-                </div>
+                )}
               </div>
 
-              {/* Notification Items List */}
-              <div className="max-h-96 overflow-y-auto divide-y divide-border">
+              <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-ink-muted text-xs">
-                    No active notifications. Systems operational.
+                  <div className="p-6 text-center text-xs text-slate-400">
+                    No active operational alerts.
                   </div>
                 ) : (
-                  notifications.map((notif) => (
+                  notifications.map((n) => (
                     <div
-                      key={notif.id}
-                      className={`p-3.5 transition-colors flex items-start gap-3 ${
-                        notif.read ? "bg-white hover:bg-slate-50/60" : "bg-brand-50/30 hover:bg-brand-50/60"
+                      key={n.id}
+                      className={`p-4 transition-colors ${
+                        n.read ? "bg-white opacity-60" : "bg-teal-50/30"
                       }`}
                     >
-                      <div className="mt-0.5 shrink-0">
-                        {notif.type === "urgent" ? (
-                          <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700">
-                            <AlertTriangle className="w-4 h-4" />
-                          </div>
-                        ) : notif.type === "payout" ? (
-                          <div className="p-1.5 rounded-lg bg-amber-100 text-amber-700">
-                            <Wallet className="w-4 h-4" />
-                          </div>
-                        ) : notif.type === "kyc" ? (
-                          <div className="p-1.5 rounded-lg bg-blue-100 text-brand-700">
-                            <ShieldCheck className="w-4 h-4" />
-                          </div>
-                        ) : (
-                          <div className="p-1.5 rounded-lg bg-purple-100 text-purple-700">
-                            <FileText className="w-4 h-4" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-xs font-semibold text-ink truncate">{notif.title}</h4>
-                          <span className="text-[10px] text-ink-subtle ml-2 whitespace-nowrap">{notif.time}</span>
-                        </div>
-                        <p className="text-[11px] text-ink-muted mt-0.5 line-clamp-2">{notif.message}</p>
-
-                        <div className="flex items-center gap-2 mt-2">
-                          <Link
-                            href={notif.actionUrl}
-                            onClick={() => {
-                              handleMarkAsRead(notif.id);
-                              setShowNotifications(false);
-                            }}
-                            className="text-[10px] font-bold text-brand-600 hover:text-brand-800 bg-brand-50/80 px-2.5 py-1 rounded-md border border-brand-200 transition-colors inline-block"
-                          >
-                            {notif.actionLabel || "View Details"}
-                          </Link>
-                          {!notif.read && (
-                            <button
-                              onClick={() => handleMarkAsRead(notif.id)}
-                              className="text-[10px] text-slate-400 hover:text-ink flex items-center gap-0.5"
-                            >
-                              <Check className="w-3 h-3" />
-                              Dismiss
-                            </button>
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 shrink-0">
+                          {n.type === "urgent" ? (
+                            <Wallet className="w-4 h-4 text-rose-600" />
+                          ) : n.type === "kyc" ? (
+                            <ShieldCheck className="w-4 h-4 text-amber-600" />
+                          ) : n.type === "payout" ? (
+                            <FileText className="w-4 h-4 text-teal-600" />
+                          ) : (
+                            <AlertTriangle className="w-4 h-4 text-amber-600" />
                           )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-xs font-bold text-slate-900 truncate">
+                              {n.title}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                              {n.time}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-600 mt-0.5">{n.message}</p>
+
+                          <div className="flex items-center justify-between mt-2 pt-1">
+                            {n.actionUrl && (
+                              <Link
+                                href={n.actionUrl}
+                                onClick={() => {
+                                  handleMarkRead(n.id);
+                                  setShowNotifications(false);
+                                }}
+                                className="text-[11px] font-semibold text-teal-700 hover:text-teal-800 flex items-center gap-1"
+                              >
+                                {n.actionLabel || "Review"} &rarr;
+                              </Link>
+                            )}
+                            {!n.read && (
+                              <button
+                                onClick={() => handleMarkRead(n.id)}
+                                className="text-[10px] text-slate-400 hover:text-slate-600 font-medium ml-auto"
+                              >
+                                Dismiss
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   ))
                 )}
               </div>
-
-              {/* Bottom Quick Broadcast Action */}
-              <div className="p-3 bg-surface-subtle border-t border-border flex items-center justify-between">
-                <button
-                  onClick={() => {
-                    setShowNotifications(false);
-                    setShowBroadcastModal(true);
-                  }}
-                  className="w-full py-1.5 px-3 bg-white hover:bg-slate-50 border border-border text-ink text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <Radio className="w-3.5 h-3.5 text-brand-600" />
-                  Dispatch Push Broadcast
-                </button>
-              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Broadcast Push Notification Modal */}
+      {/* Global Command Palette Modal (Cmd+K) */}
+      {showCommandPalette && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-start justify-center pt-20 p-4">
+          <div className="w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center px-4 border-b border-slate-100 bg-slate-50/50">
+              <Search className="w-4 h-4 text-slate-400 shrink-0" />
+              <input
+                type="text"
+                autoFocus
+                placeholder="Type a command or search operational desk..."
+                value={commandQuery}
+                onChange={(e) => setCommandQuery(e.target.value)}
+                className="w-full px-3 py-3.5 text-xs bg-transparent border-0 focus:outline-none text-slate-900 placeholder:text-slate-400"
+              />
+              <kbd className="text-[10px] bg-white border border-slate-200 text-slate-500 font-mono px-1.5 py-0.5 rounded shadow-2xs">
+                ESC
+              </kbd>
+            </div>
+
+            <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+              {filteredCommands.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-400">
+                  No operational desks found matching &quot;{commandQuery}&quot;.
+                </div>
+              ) : (
+                filteredCommands.map((cmd) => (
+                  <button
+                    key={cmd.href}
+                    onClick={() => {
+                      router.push(cmd.href);
+                      setShowCommandPalette(false);
+                      setCommandQuery("");
+                    }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl text-left hover:bg-slate-50 text-xs text-slate-700 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-teal-600 transition-colors" />
+                      <span className="font-semibold text-slate-900">{cmd.name}</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 uppercase">
+                      {cmd.category}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Push Broadcast Modal */}
       {showBroadcastModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-border text-xs">
-            <div className="flex items-center justify-between border-b border-border pb-3">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Radio className="w-4 h-4 text-brand-600" />
-                <h3 className="text-sm font-bold text-ink">Broadcast Push Notification</h3>
+                <Radio className="w-4 h-4 text-teal-600" />
+                <h3 className="text-sm font-bold text-slate-900">
+                  Dispatch Operational Push Notification
+                </h3>
               </div>
               <button
                 onClick={() => setShowBroadcastModal(false)}
-                className="text-slate-400 hover:text-ink"
+                className="text-slate-400 hover:text-slate-700 text-sm"
               >
-                <X className="w-4 h-4" />
+                ✕
               </button>
             </div>
 
+            <p className="text-xs text-slate-500">
+              Dispatches live push notifications via FCM / APNs Edge Function. Zero carrier SMS cost.
+            </p>
+
             {broadcastSuccess && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl flex items-center gap-2 font-medium">
-                <Check className="w-4 h-4 text-emerald-600" />
-                <span>{broadcastSuccess}</span>
+              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl font-semibold">
+                ✓ {broadcastSuccess}
               </div>
             )}
 
-            <form onSubmit={handleSendBroadcast} className="space-y-3">
+            <form onSubmit={handleSendBroadcast} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-ink mb-1">Target Audience</label>
+                <label className="block font-semibold text-slate-800 mb-1">Target Audience</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(["consumer", "partner", "admin"] as const).map((t) => (
                     <button
                       key={t}
                       type="button"
                       onClick={() => setBroadcastTarget(t)}
-                      className={`py-1.5 px-2 rounded-lg font-semibold uppercase text-[10px] border transition-all ${
+                      className={`py-1.5 px-2 rounded-xl font-semibold uppercase text-[10px] border transition-all ${
                         broadcastTarget === t
-                          ? "bg-brand-600 text-white border-brand-600 shadow-sm"
-                          : "bg-surface-subtle text-ink-muted border-border hover:bg-slate-100"
+                          ? "bg-teal-600 text-white border-teal-600 shadow-sm"
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                       }`}
                     >
                       {t}
@@ -300,43 +400,44 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
               </div>
 
               <div>
-                <label className="block font-semibold text-ink mb-1">Notification Title</label>
+                <label className="block font-semibold text-slate-800 mb-1">Notification Title</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Flash Deal Alert or Heavy Rain Notice"
+                  placeholder="e.g. Kathmandu Valley Monsoon Advisory"
                   value={broadcastTitle}
                   onChange={(e) => setBroadcastTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-ink mb-1">Notification Body</label>
+                <label className="block font-semibold text-slate-800 mb-1">Message Body</label>
                 <textarea
-                  required
                   rows={3}
-                  placeholder="e.g. Enjoy flat 20% off on all restaurants in Kathmandu valley until 8 PM."
+                  required
+                  placeholder="e.g. Heavy rainfall reported in Ring Road corridor. Expect minor delivery delays."
                   value={broadcastBody}
                   onChange={(e) => setBroadcastBody(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none resize-none"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-900"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowBroadcastModal(false)}
-                  className="px-3 py-1.5 text-ink-muted hover:bg-slate-100 rounded-lg font-semibold"
+                  className="px-4 py-2 font-semibold text-slate-600 hover:text-slate-900 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-bold flex items-center gap-1.5 shadow-md shadow-brand-900/30"
+                  disabled={isBroadcasting}
+                  className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  Dispatch (FCM & APNs)
+                  {isBroadcasting ? "Sending..." : "Dispatch Broadcast"}
                 </button>
               </div>
             </form>
@@ -346,4 +447,3 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
     </header>
   );
 }
-
