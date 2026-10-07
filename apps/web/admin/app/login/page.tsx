@@ -241,7 +241,7 @@ export default function AdminLoginPage() {
                   className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold transition-all shadow-md shadow-brand-900/30 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <KeyRound className="w-4 h-4" />
-                  {isLoading ? "Dispatching..." : "Send WhatsApp / SMS OTP"}
+                  {isLoading ? "Dispatching..." : "Send WhatsApp Verification OTP"}
                 </button>
               ) : (
                 <form onSubmit={handleVerifyOtp} className="space-y-3">

@@ -110,7 +110,7 @@ export default function KycVerificationPage() {
         prev.map((p) => (p.id === currentPartner.id ? res.updatedPartner! : p))
       );
       setActionFeedback(
-        `Approved ${currentPartner.partnerName}! Activation SMS & push credentials dispatched.`
+        `Approved ${currentPartner.partnerName}! Activation push notification & credentials dispatched.`
       );
       setTimeout(() => setActionFeedback(null), 5000);
     }
@@ -134,7 +134,7 @@ export default function KycVerificationPage() {
       setActionFeedback(
         modalMode === "reject"
           ? `Partner ${currentPartner.partnerName} rejected. Reason logged in audit trail.`
-          : `Re-upload requested from ${currentPartner.partnerName}. Partner notified via SMS.`
+          : `Re-upload requested from ${currentPartner.partnerName}. Partner notified via push & in-app alert.`
       );
       setModalMode(null);
       setModalReason("");
@@ -160,7 +160,7 @@ export default function KycVerificationPage() {
               <span className="font-semibold">{actionFeedback}</span>
             </div>
             <span className="text-[11px] font-mono text-brand-600 bg-white px-2 py-0.5 rounded border border-brand-200">
-              Gateway: Meta WhatsApp & Aakash SMS
+              Channel: In-App & Push (FCM/APNs)
             </span>
           </div>
         )}
@@ -675,7 +675,7 @@ export default function KycVerificationPage() {
 
             <p className="text-xs text-ink-muted">
               {modalMode === "reject"
-                ? `Specify why ${currentPartner?.partnerName}'s submission is rejected. Partner will receive this reason via SMS.`
+                ? `Specify why ${currentPartner?.partnerName}'s submission is rejected. Partner will receive this reason via push notification and in-app alert.`
                 : `Explain what was unclear or missing so ${currentPartner?.partnerName} can re-upload correct documents.`}
             </p>
 

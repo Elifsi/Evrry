@@ -198,8 +198,7 @@ A split-screen verification interface optimized for rapid processing of partner 
 
 When an admin clicks **Approve** or **Reject**, the system automatically:
 1. Updates `partner_profiles.status = 'active'` (or `'rejected'`).
-2. Fires an automated SMS via `supabase/functions/send-sms` to the partner's Nepali phone.
-3. Sends a push notification to their mobile partner app.
+2. Sends an immediate high-priority push notification via `supabase/functions/push-notify` to their mobile partner app (FCM/APNs) and in-app feed, avoiding costly telecom SMS drain.
 
 ---
 

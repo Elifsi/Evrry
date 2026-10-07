@@ -95,7 +95,7 @@ export default function DisputesPage() {
       ipAddress: "103.10.29.14 (Kathmandu)",
     });
 
-    setActionAlert(`Dispute ${selectedDispute.id} rejected. Customer informed via SMS.`);
+    setActionAlert(`Dispute ${selectedDispute.id} rejected. Customer notified via push & in-app alert.`);
     setTimeout(() => setActionAlert(null), 4000);
   };
 

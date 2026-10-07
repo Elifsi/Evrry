@@ -26,7 +26,7 @@ It is distinct from the **Partner Web Portal** (`apps/web/partner`):
    - Nepali Driving License & Vehicle Blue Book verification for riders/drivers.
    - PAN/VAT certificates, company registration documents, and food hygiene permits for merchants.
    - Lalpurja (property ownership) & lease agreements for landlords and hotel hosts.
-   - One-click approve/reject with automated SMS/push notification feedback.
+   - One-click approve/reject with automated push and in-app notification feedback.
 
 2. **User Moderation & Fraud Prevention**:
    - Global search across users, phone numbers, vehicle plates, and device UUIDs.

@@ -83,10 +83,21 @@ Deno.serve(async (req: Request) => {
     const tenDigitPhone = match[1]; // e.g. 9812345678
     const e164Phone = `+977${tenDigitPhone}`; // e.g. +9779812345678
 
-    // 3. Construct message body
-    const message = payload.message || (otpCode
-      ? `Your evrry security code is ${otpCode}. Valid for 10 minutes. Do not share this code.`
-      : 'Your evrry verification request has been received.');
+    // Cost-protection invariant: Strictly disallow expensive arbitrary transactional SMS.
+    // Transactional alerts (order status, ride arrival, KYC updates, disputes) MUST use
+    // free push notifications (FCM/APNs) or WhatsApp to prevent carrier telecom budget drain.
+    if (!otpCode) {
+      return new Response(
+        JSON.stringify({
+          error: 'transactional_sms_disabled',
+          message: 'Transactional telecom SMS is disabled to prevent budget drain. Use free push notifications (push-notify) or WhatsApp.',
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 3. Construct message body (strictly for security authentication OTP)
+    const message = `Your evrry security code is ${otpCode}. Valid for 10 minutes. Do not share this code.`;
 
     // 4. Rate-Limiting Check via Supabase RPC
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';

@@ -383,7 +383,7 @@ export const sampleAuditLogs: AuditLogEntry[] = [
     adminName: 'Pratima Sharma (KYC Compliance)',
     adminEmail: 'pratima@evrry.com.np',
     actionType: 'KYC_APPROVED',
-    details: 'Approved Bikash Tamang (Dzire Tour Ba 1 Ja 7812). SMS confirmation triggered.',
+    details: 'Approved Bikash Tamang (Dzire Tour Ba 1 Ja 7812). Push notification credentials dispatched.',
     ipAddress: '103.10.29.18 (Kathmandu)',
   },
   {
