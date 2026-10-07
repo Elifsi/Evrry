@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
 import {
   Percent,
@@ -8,32 +8,45 @@ import {
   Sparkles,
   Truck,
   Bike,
-  Shield,
-  Clock,
-  CloudRain,
-  DollarSign,
   Save,
   RotateCcw,
+  DollarSign,
+  TrendingUp,
 } from "lucide-react";
-import { initialPricingSettings } from "@/lib/admin/mockData";
+import { fetchPricingSettings, updatePricingSettings } from "@/lib/admin/api";
 import { PlatformPricingSettings } from "@/lib/admin/types";
+import { initialPricingSettings } from "@/lib/admin/mockData";
 
 export default function PricingControlPage() {
   const [settings, setSettings] = useState<PlatformPricingSettings>(initialPricingSettings);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [savedMessage, setSavedMessage] = useState("");
   const [adminNote, setAdminNote] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleSave = () => {
-    // In production, invokes Supabase RPC / platform_settings mutation
+  const loadSettings = async () => {
+    setIsRefreshing(true);
+    const data = await fetchPricingSettings();
+    setSettings(data);
+    setIsRefreshing(false);
+  };
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const handleSave = async () => {
+    const res = await updatePricingSettings(settings, "suman@evrry.com.np");
+    setSavedMessage(res.message);
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 4000);
+    setTimeout(() => setSavedSuccess(false), 5000);
   };
 
   const handleReset = () => {
     setSettings(initialPricingSettings);
   };
 
-  // Sample simulation calculation for 5km delivery
+  // Simulation calculation for 5km delivery
   const extraKm = Math.max(0, 5 - settings.baseDeliveryRadiusMeters / 1000);
   const extraFeePaisa = extraKm * settings.extraDistanceFeePerKmPaisa;
   const totalDeliveryPaisa = settings.baseDeliveryFeePaisa + extraFeePaisa;
@@ -46,32 +59,34 @@ export default function PricingControlPage() {
       <AdminHeader
         title="Dynamic Fee & Pricing Control Matrix"
         subtitle="Zero-SQL Live Governance • Instant Client-Side Reactive Updates"
+        onRefresh={loadSettings}
+        isRefreshing={isRefreshing}
       />
 
       <div className="p-8 space-y-8 flex-1 max-w-6xl">
         {/* Success Alert */}
         {savedSuccess && (
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-800 text-xs flex items-center justify-between">
+          <div className="bg-brand-50 border border-brand-200 p-4 rounded-xl text-brand-900 text-xs flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <span className="font-semibold">
-                Pricing updated successfully! Cache invalidated across all mobile and web clients.
-              </span>
+              <CheckCircle2 className="w-5 h-5 text-brand-600" />
+              <span className="font-semibold">{savedMessage}</span>
             </div>
-            <span className="text-[11px] font-mono text-emerald-600">Audit Log #LOG-2026-PRC</span>
+            <span className="text-[11px] font-mono text-brand-600 bg-white px-2 py-0.5 rounded border border-brand-200">
+              Postgres platform_settings
+            </span>
           </div>
         )}
 
         {/* Action Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-border shadow-card">
           <div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <Percent className="w-5 h-5 text-emerald-600" />
-              Live Pricing Parameters (All Verticals)
+            <h2 className="text-base font-bold text-ink tracking-tight flex items-center gap-2">
+              <Percent className="w-5 h-5 text-brand-600" />
+              Live Pricing Parameters (Kathmandu Valley & Nepal)
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               Changes take effect platform-wide immediately. Every update is permanently logged in{" "}
-              <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">
+              <code className="text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded font-mono border border-brand-200">
                 public.admin_audit_logs
               </code>
               .
@@ -80,14 +95,14 @@ export default function PricingControlPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleReset}
-              className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 border border-border hover:bg-slate-50 text-ink-muted hover:text-ink text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset Defaults
             </button>
             <button
               onClick={handleSave}
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-md shadow-emerald-900/20"
+              className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-md shadow-brand-900/30"
             >
               <Save className="w-3.5 h-3.5" />
               Save & Apply Parameters
@@ -99,19 +114,19 @@ export default function PricingControlPage() {
           {/* Left Column: Form Controls */}
           <div className="lg:col-span-2 space-y-6">
             {/* 1. Platform Fee Controls */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2 border-b border-slate-100 pb-3">
-                <DollarSign className="w-4 h-4 text-emerald-600" />
+            <div className="bg-white p-6 rounded-2xl border border-border shadow-card space-y-4">
+              <h3 className="text-sm font-bold text-ink tracking-tight flex items-center gap-2 border-b border-border pb-3">
+                <DollarSign className="w-4 h-4 text-brand-600" />
                 1. Platform Fee Settings
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink mb-1">
                     Standard Order Platform Fee (NPR)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">
+                    <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-semibold">
                       Rs
                     </span>
                     <input
@@ -124,20 +139,20 @@ export default function PricingControlPage() {
                           platformFeePaisa: Math.round(Number(e.target.value) * 100),
                         })
                       }
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 font-semibold text-ink"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-ink-muted mt-1">
                     Charged on every Food, Grocery Mart, and Parcel checkout.
                   </p>
                 </div>
 
                 <div className="flex flex-col justify-between">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-semibold text-ink mb-1">
                       Promotional Platform Fee Waiver
                     </label>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-ink-muted">
                       Instantly waives the Rs 10 fee for all customers during festivals.
                     </p>
                   </div>
@@ -151,7 +166,7 @@ export default function PricingControlPage() {
                         })
                       }
                       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        settings.platformFeeWaiver ? "bg-emerald-600" : "bg-slate-200"
+                        settings.platformFeeWaiver ? "bg-brand-600" : "bg-slate-200"
                       }`}
                     >
                       <span
@@ -160,7 +175,7 @@ export default function PricingControlPage() {
                         }`}
                       />
                     </button>
-                    <span className="ml-3 text-xs font-semibold text-slate-700">
+                    <span className="ml-3 text-xs font-semibold text-ink">
                       {settings.platformFeeWaiver ? "Waiver Active (Rs 0 Fee)" : "Standard Fee Active"}
                     </span>
                   </div>
@@ -169,19 +184,19 @@ export default function PricingControlPage() {
             </div>
 
             {/* 2. Delivery Band & Radius Rules */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2 border-b border-slate-100 pb-3">
-                <Truck className="w-4 h-4 text-emerald-600" />
+            <div className="bg-white p-6 rounded-2xl border border-border shadow-card space-y-4">
+              <h3 className="text-sm font-bold text-ink tracking-tight flex items-center gap-2 border-b border-border pb-3">
+                <Truck className="w-4 h-4 text-brand-600" />
                 2. Delivery Distance Bands & Free Delivery
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink mb-1">
                     Free Delivery Basket Threshold (NPR)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">
+                    <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-semibold">
                       Rs
                     </span>
                     <input
@@ -194,16 +209,16 @@ export default function PricingControlPage() {
                           freeDeliveryThresholdPaisa: Math.round(Number(e.target.value) * 100),
                         })
                       }
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 font-semibold text-ink"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-ink-muted mt-1">
                     Orders at or above this value receive 100% Free Delivery.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink mb-1">
                     Base Delivery Radius (Kilometers)
                   </label>
                   <input
@@ -216,19 +231,19 @@ export default function PricingControlPage() {
                         baseDeliveryRadiusMeters: Math.round(Number(e.target.value) * 1000),
                       })
                     }
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900"
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 font-semibold text-ink"
                   />
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-ink-muted mt-1">
                     Standard flat rate applies within this radius (Default: 3 km).
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink mb-1">
                     Base Delivery Fee (NPR within radius)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">
+                    <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-semibold">
                       Rs
                     </span>
                     <input
@@ -241,20 +256,20 @@ export default function PricingControlPage() {
                           baseDeliveryFeePaisa: Math.round(Number(e.target.value) * 100),
                         })
                       }
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 font-semibold text-ink"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Customer charge for deliveries &lt; 3 km (Default: Rs 50).
+                  <p className="text-[11px] text-ink-muted mt-1">
+                    Customer charge for deliveries &le; 3 km (Default: Rs 50).
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink mb-1">
                     Extra Distance Fee (NPR per km)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">
+                    <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-semibold">
                       Rs
                     </span>
                     <input
@@ -267,10 +282,10 @@ export default function PricingControlPage() {
                           extraDistanceFeePerKmPaisa: Math.round(Number(e.target.value) * 100),
                         })
                       }
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 font-semibold text-ink"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-ink-muted mt-1">
                     Added per km beyond the 3 km base (Default: Rs 15/km).
                   </p>
                 </div>
@@ -278,19 +293,19 @@ export default function PricingControlPage() {
             </div>
 
             {/* 3. Driver Earnings Model */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2 border-b border-slate-100 pb-3">
-                <Bike className="w-4 h-4 text-emerald-600" />
+            <div className="bg-white p-6 rounded-2xl border border-border shadow-card space-y-4">
+              <h3 className="text-sm font-bold text-ink tracking-tight flex items-center gap-2 border-b border-border pb-3">
+                <Bike className="w-4 h-4 text-brand-600" />
                 3. Rider & Driver Delivery Share Rules
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink mb-1">
                     Base Driver Payout (0–3 km)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">
+                    <span className="absolute left-3 top-2.5 text-xs text-ink-muted font-semibold">
                       Rs
                     </span>
                     <input
@@ -303,16 +318,16 @@ export default function PricingControlPage() {
                           driverBaseSharePaisa: Math.round(Number(e.target.value) * 100),
                         })
                       }
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 font-semibold text-ink"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-ink-muted mt-1">
                     Guaranteed rider base pay per completed delivery (Default: Rs 40).
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink mb-1">
                     Rider Share of Extra Distance Fee (%)
                   </label>
                   <div className="relative">
@@ -328,13 +343,13 @@ export default function PricingControlPage() {
                           driverExtraDistanceShareBps: Math.round(Number(e.target.value) * 100),
                         })
                       }
-                      className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900"
+                      className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 font-semibold text-ink"
                     />
-                    <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">
+                    <span className="absolute right-3 top-2.5 text-xs text-ink-muted font-semibold">
                       %
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-ink-muted mt-1">
                     Share of extra distance fee passed directly to rider (Default: 80%).
                   </p>
                 </div>
@@ -342,9 +357,9 @@ export default function PricingControlPage() {
             </div>
 
             {/* 4. Vertical Take-Rate Sliders */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2 border-b border-slate-100 pb-3">
-                <Sparkles className="w-4 h-4 text-emerald-600" />
+            <div className="bg-white p-6 rounded-2xl border border-border shadow-card space-y-4">
+              <h3 className="text-sm font-bold text-ink tracking-tight flex items-center gap-2 border-b border-border pb-3">
+                <Sparkles className="w-4 h-4 text-brand-600" />
                 4. Default Vertical Commission Rates (Take-Rates)
               </h3>
 
@@ -389,8 +404,8 @@ export default function PricingControlPage() {
                 ].map((item) => (
                   <div key={item.key} className="space-y-1">
                     <div className="flex items-center justify-between text-xs font-semibold">
-                      <span className="text-slate-800">{item.name}</span>
-                      <span className="text-emerald-700 font-mono text-sm">
+                      <span className="text-ink">{item.name}</span>
+                      <span className="text-brand-600 font-mono text-sm font-bold">
                         {(item.val / 100).toFixed(1)}% ({item.val} bps)
                       </span>
                     </div>
@@ -409,7 +424,7 @@ export default function PricingControlPage() {
                           },
                         })
                       }
-                      className="w-full accent-emerald-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                      className="w-full accent-brand-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                     />
                   </div>
                 ))}
@@ -419,32 +434,32 @@ export default function PricingControlPage() {
 
           {/* Right Column: Instant Live Simulation */}
           <div className="space-y-6">
-            <div className="bg-gradient-to-b from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-lg border border-slate-700/60 space-y-5 sticky top-24">
+            <div className="bg-gradient-to-b from-slate-900 to-brand-950 text-white p-6 rounded-2xl shadow-xl border border-slate-800 space-y-5 sticky top-24">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-300">
                   Live Financial Simulation
                 </span>
-                <span className="text-[10px] bg-slate-700 px-2 py-0.5 rounded font-mono text-slate-300">
+                <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded font-mono text-slate-300 border border-slate-700">
                   5 km Delivery
                 </span>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-slate-700/80">
+                <div className="flex justify-between py-1.5 border-b border-slate-800">
                   <span className="text-slate-300">Standard Platform Fee</span>
                   <span className="font-semibold text-white">
                     Rs {(settings.platformFeeWaiver ? 0 : settings.platformFeePaisa / 100).toFixed(2)}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-slate-700/80">
+                <div className="flex justify-between py-1.5 border-b border-slate-800">
                   <span className="text-slate-300">Base Delivery (&le; 3 km)</span>
                   <span className="font-semibold text-white">
                     Rs {(settings.baseDeliveryFeePaisa / 100).toFixed(2)}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-slate-700/80">
+                <div className="flex justify-between py-1.5 border-b border-slate-800">
                   <span className="text-slate-300">Extra Distance (2 km @ Rs 15)</span>
                   <span className="font-semibold text-white">
                     Rs {(extraFeePaisa / 100).toFixed(2)}
@@ -453,14 +468,14 @@ export default function PricingControlPage() {
 
                 <div className="flex justify-between py-2 bg-slate-800/80 px-3 rounded-lg font-semibold">
                   <span className="text-slate-200">Customer Delivery Total</span>
-                  <span className="text-emerald-400 text-sm">
+                  <span className="text-brand-300 text-sm font-bold">
                     Rs {(totalDeliveryPaisa / 100).toFixed(2)}
                   </span>
                 </div>
               </div>
 
               {/* Rider Breakdown */}
-              <div className="pt-2 border-t border-slate-700/80 space-y-2 text-xs">
+              <div className="pt-2 border-t border-slate-800 space-y-2 text-xs">
                 <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   Driver Earnings Breakdown
                 </div>
@@ -491,7 +506,7 @@ export default function PricingControlPage() {
               </div>
 
               {/* Approval Note Input */}
-              <div className="pt-3 border-t border-slate-700/80">
+              <div className="pt-3 border-t border-slate-800">
                 <label className="block text-[11px] font-semibold text-slate-300 mb-1">
                   Reason / Approval Reference (for Audit Log)
                 </label>
@@ -500,13 +515,13 @@ export default function PricingControlPage() {
                   placeholder="e.g. Festival promo approved by VP Operations"
                   value={adminNote}
                   onChange={(e) => setAdminNote(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-slate-500"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500 placeholder-slate-500"
                 />
               </div>
 
               <button
                 onClick={handleSave}
-                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-900/40 transition-all flex items-center justify-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Commit Changes to Database

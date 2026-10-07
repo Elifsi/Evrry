@@ -3,17 +3,12 @@
 import { useState } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
 import {
-  HelpCircle,
   CheckCircle2,
-  XCircle,
   MessageSquare,
   DollarSign,
-  AlertCircle,
   Receipt,
-  User,
-  Store,
-  RotateCcw,
 } from "lucide-react";
+import { recordAdminAuditLog } from "@/lib/admin/api";
 
 interface DisputeItem {
   id: string;
@@ -66,22 +61,40 @@ export default function DisputesPage() {
   const [selectedDispute, setSelectedDispute] = useState<DisputeItem>(sampleDisputes[0]);
   const [actionAlert, setActionAlert] = useState<string | null>(null);
 
-  const handleApproveRefund = () => {
+  const handleApproveRefund = async () => {
     setDisputes((prev) =>
       prev.map((d) => (d.id === selectedDispute.id ? { ...d, status: "refunded" } : d))
     );
     setSelectedDispute({ ...selectedDispute, status: "refunded" });
+
+    await recordAdminAuditLog({
+      adminName: "Suman Adhikari (VP Operations)",
+      adminEmail: "suman@evrry.com.np",
+      actionType: "REFUND_APPROVED",
+      details: `Approved full refund of Rs ${(selectedDispute.orderTotalPaisa / 100).toFixed(2)} for ${selectedDispute.customerName} via ${selectedDispute.paymentMethod}. Order: ${selectedDispute.orderId}`,
+      ipAddress: "103.10.29.14 (Kathmandu)",
+    });
+
     setActionAlert(
       `Refund of Rs ${(selectedDispute.orderTotalPaisa / 100).toFixed(2)} dispatched to ${selectedDispute.customerName}'s ${selectedDispute.paymentMethod} account!`
     );
     setTimeout(() => setActionAlert(null), 5000);
   };
 
-  const handleRejectClaim = () => {
+  const handleRejectClaim = async () => {
     setDisputes((prev) =>
       prev.map((d) => (d.id === selectedDispute.id ? { ...d, status: "rejected" } : d))
     );
     setSelectedDispute({ ...selectedDispute, status: "rejected" });
+
+    await recordAdminAuditLog({
+      adminName: "Suman Adhikari (VP Operations)",
+      adminEmail: "suman@evrry.com.np",
+      actionType: "REFUND_REJECTED",
+      details: `Rejected dispute claim ${selectedDispute.id} for order ${selectedDispute.orderId}.`,
+      ipAddress: "103.10.29.14 (Kathmandu)",
+    });
+
     setActionAlert(`Dispute ${selectedDispute.id} rejected. Customer informed via SMS.`);
     setTimeout(() => setActionAlert(null), 4000);
   };
@@ -96,21 +109,23 @@ export default function DisputesPage() {
       <div className="p-8 space-y-6 flex-1 max-w-6xl">
         {/* Alert Feedback */}
         {actionAlert && (
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-800 text-xs flex items-center justify-between shadow-sm">
+          <div className="bg-brand-50 border border-brand-200 p-4 rounded-xl text-brand-900 text-xs flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <CheckCircle2 className="w-5 h-5 text-brand-600" />
               <span className="font-semibold">{actionAlert}</span>
             </div>
-            <span className="text-[11px] font-mono text-emerald-600">Fintech Refund Bridge</span>
+            <span className="text-[11px] font-mono text-brand-600 bg-white px-2 py-0.5 rounded border border-brand-200">
+              Fintech Refund Bridge
+            </span>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[550px]">
           {/* Left Column: Disputes List (5 cols) */}
-          <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
-            <div className="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="lg:col-span-5 bg-white rounded-2xl border border-border shadow-card p-4 space-y-3">
+            <div className="text-xs font-bold text-ink flex items-center justify-between border-b border-border pb-3">
               <span>Customer Dispute Queue</span>
-              <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-mono">
+              <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
                 {disputes.filter((d) => d.status === "open").length} Open
               </span>
             </div>
@@ -123,7 +138,7 @@ export default function DisputesPage() {
                   className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                     selectedDispute.id === d.id
                       ? "bg-slate-900 text-white border-slate-900 shadow-md"
-                      : "bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100"
+                      : "bg-surface-subtle text-ink border-border hover:bg-slate-100"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -131,17 +146,17 @@ export default function DisputesPage() {
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded uppercase font-mono ${
                         d.status === "open"
-                          ? "bg-amber-500/20 text-amber-500"
+                          ? "bg-amber-500/20 text-amber-300"
                           : d.status === "refunded"
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : "bg-rose-500/20 text-rose-300"
                       }`}
                     >
                       {d.status}
                     </span>
                   </div>
 
-                  <div className={`text-[11px] mt-1 line-clamp-1 ${selectedDispute.id === d.id ? "text-slate-300" : "text-slate-500"}`}>
+                  <div className={`text-[11px] mt-1 line-clamp-1 ${selectedDispute.id === d.id ? "text-slate-300" : "text-ink-muted"}`}>
                     {d.disputeReason}
                   </div>
 
@@ -157,20 +172,20 @@ export default function DisputesPage() {
           </div>
 
           {/* Right Column: Dispute Inspection & Refund Action Desk (7 cols) */}
-          <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between space-y-6">
+          <div className="lg:col-span-7 bg-white rounded-2xl border border-border shadow-card p-6 flex flex-col justify-between space-y-6">
             <div className="space-y-5">
               {/* Header */}
-              <div className="border-b border-slate-100 pb-4">
+              <div className="border-b border-border pb-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-ink-subtle uppercase tracking-wider">
                     Complaint Dossier
                   </span>
-                  <span className="text-xs font-mono text-slate-400">{selectedDispute.id}</span>
+                  <span className="text-xs font-mono text-ink-muted">{selectedDispute.id}</span>
                 </div>
-                <h3 className="text-base font-bold text-slate-900 mt-1">
+                <h3 className="text-base font-bold text-ink mt-1">
                   {selectedDispute.disputeReason}
                 </h3>
-                <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                <div className="flex items-center gap-2 mt-1 text-xs text-ink-muted">
                   <span>Customer: {selectedDispute.customerName} ({selectedDispute.customerPhone})</span>
                   <span>•</span>
                   <span>Store: {selectedDispute.vendorName}</span>
@@ -178,63 +193,63 @@ export default function DisputesPage() {
               </div>
 
               {/* Customer Comment */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
-                <div className="font-semibold text-slate-700 flex items-center gap-1.5 mb-1">
-                  <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+              <div className="bg-surface-subtle p-4 rounded-xl border border-border text-xs">
+                <div className="font-semibold text-ink flex items-center gap-1.5 mb-1">
+                  <MessageSquare className="w-3.5 h-3.5 text-brand-600" />
                   Customer Stated:
                 </div>
-                <p className="text-slate-600 italic">&ldquo;{selectedDispute.customerComment}&rdquo;</p>
+                <p className="text-ink-muted italic">&ldquo;{selectedDispute.customerComment}&rdquo;</p>
               </div>
 
               {/* Photo Evidence */}
               {selectedDispute.photoEvidenceUrl && (
                 <div>
-                  <div className="text-[11px] font-semibold text-slate-500 mb-2">
+                  <div className="text-[11px] font-semibold text-ink-muted mb-2">
                     Photo Evidence Submitted by Customer:
                   </div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={selectedDispute.photoEvidenceUrl}
                     alt="Customer Evidence"
-                    className="h-44 w-full object-cover rounded-xl border border-slate-200"
+                    className="h-44 w-full object-cover rounded-xl border border-border"
                   />
                 </div>
               )}
 
               {/* Payment Summary */}
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+              <div className="flex items-center justify-between p-3.5 bg-surface-subtle rounded-xl border border-border text-xs">
                 <div className="flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-emerald-600" />
-                  <span className="font-semibold text-slate-800">
+                  <Receipt className="w-4 h-4 text-brand-600" />
+                  <span className="font-semibold text-ink">
                     Original Payment via {selectedDispute.paymentMethod}
                   </span>
                 </div>
-                <span className="font-mono font-bold text-slate-900 text-sm">
+                <span className="font-mono font-bold text-ink text-sm">
                   Rs {(selectedDispute.orderTotalPaisa / 100).toFixed(2)}
                 </span>
               </div>
             </div>
 
             {/* Action Bar */}
-            <div className="pt-4 border-t border-slate-100 flex items-center gap-3">
+            <div className="pt-4 border-t border-border flex items-center gap-3">
               {selectedDispute.status === "open" ? (
                 <>
                   <button
                     onClick={handleApproveRefund}
-                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-900/30 transition-all flex items-center justify-center gap-1.5"
                   >
                     <DollarSign className="w-4 h-4" />
                     Approve 100% Refund (to {selectedDispute.paymentMethod})
                   </button>
                   <button
                     onClick={handleRejectClaim}
-                    className="px-5 py-2.5 border border-red-200 text-red-600 hover:bg-red-50 font-semibold text-xs rounded-xl transition-all"
+                    className="px-5 py-2.5 border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold text-xs rounded-xl transition-all"
                   >
                     Reject Claim
                   </button>
                 </>
               ) : (
-                <div className="w-full text-center py-2 text-xs font-semibold text-slate-500 bg-slate-100 rounded-lg">
+                <div className="w-full text-center py-2 text-xs font-semibold text-ink-muted bg-surface-subtle rounded-lg border border-border">
                   Case status: {selectedDispute.status.toUpperCase()}
                 </div>
               )}

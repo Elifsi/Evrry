@@ -7,12 +7,8 @@ import {
   Plus,
   Play,
   Pause,
-  Trash2,
-  TrendingUp,
-  Percent,
   CheckCircle2,
   Calendar,
-  Layers,
 } from "lucide-react";
 import { sampleVouchers } from "@/lib/admin/mockData";
 import { VoucherCampaign } from "@/lib/admin/types";
@@ -82,29 +78,31 @@ export default function VouchersPage() {
       <div className="p-8 space-y-8 flex-1 max-w-6xl">
         {/* Alert Banner */}
         {actionAlert && (
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-800 text-xs flex items-center justify-between">
+          <div className="bg-brand-50 border border-brand-200 p-4 rounded-xl text-brand-900 text-xs flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <CheckCircle2 className="w-5 h-5 text-brand-600" />
               <span className="font-semibold">{actionAlert}</span>
             </div>
-            <span className="text-[11px] font-mono text-emerald-600">Active in Checkout</span>
+            <span className="text-[11px] font-mono text-brand-600 bg-white px-2 py-0.5 rounded border border-brand-200">
+              Active in Checkout
+            </span>
           </div>
         )}
 
         {/* Action Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-border shadow-card">
           <div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <Ticket className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-base font-bold text-ink tracking-tight flex items-center gap-2">
+              <Ticket className="w-5 h-5 text-brand-600" />
               Active Marketing Campaigns ({vouchers.length})
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               Create discount coupons, set financial burn limits, and target specific verticals.
             </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-md shadow-indigo-900/20"
+            className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-md shadow-brand-900/30"
           >
             <Plus className="w-4 h-4" />
             Create New Voucher
@@ -124,17 +122,17 @@ export default function VouchersPage() {
             return (
               <div
                 key={v.id}
-                className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4"
+                className="bg-white p-5 rounded-2xl border border-border shadow-card flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-mono font-bold text-xs rounded-lg border border-indigo-200 tracking-wider">
+                    <span className="px-2.5 py-1 bg-brand-50 text-brand-700 font-mono font-bold text-xs rounded-lg border border-brand-200 tracking-wider">
                       {v.code}
                     </span>
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${
                         v.status === "active"
-                          ? "bg-emerald-100 text-emerald-700"
+                          ? "bg-emerald-100 text-emerald-800"
                           : v.status === "paused"
                           ? "bg-amber-100 text-amber-800"
                           : "bg-slate-100 text-slate-600"
@@ -145,27 +143,27 @@ export default function VouchersPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-xs font-bold text-slate-900">{v.title}</h3>
-                    <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2">{v.description}</p>
+                    <h3 className="text-xs font-bold text-ink">{v.title}</h3>
+                    <p className="text-[11px] text-ink-muted mt-0.5 line-clamp-2">{v.description}</p>
                   </div>
 
                   {/* Discount Rule Summary */}
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-[11px] space-y-1 text-slate-600">
+                  <div className="bg-surface-subtle p-2.5 rounded-xl border border-border text-[11px] space-y-1 text-ink-muted">
                     <div className="flex justify-between">
                       <span>Discount:</span>
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-ink">
                         {v.discountType === "flat" ? `Rs ${v.discountValue}` : `${v.discountValue}%`}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Min Basket:</span>
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-ink">
                         Rs {v.minOrderValuePaisa / 100}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Max Cap:</span>
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-ink">
                         Rs {v.maxDiscountCapPaisa / 100}
                       </span>
                     </div>
@@ -174,8 +172,8 @@ export default function VouchersPage() {
                   {/* Budget Burn Tracker */}
                   <div className="space-y-1.5 pt-1">
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-slate-500">Budget Burned:</span>
-                      <span className="font-mono font-semibold text-slate-900">
+                      <span className="text-ink-muted">Budget Burned:</span>
+                      <span className="font-mono font-semibold text-ink">
                         Rs {(v.burnedBudgetPaisa / 100).toLocaleString()} /{" "}
                         {(v.allocatedBudgetPaisa / 100).toLocaleString()}
                       </span>
@@ -184,15 +182,15 @@ export default function VouchersPage() {
                       <div
                         className={`h-full rounded-full transition-all ${
                           burnPercent >= 90
-                            ? "bg-red-500"
+                            ? "bg-rose-500"
                             : burnPercent >= 70
                             ? "bg-amber-500"
-                            : "bg-indigo-600"
+                            : "bg-brand-600"
                         }`}
                         style={{ width: `${Math.min(burnPercent, 100)}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-[10px] text-slate-400">
+                    <div className="flex justify-between text-[10px] text-ink-subtle">
                       <span>{redemptionPercent}% claimed</span>
                       <span>{v.redeemedCount.toLocaleString()} uses</span>
                     </div>
@@ -200,8 +198,8 @@ export default function VouchersPage() {
                 </div>
 
                 {/* Campaign Controls */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-ink-subtle flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     Until {v.validUntil}
                   </span>
@@ -212,7 +210,7 @@ export default function VouchersPage() {
                         className={`p-1.5 rounded-lg border text-xs transition-colors ${
                           v.status === "active"
                             ? "text-amber-700 border-amber-200 hover:bg-amber-50"
-                            : "text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                            : "text-brand-700 border-brand-200 hover:bg-brand-50"
                         }`}
                         title={v.status === "active" ? "Pause Voucher" : "Resume Voucher"}
                       >
@@ -233,15 +231,15 @@ export default function VouchersPage() {
         {/* Create Voucher Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Ticket className="w-4 h-4 text-indigo-600" />
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-border">
+              <h3 className="text-base font-bold text-ink flex items-center gap-2">
+                <Ticket className="w-4 h-4 text-brand-600" />
                 Create New Marketing Voucher
               </h3>
 
               <form onSubmit={handleCreateVoucher} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-semibold text-ink mb-1">
                     Voucher Code (Auto-uppercase)
                   </label>
                   <input
@@ -250,41 +248,41 @@ export default function VouchersPage() {
                     placeholder="e.g. MONSOON200"
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg font-mono font-bold uppercase focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 border border-border rounded-lg font-mono font-bold uppercase focus:ring-2 focus:ring-brand-600 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Public Title</label>
+                  <label className="block font-semibold text-ink mb-1">Public Title</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Monsoon Special: Flat Rs 200 Off"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Description</label>
+                  <label className="block font-semibold text-ink mb-1">Description</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Valid on food and mart orders above Rs 600."
                     value={newDesc}
                     onChange={(e) => setNewDesc(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Discount Type</label>
+                    <label className="block font-semibold text-ink mb-1">Discount Type</label>
                     <select
                       value={discountType}
                       onChange={(e) => setDiscountType(e.target.value as "flat" | "percentage")}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-semibold"
+                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none font-semibold"
                     >
                       <option value="flat">Flat Amount (NPR)</option>
                       <option value="percentage">Percentage (%)</option>
@@ -292,20 +290,20 @@ export default function VouchersPage() {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Discount Value</label>
+                    <label className="block font-semibold text-ink mb-1">Discount Value</label>
                     <input
                       type="number"
                       required
                       value={discountVal}
                       onChange={(e) => setDiscountVal(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-semibold"
+                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none font-semibold"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-semibold text-ink mb-1">
                       Min Basket Value (Rs)
                     </label>
                     <input
@@ -313,12 +311,12 @@ export default function VouchersPage() {
                       required
                       value={minOrder}
                       onChange={(e) => setMinOrder(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-semibold text-ink mb-1">
                       Max Discount Cap (Rs)
                     </label>
                     <input
@@ -326,14 +324,14 @@ export default function VouchersPage() {
                       required
                       value={maxDiscount}
                       onChange={(e) => setMaxDiscount(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-semibold text-ink mb-1">
                       Total Redemption Cap
                     </label>
                     <input
@@ -341,12 +339,12 @@ export default function VouchersPage() {
                       required
                       value={totalClaims}
                       onChange={(e) => setTotalClaims(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-semibold text-ink mb-1">
                       Marketing Budget (Rs)
                     </label>
                     <input
@@ -354,22 +352,22 @@ export default function VouchersPage() {
                       required
                       value={budgetNpr}
                       onChange={(e) => setBudgetNpr(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-600 focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-semibold"
+                    className="px-4 py-2 text-ink-muted hover:bg-slate-100 rounded-lg font-semibold"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-md"
+                    className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-bold shadow-md shadow-brand-900/30"
                   >
                     Publish Voucher
                   </button>

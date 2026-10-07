@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-slate-50 text-slate-900 min-h-screen flex antialiased">
+      <body className="bg-surface-subtle text-ink min-h-screen flex antialiased">
         <AdminSidebar />
         <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
           {children}

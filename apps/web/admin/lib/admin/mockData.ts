@@ -31,7 +31,13 @@ export const initialPricingSettings: PlatformPricingSettings = {
   },
 };
 
+/**
+ * KYC verification records.
+ * Status: 'pending' | 'approved' | 'rejected' | 'reupload_requested'
+ * Pending queue strictly displays items where status === 'pending'.
+ */
 export const sampleKycQueue: KycDocumentItem[] = [
+  // ── Pending Queue (Awaiting Verification) ──
   {
     id: 'kyc-001',
     partnerName: 'Ram Bahadur Shrestha',
@@ -53,7 +59,7 @@ export const sampleKycQueue: KycDocumentItem[] = [
     documents: [
       {
         type: 'license_front',
-        title: 'Nepali Smart Driving License (Front)',
+        title: 'Smart Driving License (Category A - Two Wheeler)',
         imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
       },
       {
@@ -94,6 +100,59 @@ export const sampleKycQueue: KycDocumentItem[] = [
     ],
   },
   {
+    id: 'kyc-005',
+    partnerName: 'Krishna Pokharel',
+    partnerType: 'driver',
+    phoneNumber: '+977 9851098765',
+    submittedAt: '2026-10-07 11:00 AM',
+    status: 'pending',
+    vehicleInfo: {
+      type: 'Cab / Sedan (Four-Wheeler Taxi)',
+      plateNumber: 'Ba 2 Ja 4109',
+      model: 'Hyundai Aura (2023)',
+      taxClearanceYear: 2083,
+    },
+    licenseInfo: {
+      number: '03-06-00481920',
+      expiryDate: '2029-11-20',
+      issueDistrict: 'Bhaktapur (Radhe Radhe)',
+    },
+    documents: [
+      {
+        type: 'license_front',
+        title: 'Smart Driving License (Category B - Light Vehicle Taxi)',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        type: 'bluebook_tax',
+        title: 'Taxi Route Permit & Blue Book Tax Clearance',
+        imageUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80',
+      },
+    ],
+  },
+  {
+    id: 'kyc-006',
+    partnerName: 'Organic Valley Grocery Jhamsikhel',
+    partnerType: 'grocery',
+    phoneNumber: '+977 9811223344',
+    submittedAt: '2026-10-07 11:25 AM',
+    status: 'pending',
+    panVatInfo: {
+      panNumber: '401928374',
+      businessName: 'Organic Valley Fresh Produce Store',
+      entityType: 'Partnership',
+    },
+    documents: [
+      {
+        type: 'pan_certificate',
+        title: 'PAN Registration Document',
+        imageUrl: 'https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=800&q=80',
+      },
+    ],
+  },
+
+  // ── Approved Partners Tab ──
+  {
     id: 'kyc-003',
     partnerName: 'Bikash Tamang',
     partnerType: 'driver',
@@ -120,13 +179,35 @@ export const sampleKycQueue: KycDocumentItem[] = [
     ],
   },
   {
+    id: 'kyc-007',
+    partnerName: 'Pokhara Lakeside Boutique Stay',
+    partnerType: 'hotel',
+    phoneNumber: '+977 9856012345',
+    submittedAt: '2026-10-05 02:00 PM',
+    status: 'approved',
+    panVatInfo: {
+      panNumber: '501829304',
+      businessName: 'Lakeside Boutique Hospitality Pvt Ltd',
+      entityType: 'Private Limited Company',
+    },
+    documents: [
+      {
+        type: 'pan_certificate',
+        title: 'Hotel Tourism License & VAT Certificate',
+        imageUrl: 'https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=800&q=80',
+      },
+    ],
+  },
+
+  // ── Re-Upload Requested Tab ──
+  {
     id: 'kyc-004',
     partnerName: 'Everest Kirana & Departmental Mart',
     partnerType: 'grocery',
     phoneNumber: '+977 9851022334',
     submittedAt: '2026-10-06 02:10 PM',
     status: 'reupload_requested',
-    rejectionReason: 'VAT certificate photo was blurry and corner was cut off. Please re-upload full page.',
+    rejectionReason: 'VAT certificate photo was blurry and bottom seal was cut off. Please re-upload full page in good lighting.',
     panVatInfo: {
       panNumber: '302918274',
       businessName: 'Everest Grocery Traders',
@@ -135,8 +216,37 @@ export const sampleKycQueue: KycDocumentItem[] = [
     documents: [
       {
         type: 'pan_certificate',
-        title: 'VAT Certificate (Blurry sample)',
+        title: 'VAT Certificate (Photo flagged as blurry)',
         imageUrl: 'https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=800&q=80',
+      },
+    ],
+  },
+
+  // ── Rejected Tab ──
+  {
+    id: 'kyc-008',
+    partnerName: 'Nitesh Lama',
+    partnerType: 'rider',
+    phoneNumber: '+977 9822334455',
+    submittedAt: '2026-10-05 11:15 AM',
+    status: 'rejected',
+    rejectionReason: 'Driving license Category A was expired on 2024-03-12 and vehicle blue book tax clearance stamp for 2081/2082 was missing.',
+    vehicleInfo: {
+      type: 'Motorcycle (Two-Wheeler)',
+      plateNumber: 'Ba 42 Pa 1120',
+      model: 'Honda CB Shine (2018)',
+      taxClearanceYear: 2080,
+    },
+    licenseInfo: {
+      number: '01-02-00109923',
+      expiryDate: '2024-03-12',
+      issueDistrict: 'Kathmandu',
+    },
+    documents: [
+      {
+        type: 'license_front',
+        title: 'Driving License (Expired)',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
       },
     ],
   },

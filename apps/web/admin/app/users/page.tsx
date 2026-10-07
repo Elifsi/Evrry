@@ -3,19 +3,15 @@
 import { useState } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
 import {
-  Users,
   Search,
-  ShieldAlert,
-  ShieldBan,
-  Ban,
   CheckCircle2,
   AlertTriangle,
   Smartphone,
   Phone,
-  UserX,
   CreditCard,
-  History,
+  Ban,
 } from "lucide-react";
+import { recordAdminAuditLog } from "@/lib/admin/api";
 
 interface AdminUserItem {
   id: string;
@@ -96,7 +92,7 @@ export default function UsersModerationPage() {
     return matchesSearch && matchesRole;
   });
 
-  const handleUpdateStatus = (
+  const handleUpdateStatus = async (
     userId: string,
     newStatus: "active" | "suspended" | "banned" | "cod_disabled",
     reason: string
@@ -106,6 +102,15 @@ export default function UsersModerationPage() {
         u.id === userId ? { ...u, status: newStatus, strikeReason: reason } : u
       )
     );
+
+    await recordAdminAuditLog({
+      adminName: "Suman Adhikari (VP Operations)",
+      adminEmail: "suman@evrry.com.np",
+      actionType: `USER_${newStatus.toUpperCase()}`,
+      details: `User ${userId} status changed to ${newStatus}. Reason: ${reason}`,
+      ipAddress: "103.10.29.14 (Kathmandu)",
+    });
+
     setSelectedUser(null);
     setActionAlert(`User ${userId} status changed to ${newStatus.toUpperCase()}.`);
     setTimeout(() => setActionAlert(null), 4000);
@@ -121,17 +126,19 @@ export default function UsersModerationPage() {
       <div className="p-8 space-y-6 flex-1 max-w-6xl">
         {/* Alert Feedback */}
         {actionAlert && (
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-800 text-xs flex items-center justify-between shadow-sm">
+          <div className="bg-brand-50 border border-brand-200 p-4 rounded-xl text-brand-900 text-xs flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <CheckCircle2 className="w-5 h-5 text-brand-600" />
               <span className="font-semibold">{actionAlert}</span>
             </div>
-            <span className="text-[11px] font-mono text-emerald-600">Logged to admin_audit_logs</span>
+            <span className="text-[11px] font-mono text-brand-600 bg-white px-2 py-0.5 rounded border border-brand-200">
+              Logged to admin_audit_logs
+            </span>
           </div>
         )}
 
         {/* Search & Filter Toolbar */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-border shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
@@ -139,12 +146,12 @@ export default function UsersModerationPage() {
               placeholder="Search by Name, Nepali Phone (+977), or Device UUID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full pl-10 pr-4 py-2 text-xs border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 text-ink bg-surface-subtle"
             />
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500 font-semibold">Filter:</span>
+            <span className="text-ink-muted font-semibold">Filter:</span>
             {["all", "consumer", "driver", "merchant"].map((role) => (
               <button
                 key={role}
@@ -152,7 +159,7 @@ export default function UsersModerationPage() {
                 className={`px-3 py-1.5 rounded-lg font-semibold uppercase text-[10px] transition-all border ${
                   filterRole === role
                     ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    : "bg-surface-subtle text-ink-muted border-border hover:bg-slate-100"
                 }`}
               >
                 {role}
@@ -162,11 +169,11 @@ export default function UsersModerationPage() {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-border shadow-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-semibold uppercase text-[10px] bg-slate-50/50">
+                <tr className="border-b border-border text-ink-subtle font-semibold uppercase text-[10px] bg-surface-subtle">
                   <th className="py-3 px-4">User Details</th>
                   <th className="py-3 px-4">Phone & Device</th>
                   <th className="py-3 px-4">Role</th>
@@ -175,27 +182,27 @@ export default function UsersModerationPage() {
                   <th className="py-3 px-4 text-right">Moderation Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border">
                 {filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-900">{user.name}</div>
-                      <div className="text-[10px] font-mono text-slate-400">{user.id}</div>
+                      <div className="font-semibold text-ink">{user.name}</div>
+                      <div className="text-[10px] font-mono text-ink-subtle">{user.id}</div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="font-mono text-slate-800 font-medium flex items-center gap-1.5">
+                      <div className="font-mono text-ink font-medium flex items-center gap-1.5">
                         <Phone className="w-3 h-3 text-slate-400" />
                         {user.phone}
                       </div>
-                      <div className="text-[10px] font-mono text-slate-400 flex items-center gap-1 mt-0.5">
+                      <div className="text-[10px] font-mono text-ink-subtle flex items-center gap-1 mt-0.5">
                         <Smartphone className="w-3 h-3 text-slate-400" />
                         UUID: {user.deviceUuid}
                       </div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 uppercase font-mono">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-subtle text-ink uppercase font-mono border border-border">
                         {user.role}
                       </span>
                     </td>
@@ -214,16 +221,16 @@ export default function UsersModerationPage() {
                           Suspended
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800">
                           Banned
                         </span>
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4 text-slate-600">
+                    <td className="py-3.5 px-4 text-ink-muted">
                       <div>{user.totalOrders} total completed</div>
                       {user.codViolationCount > 0 && (
-                        <div className="text-[11px] text-red-600 font-semibold">
+                        <div className="text-[11px] text-rose-600 font-semibold">
                           {user.codViolationCount} rejected COD deliveries
                         </div>
                       )}
@@ -232,7 +239,7 @@ export default function UsersModerationPage() {
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => setSelectedUser(user)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-lg transition-colors border border-slate-200"
+                        className="px-3 py-1.5 bg-surface-subtle hover:bg-slate-100 text-ink font-semibold text-xs rounded-lg transition-colors border border-border"
                       >
                         Manage & Moderate
                       </button>
@@ -247,12 +254,12 @@ export default function UsersModerationPage() {
         {/* Moderation Action Modal */}
         {selectedUser && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-xs">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-sm font-bold text-slate-900">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-border text-xs">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-sm font-bold text-ink">
                   Moderate Account: {selectedUser.name}
                 </h3>
-                <span className="font-mono text-slate-400">{selectedUser.phone}</span>
+                <span className="font-mono text-ink-subtle">{selectedUser.phone}</span>
               </div>
 
               <div className="space-y-2">
@@ -327,24 +334,24 @@ export default function UsersModerationPage() {
                       "Permanent ban and Device UUID blacklisted for fraud."
                     )
                   }
-                  className="w-full text-left p-3 rounded-xl border border-red-200 bg-red-50/50 hover:bg-red-100/70 text-red-900 font-semibold transition-all flex items-center justify-between"
+                  className="w-full text-left p-3 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100/70 text-rose-900 font-semibold transition-all flex items-center justify-between"
                 >
                   <div>
                     <div className="flex items-center gap-1.5 font-bold">
-                      <Ban className="w-4 h-4 text-red-600" />
+                      <Ban className="w-4 h-4 text-rose-600" />
                       Permanent Ban & Blacklist Device
                     </div>
-                    <div className="text-[11px] font-normal text-red-700 mt-0.5">
+                    <div className="text-[11px] font-normal text-rose-700 mt-0.5">
                       Permanently revokes account and blacklists device UUID.
                     </div>
                   </div>
                 </button>
               </div>
 
-              <div className="flex justify-end pt-2 border-t border-slate-100">
+              <div className="flex justify-end pt-2 border-t border-border">
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold"
+                  className="px-4 py-1.5 bg-surface-subtle hover:bg-slate-100 text-ink rounded-lg font-semibold border border-border"
                 >
                   Close
                 </button>

@@ -1,53 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
 import {
   Wallet,
-  Download,
   CheckCircle2,
   AlertTriangle,
   Lock,
   Unlock,
   Building,
   Bike,
-  CreditCard,
   Send,
   FileSpreadsheet,
 } from "lucide-react";
 import {
-  samplePayoutBatch,
-  sampleRiderCodBalances,
-} from "@/lib/admin/mockData";
+  fetchPayoutBatch,
+  approveAndExecutePayout,
+  fetchRiderCodBalances,
+  toggleRiderCodLock,
+} from "@/lib/admin/api";
 import { MidnightPayoutBatch, RiderCodBalance } from "@/lib/admin/types";
+import { samplePayoutBatch, sampleRiderCodBalances } from "@/lib/admin/mockData";
 
 export default function PayoutsConsolePage() {
   const [batch, setBatch] = useState<MidnightPayoutBatch>(samplePayoutBatch);
   const [riders, setRiders] = useState<RiderCodBalance[]>(sampleRiderCodBalances);
   const [executionMessage, setExecutionMessage] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleExecutePayout = () => {
-    setBatch({ ...batch, status: "completed" });
-    setExecutionMessage(
-      `Disbursed NPR ${(batch.totalDisbursementPaisa / 100).toLocaleString()} via ConnectIPS & Khalti Payout API! Reference: DISB-2026-TXN-8812`
-    );
-    setTimeout(() => setExecutionMessage(null), 5000);
+  const loadData = async () => {
+    setIsRefreshing(true);
+    const [b, r] = await Promise.all([fetchPayoutBatch(), fetchRiderCodBalances()]);
+    setBatch(b);
+    setRiders(r);
+    setIsRefreshing(false);
   };
 
-  const handleToggleCodLock = (riderId: string) => {
-    setRiders((prev) =>
-      prev.map((r) => {
-        if (r.riderId === riderId) {
-          const nextStatus = r.safetyStatus === "hard_locked" ? "normal" : "hard_locked";
-          return { ...r, safetyStatus: nextStatus };
-        }
-        return r;
-      })
-    );
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleExecutePayout = async () => {
+    const res = await approveAndExecutePayout(batch.batchId);
+    if (res.success) {
+      setBatch({ ...batch, status: "completed" });
+      setExecutionMessage(res.message);
+      setTimeout(() => setExecutionMessage(null), 6000);
+    }
+  };
+
+  const handleToggleCodLock = async (riderId: string) => {
+    const updated = await toggleRiderCodLock(riderId);
+    if (updated) {
+      setRiders((prev) => prev.map((r) => (r.riderId === riderId ? updated : r)));
+    }
   };
 
   const handleDownloadNchl128 = () => {
-    // Generate mock CSV data
     const csvContent =
       "data:text/csv;charset=utf-8," +
       "BatchID,BeneficiaryBank,AccountNumber,AccountName,AmountNPR,Narration\n" +
@@ -67,26 +76,30 @@ export default function PayoutsConsolePage() {
       <AdminHeader
         title="Midnight Settlement & Payout Oversight"
         subtitle="Automated ConnectIPS Interbank Rails • Zero-Hub Rider COD Safety Monitor"
+        onRefresh={loadData}
+        isRefreshing={isRefreshing}
       />
 
       <div className="p-8 space-y-8 flex-1 max-w-6xl">
         {/* Execution Alert */}
         {executionMessage && (
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-800 text-xs flex items-center justify-between shadow-sm">
+          <div className="bg-brand-50 border border-brand-200 p-4 rounded-xl text-brand-900 text-xs flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <CheckCircle2 className="w-5 h-5 text-brand-600" />
               <span className="font-semibold">{executionMessage}</span>
             </div>
-            <span className="text-[11px] font-mono text-emerald-600">ConnectIPS / NCHL Gateway</span>
+            <span className="text-[11px] font-mono text-brand-600 bg-white px-2 py-0.5 rounded border border-brand-200">
+              ConnectIPS / NCHL Gateway
+            </span>
           </div>
         )}
 
         {/* Midnight Batch Aggregation Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div className="bg-white p-6 rounded-2xl border border-border shadow-card space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                <h2 className="text-base font-bold text-ink tracking-tight">
                   Midnight Settlement Batch: {batch.batchId}
                 </h2>
                 <span
@@ -99,7 +112,7 @@ export default function PayoutsConsolePage() {
                   {batch.status === "completed" ? "Settled & Disbursed" : "Ready for Approval"}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-ink-muted mt-1">
                 Aggregated daily earnings calculated by Supabase pg_cron at 00:00 NPT.
               </p>
             </div>
@@ -107,15 +120,15 @@ export default function PayoutsConsolePage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleDownloadNchl128}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 border border-border hover:bg-slate-50 text-ink-muted hover:text-ink text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
               >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+                <FileSpreadsheet className="w-4 h-4 text-brand-600" />
                 Export ConnectIPS NCHL-128
               </button>
               {batch.status !== "completed" && (
                 <button
                   onClick={handleExecutePayout}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-md shadow-emerald-900/20"
+                  className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-md shadow-brand-900/30"
                 >
                   <Send className="w-3.5 h-3.5" />
                   Approve & Execute Disbursal
@@ -127,33 +140,33 @@ export default function PayoutsConsolePage() {
           {/* Ledger Deductions Breakdown Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Merchant Settlement Ledger */}
-            <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3 text-xs">
-              <div className="flex items-center justify-between font-bold text-slate-900 pb-2 border-b border-slate-200">
+            <div className="bg-surface-subtle p-5 rounded-xl border border-border space-y-3 text-xs">
+              <div className="flex items-center justify-between font-bold text-ink pb-2 border-b border-border">
                 <span className="flex items-center gap-1.5">
-                  <Building className="w-4 h-4 text-emerald-600" />
+                  <Building className="w-4 h-4 text-brand-600" />
                   Merchant Venues & Stores ({batch.merchantCount})
                 </span>
-                <span className="text-emerald-700 font-mono">
+                <span className="text-brand-600 font-mono font-bold">
                   Net: NPR {(batch.netPayableMerchantsPaisa / 100).toLocaleString()}
                 </span>
               </div>
 
-              <div className="space-y-2 pt-1 text-slate-600">
+              <div className="space-y-2 pt-1 text-ink-muted">
                 <div className="flex justify-between">
                   <span>Gross Order Volume (GMV):</span>
-                  <span className="font-mono font-semibold text-slate-800">
+                  <span className="font-mono font-semibold text-ink">
                     NPR {(batch.grossMerchantEarningsPaisa / 100).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-red-600">
+                <div className="flex justify-between text-rose-600">
                   <span>Less Platform Take-Rate (15% avg):</span>
                   <span className="font-mono">
                     -NPR {(batch.platformCommissionsDeductedPaisa / 100).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-slate-200 font-bold text-slate-900">
+                <div className="flex justify-between pt-2 border-t border-border font-bold text-ink">
                   <span>Payable via Direct Bank IPS:</span>
-                  <span className="font-mono text-emerald-700 text-sm">
+                  <span className="font-mono text-brand-600 text-sm font-bold">
                     NPR {(batch.netPayableMerchantsPaisa / 100).toLocaleString()}
                   </span>
                 </div>
@@ -161,33 +174,33 @@ export default function PayoutsConsolePage() {
             </div>
 
             {/* Rider & Driver Settlement Ledger */}
-            <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3 text-xs">
-              <div className="flex items-center justify-between font-bold text-slate-900 pb-2 border-b border-slate-200">
+            <div className="bg-surface-subtle p-5 rounded-xl border border-border space-y-3 text-xs">
+              <div className="flex items-center justify-between font-bold text-ink pb-2 border-b border-border">
                 <span className="flex items-center gap-1.5">
-                  <Bike className="w-4 h-4 text-emerald-600" />
+                  <Bike className="w-4 h-4 text-brand-600" />
                   Delivery Riders & Drivers ({batch.riderCount})
                 </span>
-                <span className="text-emerald-700 font-mono">
+                <span className="text-brand-600 font-mono font-bold">
                   Net: NPR {(batch.netPayableRidersPaisa / 100).toLocaleString()}
                 </span>
               </div>
 
-              <div className="space-y-2 pt-1 text-slate-600">
+              <div className="space-y-2 pt-1 text-ink-muted">
                 <div className="flex justify-between">
                   <span>Gross Delivery Fees Earned:</span>
-                  <span className="font-mono font-semibold text-slate-800">
+                  <span className="font-mono font-semibold text-ink">
                     NPR {(batch.grossRiderFeesPaisa / 100).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-amber-700">
-                  <span>Less Rider Cash-in-Hand (COD Offset):</span>
+                <div className="flex justify-between text-rose-600">
+                  <span>Less Physical Cash-on-Delivery Retained:</span>
                   <span className="font-mono">
                     -NPR {(batch.riderCodDeductedPaisa / 100).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-slate-200 font-bold text-slate-900">
-                  <span>Net Bank Disbursal to Riders:</span>
-                  <span className="font-mono text-emerald-700 text-sm">
+                <div className="flex justify-between pt-2 border-t border-border font-bold text-ink">
+                  <span>Payable via Digital Wallet/Bank:</span>
+                  <span className="font-mono text-brand-600 text-sm font-bold">
                     NPR {(batch.netPayableRidersPaisa / 100).toLocaleString()}
                   </span>
                 </div>
@@ -196,99 +209,91 @@ export default function PayoutsConsolePage() {
           </div>
         </div>
 
-        {/* Zero-Hub Rider COD Safety Monitor */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+        {/* Zero-Hub Rider COD Safety Monitoring Table */}
+        <div className="bg-white p-6 rounded-2xl border border-border shadow-card space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Wallet className="w-4 h-4 text-amber-500" />
-                Zero-Hub Rider COD Safety Monitor
+              <h3 className="text-sm font-bold text-ink tracking-tight flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-brand-600" />
+                Zero-Hub Rider COD Float & Safety Locks
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Real-time Cash-in-Hand tracking. Soft warning at Rs 3,500; automatic dispatch lock at
-                Rs 5,000.
+              <p className="text-xs text-ink-muted">
+                Real-time monitor tracking physical cash held by riders. Auto-locks at Rs 5,000 threshold.
               </p>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5 text-amber-600 font-semibold">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                Soft Warning: &ge; Rs 3,500
+            <div className="flex items-center gap-2 text-xs">
+              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-medium">
+                Normal (&lt;Rs 3,500)
               </span>
-              <span className="flex items-center gap-1.5 text-red-600 font-semibold">
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                Hard Lock: &ge; Rs 5,000
+              <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
+                Soft Warning (&gt;Rs 3,500)
+              </span>
+              <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-medium">
+                Hard Lock (&gt;Rs 5,000)
               </span>
             </div>
           </div>
 
-          {/* COD Balance Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-semibold uppercase text-[10px]">
-                  <th className="py-2.5 px-3">Rider Name</th>
-                  <th className="py-2.5 px-3">Phone Number</th>
-                  <th className="py-2.5 px-3">Cash-In-Hand</th>
-                  <th className="py-2.5 px-3">Orders Today</th>
-                  <th className="py-2.5 px-3">Safety Status</th>
-                  <th className="py-2.5 px-3">Last Deposit</th>
-                  <th className="py-2.5 px-3 text-right">Admin Action</th>
+                <tr className="border-b border-border text-ink-muted">
+                  <th className="py-2.5 font-semibold">Rider Name</th>
+                  <th className="py-2.5 font-semibold">Phone</th>
+                  <th className="py-2.5 font-semibold">Cash in Hand</th>
+                  <th className="py-2.5 font-semibold">Today&apos;s Drops</th>
+                  <th className="py-2.5 font-semibold">Safety Status</th>
+                  <th className="py-2.5 font-semibold">Last Bank/eSewa Deposit</th>
+                  <th className="py-2.5 font-semibold text-right">Emergency Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {riders.map((rider) => {
-                  const cashNpr = rider.cashInHandPaisa / 100;
-                  return (
-                    <tr key={rider.riderId} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-3 font-semibold text-slate-900">{rider.riderName}</td>
-                      <td className="py-3 px-3 text-slate-500 font-mono">{rider.phoneNumber}</td>
-                      <td className="py-3 px-3 font-mono font-bold">
-                        <span
-                          className={
-                            cashNpr >= 5000
-                              ? "text-red-600"
-                              : cashNpr >= 3500
-                              ? "text-amber-600"
-                              : "text-slate-800"
-                          }
-                        >
-                          Rs {cashNpr.toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-slate-600">{rider.ordersDeliveredToday} pkgs</td>
-                      <td className="py-3 px-3">
+              <tbody className="divide-y divide-border">
+                {riders.map((rider) => (
+                  <tr key={rider.riderId} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3 font-semibold text-ink">{rider.riderName}</td>
+                    <td className="py-3 font-mono text-ink-muted">{rider.phoneNumber}</td>
+                    <td className="py-3 font-mono font-bold text-ink">
+                      Rs {(rider.cashInHandPaisa / 100).toLocaleString()}
+                    </td>
+                    <td className="py-3 text-ink-muted">{rider.ordersDeliveredToday} orders</td>
+                    <td className="py-3">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          rider.safetyStatus === "hard_locked"
+                            ? "bg-rose-100 text-rose-800"
+                            : rider.safetyStatus === "soft_warning"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-emerald-100 text-emerald-800"
+                        }`}
+                      >
+                        {rider.safetyStatus.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="py-3 text-ink-muted">{rider.lastDepositTime || "Pending"}</td>
+                    <td className="py-3 text-right">
+                      <button
+                        onClick={() => handleToggleCodLock(rider.riderId)}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ml-auto ${
+                          rider.safetyStatus === "hard_locked"
+                            ? "bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200"
+                            : "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                        }`}
+                      >
                         {rider.safetyStatus === "hard_locked" ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-700 flex items-center gap-1 w-fit">
-                            <Lock className="w-3 h-3" />
-                            COD Dispatched Locked
-                          </span>
-                        ) : rider.safetyStatus === "soft_warning" ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800 flex items-center gap-1 w-fit">
-                            <AlertTriangle className="w-3 h-3" />
-                            Warning (Deposit Due)
-                          </span>
+                          <>
+                            <Unlock className="w-3.5 h-3.5" />
+                            Unlock COD
+                          </>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 flex items-center gap-1 w-fit">
-                            Normal
-                          </span>
+                          <>
+                            <Lock className="w-3.5 h-3.5" />
+                            Emergency Lock
+                          </>
                         )}
-                      </td>
-                      <td className="py-3 px-3 text-slate-400">{rider.lastDepositTime || "N/A"}</td>
-                      <td className="py-3 px-3 text-right">
-                        <button
-                          onClick={() => handleToggleCodLock(rider.riderId)}
-                          className={`px-3 py-1 text-xs rounded-lg font-semibold border transition-all ${
-                            rider.safetyStatus === "hard_locked"
-                              ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                              : "border-slate-200 text-slate-600 hover:bg-slate-100"
-                          }`}
-                        >
-                          {rider.safetyStatus === "hard_locked" ? "Override & Unlock" : "Manual Lock"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
