@@ -12,6 +12,8 @@ import {
   Layers,
   ChevronRight,
   ShieldCheck,
+  Users,
+  HelpCircle,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -36,6 +38,7 @@ const navSections: Array<{ title: string; items: NavItem[] }> = [
         badge: "2 Pending",
         badgeColor: "bg-amber-500 text-white",
       },
+      { name: "User & Driver Moderation", href: "/users", icon: Users },
     ],
   },
   {
@@ -48,6 +51,7 @@ const navSections: Array<{ title: string; items: NavItem[] }> = [
         badge: "Rs 1.7M",
         badgeColor: "bg-emerald-600 text-white",
       },
+      { name: "Disputes & Refunds", href: "/disputes", icon: HelpCircle, badge: "2 Open", badgeColor: "bg-amber-500 text-white" },
       { name: "Vouchers & Promotions", href: "/marketing/vouchers", icon: Ticket },
     ],
   },
