@@ -13,43 +13,47 @@ import {
   CheckCircle2,
   Clock,
   Zap,
-  ShoppingBag,
-  Bike,
   Activity,
-  AlertTriangle,
+  Layers,
+  Database,
 } from "lucide-react";
 import {
   fetchPricingSettings,
-  fetchKycQueue,
-  fetchPayoutBatch,
+  fetchDashboardMetrics,
   fetchAuditLogs,
+  DashboardMetrics,
 } from "@/lib/admin/api";
 import {
   PlatformPricingSettings,
-  KycDocumentItem,
-  MidnightPayoutBatch,
   AuditLogEntry,
 } from "@/lib/admin/types";
-import { initialPricingSettings, samplePayoutBatch, sampleAuditLogs } from "@/lib/admin/mockData";
+import { initialPricingSettings, sampleAuditLogs } from "@/lib/admin/mockData";
 
 export default function AdminDashboardPage() {
   const [pricing, setPricing] = useState<PlatformPricingSettings>(initialPricingSettings);
-  const [kycQueue, setKycQueue] = useState<KycDocumentItem[]>([]);
-  const [payoutBatch, setPayoutBatch] = useState<MidnightPayoutBatch>(samplePayoutBatch);
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    todayGmvNpr: 2266000,
+    todayOrdersCount: 148,
+    gmvGrowthPercent: 14.2,
+    platformFeeNpr: 10,
+    pendingKycCount: 4,
+    midnightPayoutTotalNpr: 1703850,
+    merchantPayoutCount: 48,
+    riderPayoutCount: 112,
+    liveDbConnected: false,
+  });
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(sampleAuditLogs);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadDashboardData = async () => {
     setIsRefreshing(true);
-    const [p, k, pay, logs] = await Promise.all([
+    const [p, m, logs] = await Promise.all([
       fetchPricingSettings(),
-      fetchKycQueue(),
-      fetchPayoutBatch(),
+      fetchDashboardMetrics(),
       fetchAuditLogs(),
     ]);
     setPricing(p);
-    setKycQueue(k);
-    setPayoutBatch(pay);
+    setMetrics(m);
     setAuditLogs(logs);
     setIsRefreshing(false);
   };
@@ -57,9 +61,6 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     loadDashboardData();
   }, []);
-
-  // Strict pending KYC count
-  const pendingKycCount = kycQueue.filter((k) => k.status === "pending").length;
 
   return (
     <div className="flex-1 flex flex-col min-h-screen">
@@ -85,10 +86,15 @@ export default function AdminDashboardPage() {
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-500/20 text-brand-300 rounded border border-brand-500/30 uppercase">
                   Automated pg_cron
                 </span>
+                {metrics.liveDbConnected && (
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30 uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Live Supabase
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-300 mt-1">
-                Batch <span className="font-mono text-brand-300 font-semibold">{payoutBatch.batchId}</span> has
-                aggregated NPR {(payoutBatch.totalDisbursementPaisa / 100).toLocaleString()} across {payoutBatch.merchantCount} verified merchants and {payoutBatch.riderCount} riders.
+                Aggregated daily volume of NPR {metrics.midnightPayoutTotalNpr.toLocaleString()} across {metrics.merchantPayoutCount} verified merchants and {metrics.riderPayoutCount} riders.
               </p>
             </div>
           </div>
@@ -111,11 +117,11 @@ export default function AdminDashboardPage() {
               <TrendingUp className="w-4 h-4 text-brand-600" />
             </div>
             <div className="mt-3 text-2xl font-bold text-ink tracking-tight">
-              NPR 2,266,000
+              NPR {metrics.todayGmvNpr.toLocaleString()}
             </div>
             <div className="mt-1 flex items-center gap-1 text-[11px] text-emerald-600 font-semibold">
-              <span>+14.2%</span>
-              <span className="text-ink-muted font-normal">vs yesterday (Kathmandu Valley)</span>
+              <span>+{metrics.gmvGrowthPercent}%</span>
+              <span className="text-ink-muted font-normal">({metrics.todayOrdersCount} orders today)</span>
             </div>
           </div>
 
@@ -142,13 +148,13 @@ export default function AdminDashboardPage() {
               <FileCheck2 className="w-4 h-4 text-amber-500" />
             </div>
             <div className="mt-3 text-2xl font-bold text-ink tracking-tight flex items-center gap-2">
-              <span>{pendingKycCount}</span>
+              <span>{metrics.pendingKycCount}</span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                Awaiting
+                Awaiting Review
               </span>
             </div>
             <div className="mt-1 flex items-center justify-between text-[11px]">
-              <span className="text-amber-700 font-medium">Review required</span>
+              <span className="text-amber-700 font-medium">Action required</span>
               <Link
                 href="/compliance/kyc"
                 className="text-brand-600 hover:underline font-semibold"
@@ -164,11 +170,11 @@ export default function AdminDashboardPage() {
               <Wallet className="w-4 h-4 text-brand-600" />
             </div>
             <div className="mt-3 text-2xl font-bold text-ink tracking-tight">
-              NPR {(payoutBatch.totalDisbursementPaisa / 100).toLocaleString()}
+              NPR {metrics.midnightPayoutTotalNpr.toLocaleString()}
             </div>
             <div className="mt-1 flex items-center justify-between text-[11px]">
               <span className="text-ink-muted">
-                {payoutBatch.merchantCount} Venues • {payoutBatch.riderCount} Riders
+                {metrics.merchantPayoutCount} Venues • {metrics.riderPayoutCount} Riders
               </span>
             </div>
           </div>

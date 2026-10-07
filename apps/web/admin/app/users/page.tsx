@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
 import {
   Search,
@@ -10,78 +10,25 @@ import {
   Phone,
   CreditCard,
   Ban,
+  Loader2,
 } from "lucide-react";
-import { recordAdminAuditLog } from "@/lib/admin/api";
-
-interface AdminUserItem {
-  id: string;
-  name: string;
-  phone: string;
-  role: "consumer" | "driver" | "merchant";
-  status: "active" | "suspended" | "banned" | "cod_disabled";
-  registeredDate: string;
-  deviceUuid: string;
-  totalOrders: number;
-  codViolationCount: number;
-  strikeReason?: string;
-}
-
-const sampleUsers: AdminUserItem[] = [
-  {
-    id: "usr-01",
-    name: "Aayush Maharjan",
-    phone: "+977 9841998877",
-    role: "consumer",
-    status: "active",
-    registeredDate: "2026-08-14",
-    deviceUuid: "a8f3-88bc-9102-ef01",
-    totalOrders: 38,
-    codViolationCount: 0,
-  },
-  {
-    id: "usr-02",
-    name: "Ramesh Bogati",
-    phone: "+977 9801445566",
-    role: "consumer",
-    status: "cod_disabled",
-    registeredDate: "2026-09-02",
-    deviceUuid: "77cd-12da-44ef-0092",
-    totalOrders: 12,
-    codViolationCount: 3,
-    strikeReason: "Rejected 3 consecutive Cash-on-Delivery food orders after driver arrived at doorstep.",
-  },
-  {
-    id: "usr-03",
-    name: "Sandip Thapa",
-    phone: "+977 9860112244",
-    role: "driver",
-    status: "suspended",
-    registeredDate: "2026-07-20",
-    deviceUuid: "33ba-99ef-8812-7711",
-    totalOrders: 142,
-    codViolationCount: 1,
-    strikeReason: "Failed to remit cash-in-hand within 48 hours. Temporarily suspended from ride dispatch.",
-  },
-  {
-    id: "usr-04",
-    name: "Unknown Bad Actor",
-    phone: "+977 9812990011",
-    role: "consumer",
-    status: "banned",
-    registeredDate: "2026-10-01",
-    deviceUuid: "0000-ffaa-3321-bbee",
-    totalOrders: 2,
-    codViolationCount: 4,
-    strikeReason: "Abusive chat messages to restaurant partner and repeated fake delivery orders.",
-  },
-];
+import { fetchAdminUsers, updateAdminUserStatus } from "@/lib/admin/api";
+import { AdminUserItem } from "@/lib/admin/types";
 
 export default function UsersModerationPage() {
-  const [users, setUsers] = useState<AdminUserItem[]>(sampleUsers);
+  const [users, setUsers] = useState<AdminUserItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<AdminUserItem | null>(null);
   const [actionAlert, setActionAlert] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAdminUsers().then((data) => {
+      setUsers(data);
+      setLoading(false);
+    });
+  }, []);
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -103,13 +50,7 @@ export default function UsersModerationPage() {
       )
     );
 
-    await recordAdminAuditLog({
-      adminName: "Suman Adhikari (VP Operations)",
-      adminEmail: "suman@evrry.com.np",
-      actionType: `USER_${newStatus.toUpperCase()}`,
-      details: `User ${userId} status changed to ${newStatus}. Reason: ${reason}`,
-      ipAddress: "103.10.29.14 (Kathmandu)",
-    });
+    await updateAdminUserStatus(userId, newStatus, reason);
 
     setSelectedUser(null);
     setActionAlert(`User ${userId} status changed to ${newStatus.toUpperCase()}.`);
@@ -183,12 +124,28 @@ export default function UsersModerationPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="font-semibold text-ink">{user.name}</div>
-                      <div className="text-[10px] font-mono text-ink-subtle">{user.id}</div>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-ink-muted">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-brand-600" />
+                        <span>Loading profiles from Supabase Postgres...</span>
+                      </div>
                     </td>
+                  </tr>
+                ) : filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-ink-muted">
+                      No user accounts found matching your filters.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <tr key={user.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-ink">{user.name}</div>
+                        <div className="text-[10px] font-mono text-ink-subtle">{user.id}</div>
+                      </td>
 
                     <td className="py-3.5 px-4">
                       <div className="font-mono text-ink font-medium flex items-center gap-1.5">
@@ -245,7 +202,8 @@ export default function UsersModerationPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                ))
+              )}
               </tbody>
             </table>
           </div>

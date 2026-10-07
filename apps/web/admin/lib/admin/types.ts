@@ -111,3 +111,18 @@ export interface AuditLogEntry {
   details: string;
   ipAddress: string;
 }
+
+export interface AdminUserItem {
+  id: string;
+  name: string;
+  phone: string;
+  role: "consumer" | "driver" | "merchant" | "admin" | "superadmin";
+  status: "active" | "suspended" | "banned" | "cod_disabled";
+  registeredDate: string;
+  deviceUuid: string;
+  totalOrders: number;
+  codViolationCount: number;
+  codEnabled?: boolean;
+  strikeReason?: string;
+}
+

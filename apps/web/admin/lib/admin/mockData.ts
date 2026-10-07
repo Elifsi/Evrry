@@ -5,6 +5,7 @@ import {
   RiderCodBalance,
   VoucherCampaign,
   AuditLogEntry,
+  AdminUserItem,
 } from './types';
 
 export const initialPricingSettings: PlatformPricingSettings = {
@@ -395,3 +396,58 @@ export const sampleAuditLogs: AuditLogEntry[] = [
     ipAddress: '10.0.0.5 (OCI Core Server)',
   },
 ];
+
+export const sampleUsers: AdminUserItem[] = [
+  {
+    id: "usr-01",
+    name: "Aayush Maharjan",
+    phone: "+977 9841998877",
+    role: "consumer",
+    status: "active",
+    registeredDate: "2026-08-14",
+    deviceUuid: "a8f3-88bc-9102-ef01",
+    totalOrders: 38,
+    codViolationCount: 0,
+    codEnabled: true,
+  },
+  {
+    id: "usr-02",
+    name: "Ramesh Bogati",
+    phone: "+977 9801445566",
+    role: "consumer",
+    status: "cod_disabled",
+    registeredDate: "2026-09-02",
+    deviceUuid: "77cd-12da-44ef-0092",
+    totalOrders: 12,
+    codViolationCount: 3,
+    codEnabled: false,
+    strikeReason: "Rejected 3 consecutive Cash-on-Delivery food orders after driver arrived at doorstep.",
+  },
+  {
+    id: "usr-03",
+    name: "Sandip Thapa",
+    phone: "+977 9860112244",
+    role: "driver",
+    status: "suspended",
+    registeredDate: "2026-07-20",
+    deviceUuid: "33ba-99ef-8812-7711",
+    totalOrders: 142,
+    codViolationCount: 1,
+    codEnabled: true,
+    strikeReason: "Failed to remit cash-in-hand within 48 hours. Temporarily suspended from ride dispatch.",
+  },
+  {
+    id: "usr-04",
+    name: "Unknown Bad Actor",
+    phone: "+977 9812990011",
+    role: "consumer",
+    status: "banned",
+    registeredDate: "2026-10-01",
+    deviceUuid: "0000-ffaa-3321-bbee",
+    totalOrders: 2,
+    codViolationCount: 4,
+    codEnabled: false,
+    strikeReason: "Abusive chat messages to restaurant partner and repeated fake delivery orders.",
+  },
+];
+

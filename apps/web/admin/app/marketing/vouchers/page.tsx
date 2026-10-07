@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
 import {
   Ticket,
@@ -9,12 +9,14 @@ import {
   Pause,
   CheckCircle2,
   Calendar,
+  Loader2,
 } from "lucide-react";
-import { sampleVouchers } from "@/lib/admin/mockData";
+import { fetchVouchers, createVoucherCampaign, toggleVoucherStatus } from "@/lib/admin/api";
 import { VoucherCampaign } from "@/lib/admin/types";
 
 export default function VouchersPage() {
-  const [vouchers, setVouchers] = useState<VoucherCampaign[]>(sampleVouchers);
+  const [vouchers, setVouchers] = useState<VoucherCampaign[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [actionAlert, setActionAlert] = useState<string | null>(null);
 
@@ -29,10 +31,16 @@ export default function VouchersPage() {
   const [totalClaims, setTotalClaims] = useState(1000);
   const [budgetNpr, setBudgetNpr] = useState(100000);
 
-  const handleCreateVoucher = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchVouchers().then((data) => {
+      setVouchers(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleCreateVoucher = async (e: React.FormEvent) => {
     e.preventDefault();
-    const created: VoucherCampaign = {
-      id: `v-${Date.now()}`,
+    const payload = {
       code: newCode.toUpperCase(),
       title: newTitle,
       description: newDesc,
@@ -42,29 +50,24 @@ export default function VouchersPage() {
       maxDiscountCapPaisa: maxDiscount * 100,
       perUserLimit: 1,
       totalRedemptionsCap: totalClaims,
-      redeemedCount: 0,
       allocatedBudgetPaisa: budgetNpr * 100,
-      burnedBudgetPaisa: 0,
-      status: "active",
-      validFrom: "2026-10-07",
-      validUntil: "2026-11-30",
+      status: "active" as const,
+      validFrom: new Date().toISOString().split("T")[0],
+      validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
       verticals: ["food", "grocery"],
     };
-    setVouchers([created, ...vouchers]);
+
+    const res = await createVoucherCampaign(payload);
+    setVouchers([res.voucher, ...vouchers]);
     setShowCreateModal(false);
-    setActionAlert(`Voucher ${created.code} successfully launched platform-wide!`);
+    setActionAlert(`Voucher ${res.voucher.code} successfully launched platform-wide!`);
     setTimeout(() => setActionAlert(null), 4000);
   };
 
-  const handleToggleStatus = (id: string) => {
+  const handleToggleStatus = async (id: string) => {
+    const res = await toggleVoucherStatus(id);
     setVouchers((prev) =>
-      prev.map((v) => {
-        if (v.id === id) {
-          const nextStatus = v.status === "active" ? "paused" : "active";
-          return { ...v, status: nextStatus };
-        }
-        return v;
-      })
+      prev.map((v) => (v.id === id ? { ...v, status: res.status } : v))
     );
   };
 
@@ -110,7 +113,17 @@ export default function VouchersPage() {
         </div>
 
         {/* Campaign Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          <div className="bg-white p-12 rounded-2xl border border-border shadow-card flex items-center justify-center gap-2 text-ink-muted text-xs">
+            <Loader2 className="w-4 h-4 animate-spin text-brand-600" />
+            <span>Loading marketing vouchers from Supabase...</span>
+          </div>
+        ) : vouchers.length === 0 ? (
+          <div className="bg-white p-12 rounded-2xl border border-border shadow-card text-center text-ink-muted text-xs">
+            No active marketing campaigns found. Click &quot;Create New Voucher&quot; to launch one.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {vouchers.map((v) => {
             const burnPercent = Math.round(
               (v.burnedBudgetPaisa / (v.allocatedBudgetPaisa || 1)) * 100
@@ -226,7 +239,8 @@ export default function VouchersPage() {
               </div>
             );
           })}
-        </div>
+          </div>
+        )}
 
         {/* Create Voucher Modal */}
         {showCreateModal && (
