@@ -46,13 +46,23 @@ export default function PricingControlPage() {
     setSettings(initialPricingSettings);
   };
 
-  // Simulation calculation for 5km delivery
-  const extraKm = Math.max(0, 5 - settings.baseDeliveryRadiusMeters / 1000);
+  // Interactive Live Financial Simulation State
+  const [simDistanceKm, setSimDistanceKm] = useState(5);
+  const [simOrderAmountNpr, setSimOrderAmountNpr] = useState(800);
+
+  // Dynamic Economic Calculations
+  const baseRadiusKm = settings.baseDeliveryRadiusMeters / 1000;
+  const extraKm = Math.max(0, simDistanceKm - baseRadiusKm);
   const extraFeePaisa = extraKm * settings.extraDistanceFeePerKmPaisa;
-  const totalDeliveryPaisa = settings.baseDeliveryFeePaisa + extraFeePaisa;
+  const standardDeliveryPaisa = settings.baseDeliveryFeePaisa + extraFeePaisa;
+  const isFreeDelivery = simOrderAmountNpr * 100 >= settings.freeDeliveryThresholdPaisa;
+  const customerChargedDeliveryPaisa = isFreeDelivery ? 0 : standardDeliveryPaisa;
   const driverExtraCutPaisa = (extraFeePaisa * settings.driverExtraDistanceShareBps) / 10000;
   const totalDriverPayoutPaisa = settings.driverBaseSharePaisa + driverExtraCutPaisa;
-  const platformDeliveryMarginPaisa = totalDeliveryPaisa - totalDriverPayoutPaisa;
+  const platformFeePaisa = settings.platformFeeWaiver ? 0 : settings.platformFeePaisa;
+  const merchantCommissionPaisa = (simOrderAmountNpr * 100 * settings.commissions.foodBps) / 10000;
+  const platformDeliveryMarginPaisa = customerChargedDeliveryPaisa - totalDriverPayoutPaisa;
+  const totalPlatformNetRevenuePaisa = platformFeePaisa + merchantCommissionPaisa + platformDeliveryMarginPaisa;
 
   return (
     <div className="flex-1 flex flex-col min-h-screen">
@@ -440,42 +450,108 @@ export default function PricingControlPage() {
                   Live Financial Simulation
                 </span>
                 <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded font-mono text-slate-300 border border-slate-700">
-                  5 km Delivery
+                  Pre-flight Validator
                 </span>
               </div>
 
-              <div className="space-y-3 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-300">Standard Platform Fee</span>
+              {/* Interactive Scenario Controls */}
+              <div className="space-y-2 pt-1 border-t border-slate-800 text-xs">
+                <div>
+                  <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                    <span>Simulated Distance:</span>
+                    <span className="font-mono text-white font-bold">{simDistanceKm} km</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[3, 5, 8, 12].map((km) => (
+                      <button
+                        key={km}
+                        type="button"
+                        onClick={() => setSimDistanceKm(km)}
+                        className={`py-1 rounded text-[10px] font-semibold transition-all border ${
+                          simDistanceKm === km
+                            ? "bg-brand-600 text-white border-brand-500 shadow-sm"
+                            : "bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white"
+                        }`}
+                      >
+                        {km} km
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                    <span>Order Basket (Food / Mart):</span>
+                    <span className="font-mono text-white font-bold">Rs {simOrderAmountNpr}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { label: "Rs 600 (Normal)", val: 600 },
+                      { label: "Rs 1,200 (Free Deliv)", val: 1200 },
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        type="button"
+                        onClick={() => setSimOrderAmountNpr(opt.val)}
+                        className={`py-1 px-2 rounded text-[10px] font-semibold transition-all border text-center ${
+                          simOrderAmountNpr === opt.val
+                            ? "bg-brand-600 text-white border-brand-500 shadow-sm"
+                            : "bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Calculation Breakdown */}
+              <div className="space-y-2.5 text-xs pt-1 border-t border-slate-800">
+                <div className="flex justify-between py-1 border-b border-slate-800/70">
+                  <span className="text-slate-300">Standard Platform Fee:</span>
                   <span className="font-semibold text-white">
-                    Rs {(settings.platformFeeWaiver ? 0 : settings.platformFeePaisa / 100).toFixed(2)}
+                    Rs {(platformFeePaisa / 100).toFixed(2)}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-300">Base Delivery (&le; 3 km)</span>
+                <div className="flex justify-between py-1 border-b border-slate-800/70">
+                  <span className="text-slate-300">
+                    Base Delivery (&le; {baseRadiusKm} km):
+                  </span>
                   <span className="font-semibold text-white">
                     Rs {(settings.baseDeliveryFeePaisa / 100).toFixed(2)}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-300">Extra Distance (2 km @ Rs 15)</span>
-                  <span className="font-semibold text-white">
-                    Rs {(extraFeePaisa / 100).toFixed(2)}
-                  </span>
-                </div>
+                {extraKm > 0 && (
+                  <div className="flex justify-between py-1 border-b border-slate-800/70">
+                    <span className="text-slate-300">
+                      Extra Distance ({extraKm} km @ Rs {settings.extraDistanceFeePerKmPaisa / 100}):
+                    </span>
+                    <span className="font-semibold text-white">
+                      Rs {(extraFeePaisa / 100).toFixed(2)}
+                    </span>
+                  </div>
+                )}
 
-                <div className="flex justify-between py-2 bg-slate-800/80 px-3 rounded-lg font-semibold">
-                  <span className="text-slate-200">Customer Delivery Total</span>
-                  <span className="text-brand-300 text-sm font-bold">
-                    Rs {(totalDeliveryPaisa / 100).toFixed(2)}
+                <div className="flex justify-between py-2 bg-slate-800/80 px-3 rounded-lg font-semibold items-center">
+                  <div>
+                    <div className="text-slate-200">Customer Delivery Charged</div>
+                    {isFreeDelivery && (
+                      <span className="text-[10px] text-emerald-400 font-normal">
+                        Waived via Free Delivery Threshold (&ge; Rs {settings.freeDeliveryThresholdPaisa / 100})
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-sm font-bold ${isFreeDelivery ? "text-emerald-400 line-through text-xs" : "text-brand-300"}`}>
+                    Rs {(customerChargedDeliveryPaisa / 100).toFixed(2)}
                   </span>
                 </div>
               </div>
 
-              {/* Rider Breakdown */}
-              <div className="pt-2 border-t border-slate-800 space-y-2 text-xs">
+              {/* Rider Take-Home Breakdown */}
+              <div className="pt-2 border-t border-slate-800 space-y-1.5 text-xs">
                 <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   Driver Earnings Breakdown
                 </div>
@@ -485,23 +561,47 @@ export default function PricingControlPage() {
                     Rs {(settings.driverBaseSharePaisa / 100).toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-300">
-                    Extra Share ({settings.driverExtraDistanceShareBps / 100}%):
-                  </span>
-                  <span className="text-slate-200 font-mono">
-                    Rs {(driverExtraCutPaisa / 100).toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between font-bold text-emerald-400 text-sm pt-1">
+                {extraKm > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-300">
+                      Extra Distance Share ({settings.driverExtraDistanceShareBps / 100}%):
+                    </span>
+                    <span className="text-slate-200 font-mono">
+                      Rs {(driverExtraCutPaisa / 100).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-emerald-400 text-sm pt-1 border-t border-slate-800/50">
                   <span>Driver Takes Home:</span>
                   <span>Rs {(totalDriverPayoutPaisa / 100).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-[11px] text-slate-400 pt-1">
-                  <span>Platform Delivery Margin:</span>
-                  <span className="text-slate-300">
-                    Rs {(platformDeliveryMarginPaisa / 100).toFixed(2)}
+              </div>
+
+              {/* Platform Net Unit Economics */}
+              <div className="pt-2 border-t border-slate-800 space-y-2 text-xs">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Platform Net Unit Economics
+                </div>
+                <div className="flex justify-between text-slate-300">
+                  <span>Merchant Take-Rate ({settings.commissions.foodBps / 100}%):</span>
+                  <span className="font-mono text-white">
+                    +Rs {(merchantCommissionPaisa / 100).toFixed(2)}
                   </span>
+                </div>
+                <div className="flex justify-between text-slate-300">
+                  <span>Delivery Margin (Fee - Payout):</span>
+                  <span className={`font-mono ${platformDeliveryMarginPaisa >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                    {platformDeliveryMarginPaisa >= 0 ? "+" : ""}Rs {(platformDeliveryMarginPaisa / 100).toFixed(2)}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl border bg-slate-950/70 flex items-center justify-between border-slate-800">
+                  <div>
+                    <div className="text-[10px] text-slate-400 uppercase font-semibold">Total Net EVRRY Revenue</div>
+                    <div className="text-[10px] text-slate-400">Platform fee + commission + margin</div>
+                  </div>
+                  <div className={`text-sm font-bold font-mono ${totalPlatformNetRevenuePaisa >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                    Rs {(totalPlatformNetRevenuePaisa / 100).toFixed(2)}
+                  </div>
                 </div>
               </div>
 
