@@ -18,6 +18,7 @@ import {
   approveAndExecutePayout,
   fetchRiderCodBalances,
   toggleRiderCodLock,
+  exportConnectIpsBatchCsv,
 } from "@/lib/admin/api";
 import { MidnightPayoutBatch, RiderCodBalance } from "@/lib/admin/types";
 import { samplePayoutBatch, sampleRiderCodBalances } from "@/lib/admin/mockData";
@@ -56,19 +57,12 @@ export default function PayoutsConsolePage() {
     }
   };
 
-  const handleDownloadNchl128 = () => {
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      "BatchID,BeneficiaryBank,AccountNumber,AccountName,AmountNPR,Narration\n" +
-      `BATCH-2026-10-07,01-NabilBank,0010101010101,Himalayan Java Pvt Ltd,1568250,Settlement 2026-10-07\n` +
-      `BATCH-2026-10-07,04-GlobalIMERider,0040202020202,Dawa Sherpa,135600,Rider Payout 2026-10-07\n`;
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `ConnectIPS_NCHL128_${batch.batchId}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadNchl128 = async () => {
+    const res = await exportConnectIpsBatchCsv(batch, riders);
+    setExecutionMessage(
+      `Exported ${res.filename} with ${res.count} bank payout instructions totaling NPR ${res.totalNpr.toLocaleString()} for ConnectIPS corporate batch upload.`
+    );
+    setTimeout(() => setExecutionMessage(null), 6000);
   };
 
   return (

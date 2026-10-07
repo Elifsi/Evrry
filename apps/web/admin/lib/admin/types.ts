@@ -126,3 +126,13 @@ export interface AdminUserItem {
   strikeReason?: string;
 }
 
+export interface AdminNotification {
+  id: string;
+  type: "urgent" | "kyc" | "payout" | "dispute" | "system";
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  actionUrl: string;
+  actionLabel?: string;
+}
