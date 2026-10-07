@@ -151,6 +151,31 @@ export const sampleKycQueue: KycDocumentItem[] = [
       },
     ],
   },
+  {
+    id: 'kyc-009',
+    partnerName: 'Annapurna Heritage Lodge',
+    partnerType: 'hotel',
+    phoneNumber: '+977 9846054321',
+    submittedAt: '2026-10-07 11:45 AM',
+    status: 'pending',
+    panVatInfo: {
+      panNumber: '609812345',
+      businessName: 'Annapurna Heritage Hospitality Pvt Ltd',
+      entityType: 'Private Limited Company',
+    },
+    documents: [
+      {
+        type: 'pan_certificate',
+        title: 'Tourism Board Registration & IRD PAN/VAT',
+        imageUrl: 'https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        type: 'property_permit',
+        title: 'Ward Municipality Business Operating Permit',
+        imageUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=800&q=80',
+      },
+    ],
+  },
 
   // ── Approved Partners Tab ──
   {

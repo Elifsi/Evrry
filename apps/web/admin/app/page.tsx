@@ -73,27 +73,27 @@ export default function AdminDashboardPage() {
 
       <div className="p-8 space-y-8 flex-1">
         {/* Banner Alert for Midnight Payout & pg_cron Status */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-brand-950 rounded-2xl p-6 text-white shadow-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl p-6 text-ink shadow-sm border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-brand-500/20 border border-brand-500/30 rounded-xl text-brand-300 shrink-0">
-              <Zap className="w-6 h-6 text-brand-400" />
+            <div className="p-3 bg-brand-50 border border-brand-200 rounded-xl text-brand-600 shrink-0">
+              <Zap className="w-6 h-6 text-brand-600" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold tracking-tight">
+                <h2 className="text-base font-bold text-ink tracking-tight">
                   Midnight Settlement Batch Ready for Review
                 </h2>
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-500/20 text-brand-300 rounded border border-brand-500/30 uppercase">
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-50 text-brand-700 rounded border border-brand-200 uppercase">
                   Automated pg_cron
                 </span>
                 {metrics.liveDbConnected && (
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30 uppercase flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded border border-emerald-200 uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Live Supabase
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-300 mt-1">
+              <p className="text-xs text-ink-muted mt-1">
                 Aggregated daily volume of NPR {metrics.midnightPayoutTotalNpr.toLocaleString()} across {metrics.merchantPayoutCount} verified merchants and {metrics.riderPayoutCount} riders.
               </p>
             </div>
@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/finance/payouts"
-              className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-md shadow-brand-900/40"
+              className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-brand-900/20"
             >
               Review Payouts
               <ArrowUpRight className="w-3.5 h-3.5" />

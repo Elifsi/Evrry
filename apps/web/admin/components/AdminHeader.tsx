@@ -289,7 +289,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                       onClick={() => setBroadcastTarget(t)}
                       className={`py-1.5 px-2 rounded-lg font-semibold uppercase text-[10px] border transition-all ${
                         broadcastTarget === t
-                          ? "bg-slate-900 text-white border-slate-900"
+                          ? "bg-brand-600 text-white border-brand-600 shadow-sm"
                           : "bg-surface-subtle text-ink-muted border-border hover:bg-slate-100"
                       }`}
                     >

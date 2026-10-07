@@ -99,7 +99,7 @@ export default function UsersModerationPage() {
                 onClick={() => setFilterRole(role)}
                 className={`px-3 py-1.5 rounded-lg font-semibold uppercase text-[10px] transition-all border ${
                   filterRole === role
-                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                    ? "bg-brand-600 text-white border-brand-600 shadow-sm"
                     : "bg-surface-subtle text-ink-muted border-border hover:bg-slate-100"
                 }`}
               >
