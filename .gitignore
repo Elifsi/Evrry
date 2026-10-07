@@ -12,6 +12,9 @@ prototype/Phone/tsconfig.tsbuildinfo
 prototype/Phone/next-env.d.ts
 
 # ── Next.js build output (Production Web Apps) ─────────────────────────────────
+apps/web/admin/.next/
+apps/web/admin/tsconfig.tsbuildinfo
+apps/web/admin/next-env.d.ts
 apps/web/consumer/.next/
 apps/web/consumer/tsconfig.tsbuildinfo
 apps/web/consumer/next-env.d.ts

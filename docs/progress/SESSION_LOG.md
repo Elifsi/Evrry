@@ -205,23 +205,39 @@ All 11 functions are **100% implemented, production-ready, and support Dev Mock 
 
 ---
 
-## 7. Next Immediate Phase: Frontend Implementation
+---
 
-The backend is 100% complete and self-contained. The roadmap now transitions to the UI screens:
-1. **Superadmin Operations Console (`apps/web/admin`)**:
-   - Zero-SQL Pricing & Commission Control Hub (`/admin/pricing`).
-   - Voucher Creation Wizard & Budget Tracker (`/admin/marketing/vouchers`).
-   - Split-screen Partner KYC Document Review Queue (`/admin/compliance/kyc`).
-   - Midnight Settlement Batch Approval & ConnectIPS Export (`/admin/finance/payouts`).
-   - User & Rider Moderation (Bans, Cash Reconciliation).
-2. **Partner Web Portal (`apps/web/partner`)**:
-   - Restaurant Kitchen Display System (KDS) & Order Management.
-   - Menu Management & Photo-to-Menu Vision OCR.
-   - Hotel Room Availability Calendar & Rate Editor.
-3. **Responsive Consumer Web Portal (`apps/web/consumer`)**:
-   - Catalog browsing with zero-cost MapLibre GL map view.
-   - Live order tracking with mobile app handoff banner.
-4. **Native Consumer & Partner Mobile Apps (`apps/consumer/`, `apps/partner/`)**:
-   - Android: Jetpack Compose with Material 3, Google Maps SDK, and 3D vehicle models.
+## 7. Frontend Milestone: Superadmin Operations Console (`apps/web/admin`) Complete
+
+- **Full Application Scaffolding**:
+  - Scaffolded Next.js 16 (Turbopack App Router), React 18, TypeScript, Tailwind CSS, Lucide Icons, and `@supabase/ssr` / `@supabase/supabase-js`.
+  - Built `AdminSidebar` with MFA security badge, live environment status (`KTM-DC-01`), and multi-section navigation.
+  - Built `AdminHeader` with OCI cluster health, Postgres 16 RLS status, and breadcrumbs.
+- **Implemented Modules & Pages**:
+  - **Overview Dashboard (`/`)**: Live GMV (NPR 2.26M), Platform gross revenue, pending KYC alert, and immutable audit trail (`public.admin_audit_logs`).
+  - **Dynamic Pricing & Commission Hub (`/pricing`)**: Sliders and inputs for the **Rs 10 platform fee**, fee waiver toggle, **Rs 1,000 free delivery threshold**, **Rs 50 base (3 km)**, **Rs 15/km extra**, **Rs 40 driver base pay + 80% extra cut**, vertical commission take-rates, and instant live 5 km delivery financial calculator.
+  - **Partner KYC Verification Queue (`/compliance/kyc`)**: Split-screen interface with high-resolution pan/zoom/contrast viewer for smartphone uploads of Nepali Smart Driving Licenses, Vehicle Blue Book tax clearance stamps, and IRD PAN certificates; 1-click Approve & Activate, Reject with pre-configured reasons, and Request Re-upload with automated SMS trigger.
+  - **Midnight Settlement & Payouts Console (`/finance/payouts`)**: Daily settlement aggregation across 48 venues and 112 riders, ledger deductions breakdown, downloadable **ConnectIPS NCHL-128 batch clearing file**, and **Zero-Hub Rider COD Safety Monitor** (Rs 3,500 soft warning and Rs 5,000 automatic hard safety lock).
+  - **Vouchers & Marketing Engine (`/marketing/vouchers`)**: Campaign creation wizard (`EVRRYNEW100`), per-user limits, budget burn tracker, and pause/resume controls.
+  - **Compliance & Emergency Governance (`/settings/governance`)**: Inland Revenue Department **13% VAT one-click activation**, monsoon weather surge slider (1.0x–2.0x), and ward-level emergency kill-switches.
+- **Build & Quality Validation**:
+  - `npm run build` in `apps/web/admin`: **8/8 routes compiled successfully, 0 errors**.
+  - `npm test` in `prototype/Phone`: **15/15 test suites passed, 97/97 tests passed (100%)**.
+  - `bash scripts/verify-backend-readiness.sh`: **100% verified (20 migrations, 11 edge functions, client bridges)**.
+
+---
+
+## 8. Next Immediate Phase: Consumer Web & Mobile Client Rollout
+
+1. **Consumer Web Portal (`apps/web/consumer`) & Shared SDK (`apps/web/common`)**:
+   - Zero-cost MapLibre GL map browsing (restaurants, stores, stays).
+   - Menu viewing, shopping cart, checkout (eSewa, Khalti, COD), and web order tracking with mobile handoff banner.
+2. **Partner Web Operations Portal (`apps/web/partner`)**:
+   - Restaurant Kitchen Display System (KDS) & audio chimes.
+   - Grocery bulk inventory & barcode scanning.
+   - Hotel booking calendar (zero double bookings via PostgreSQL `btree_gist`).
+3. **Native Consumer & Partner Mobile Apps (`apps/consumer/`, `apps/partner/`)**:
+   - Android: Jetpack Compose with Material 3, Google Maps SDK, and 3D vehicle models (Scooter, Bike, Cab).
    - iOS: SwiftUI with Clean Architecture, Google Maps SDK, 3D vehicles, and mandatory 44pt in-app back buttons.
+
 
