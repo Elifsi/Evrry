@@ -952,4 +952,149 @@ export async function exportConnectIpsBatchCsv(
   return { count: records.length, totalNpr, filename };
 }
 
+export interface SettlementExcelRow {
+  sn: number;
+  partnerName: string;
+  partnerType: string;
+  phone: string;
+  bankName: string;
+  branch: string;
+  accountNumber: string;
+  grossAmountNpr: number;
+  commissionDeductedNpr: number;
+  codDeductedNpr: number;
+  netPayableNpr: number;
+  settlementDate: string;
+  batchId: string;
+  status: string;
+  referenceRemarks: string;
+}
+
+export function generateSettlementExcelRows(
+  batch: MidnightPayoutBatch,
+  riders: RiderCodBalance[]
+): SettlementExcelRow[] {
+  const rows: SettlementExcelRow[] = [];
+  let sn = 1;
+
+  // 1. Merchants & Store Partners
+  const sampleMerchants = [
+    { name: "Himalayan Java Pvt Ltd", type: "Restaurant / Cafe", phone: "+977 9801122334", bank: "01-NabilBank", branch: "DurbarMarg", acc: "0010101010101", share: 0.28 },
+    { name: "Roadhouse Cafe Pulchowk", type: "Restaurant / Cafe", phone: "+977 9851044556", bank: "07-NICAsia", branch: "Pulchowk", acc: "0070202020202", share: 0.22 },
+    { name: "Bhatbhateni Supermarket", type: "Grocery Mart", phone: "+977 9802033445", bank: "04-GlobalIME", branch: "Tangal", acc: "0040303030303", share: 0.35 },
+    { name: "Fire & Ice Pizzeria", type: "Restaurant / Cafe", phone: "+977 9841556677", bank: "03-HimalayanBank", branch: "Thamel", acc: "0030404040404", share: 0.15 },
+  ];
+
+  const grossMerchantTotalNpr = (batch.grossMerchantEarningsPaisa || 0) / 100;
+  const commissionMerchantTotalNpr = (batch.platformCommissionsDeductedPaisa || 0) / 100;
+  const netMerchantTotalNpr = batch.netPayableMerchantsPaisa / 100;
+
+  sampleMerchants.forEach((m, idx) => {
+    const grossVal = Math.round(grossMerchantTotalNpr * m.share);
+    const commVal = Math.round(commissionMerchantTotalNpr * m.share);
+    const netVal = Math.round(netMerchantTotalNpr * m.share);
+
+    rows.push({
+      sn: sn++,
+      partnerName: m.name,
+      partnerType: m.type,
+      phone: m.phone,
+      bankName: m.bank,
+      branch: m.branch,
+      accountNumber: m.acc,
+      grossAmountNpr: grossVal,
+      commissionDeductedNpr: commVal,
+      codDeductedNpr: 0,
+      netPayableNpr: netVal,
+      settlementDate: batch.date,
+      batchId: batch.batchId,
+      status: "Verified Ready",
+      referenceRemarks: `evrry-mch-${idx + 1}-${batch.date}`,
+    });
+  });
+
+  // 2. Delivery Riders & Cab Drivers
+  riders.forEach((r, idx) => {
+    const grossEarnedNpr = 3500;
+    const cashInHandNpr = r.cashInHandPaisa / 100;
+    const netPayout = Math.max(grossEarnedNpr - cashInHandNpr, 500);
+
+    rows.push({
+      sn: sn++,
+      partnerName: r.riderName,
+      partnerType: "Delivery Rider / Driver",
+      phone: r.phoneNumber || "+977 9841000000",
+      bankName: "04-GlobalIME",
+      branch: "Kathmandu",
+      accountNumber: `004099${idx}882101`,
+      grossAmountNpr: grossEarnedNpr,
+      commissionDeductedNpr: 0,
+      codDeductedNpr: cashInHandNpr,
+      netPayableNpr: netPayout,
+      settlementDate: batch.date,
+      batchId: batch.batchId,
+      status: r.safetyStatus === "hard_locked" ? "Review (High COD)" : "Verified Ready",
+      referenceRemarks: `evrry-rdr-${r.riderId}`,
+    });
+  });
+
+  return rows;
+}
+
+export async function exportSettlementExcelCsv(
+  batch: MidnightPayoutBatch,
+  riders: RiderCodBalance[]
+): Promise<{ count: number; totalNpr: number; filename: string }> {
+  const rows = generateSettlementExcelRows(batch, riders);
+
+  // Prepend UTF-8 BOM so Microsoft Excel opens it directly with proper character encoding
+  const bom = "\uFEFF";
+  let csv = bom;
+  csv += "S.N.,Partner Name,Partner Type,Contact Phone,Bank / Wallet Name,Bank Branch,Account / Wallet Number,Gross Earnings (NPR),Platform Commission (NPR),Rider COD Deducted (NPR),Net Payable Amount (NPR),Settlement Date,Batch ID,Status,Payment Reference\r\n";
+
+  let totalGross = 0;
+  let totalComm = 0;
+  let totalCod = 0;
+  let totalNet = 0;
+
+  for (const r of rows) {
+    totalGross += r.grossAmountNpr;
+    totalComm += r.commissionDeductedNpr;
+    totalCod += r.codDeductedNpr;
+    totalNet += r.netPayableNpr;
+
+    const safeName = r.partnerName.replace(/"/g, '""');
+    const safeBank = r.bankName.replace(/"/g, '""');
+    const safeBranch = r.branch.replace(/"/g, '""');
+    // Prepend tab so Excel formats numeric account strings with leading zeros without exponential notation
+    const safeAcc = `\t${r.accountNumber}`;
+
+    csv += `${r.sn},"${safeName}","${r.partnerType}","${r.phone}","${safeBank}","${safeBranch}","${safeAcc}",${r.grossAmountNpr.toFixed(2)},${r.commissionDeductedNpr.toFixed(2)},${r.codDeductedNpr.toFixed(2)},${r.netPayableNpr.toFixed(2)},"${r.settlementDate}","${r.batchId}","${r.status}","${r.referenceRemarks}"\r\n`;
+  }
+
+  // Summary Row at the bottom for instant ledger reconciliation
+  csv += `TOTAL,"All Beneficiaries: ${rows.length}","","","","","",${totalGross.toFixed(2)},${totalComm.toFixed(2)},${totalCod.toFixed(2)},${totalNet.toFixed(2)},"${batch.date}","${batch.batchId}","SUMMARY",""\r\n`;
+
+  const filename = `EVRRY_Settlement_Ledger_${batch.batchId}.csv`;
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  await recordAdminAuditLog({
+    adminName: "Suman Adhikari (VP Operations)",
+    adminEmail: "suman@evrry.com.np",
+    actionType: "SETTLEMENT_EXCEL_EXPORTED",
+    details: `Exported Excel Settlement Ledger (${filename}) with ${rows.length} beneficiaries totaling NPR ${totalNet.toLocaleString()} for direct bank/wallet disbursements.`,
+    ipAddress: "103.10.29.14 (Kathmandu)",
+  });
+
+  return { count: rows.length, totalNpr: totalNet, filename };
+}
+
 

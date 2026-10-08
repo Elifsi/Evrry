@@ -20,6 +20,7 @@ import {
   Utensils,
   Car,
   Bed,
+  Download,
 } from "lucide-react";
 import {
   fetchPayoutBatch,
@@ -28,6 +29,7 @@ import {
   toggleRiderCodLock,
   recordRiderCashHandover,
   exportConnectIpsBatchCsv,
+  exportSettlementExcelCsv,
 } from "@/lib/admin/api";
 import { MidnightPayoutBatch, RiderCodBalance } from "@/lib/admin/types";
 import { samplePayoutBatch, sampleRiderCodBalances } from "@/lib/admin/mockData";
@@ -98,6 +100,14 @@ export default function PayoutsConsolePage() {
     const res = await exportConnectIpsBatchCsv(batch, riders);
     setExecutionMessage(
       `Exported ${res.filename} with ${res.count} bank payout instructions totaling NPR ${res.totalNpr.toLocaleString()} for ConnectIPS corporate batch upload.`
+    );
+    setTimeout(() => setExecutionMessage(null), 6000);
+  };
+
+  const handleDownloadExcelLedger = async () => {
+    const res = await exportSettlementExcelCsv(batch, riders);
+    setExecutionMessage(
+      `Exported Excel Settlement Ledger (${res.filename}) with ${res.count} partner beneficiaries totaling NPR ${res.totalNpr.toLocaleString()} ready for direct commercial bank or wallet disbursement.`
     );
     setTimeout(() => setExecutionMessage(null), 6000);
   };
@@ -325,14 +335,24 @@ export default function PayoutsConsolePage() {
               </p>
             </div>
 
-            {/* Actions: Export NCHL-128 & Disburse */}
-            <div className="flex items-center gap-2.5">
+            {/* Actions: Export Excel, Export NCHL-128 & Disburse */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                onClick={handleDownloadExcelLedger}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+                title="Zero ConnectIPS Cost: Formatted for Microsoft Excel, Google Sheets, or Bank Corporate Portal"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Export Excel Settlement Sheet
+              </button>
+
               <button
                 onClick={handleDownloadNchl128}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
+                className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
+                title="NCHL-128 ConnectIPS Corporate Batch Format"
               >
-                <FileSpreadsheet className="w-4 h-4 text-teal-600" />
-                Export NCHL-128 Batch CSV
+                <Download className="w-3.5 h-3.5 text-slate-500" />
+                ConnectIPS NCHL-128
               </button>
 
               {batch.status !== "completed" && (
