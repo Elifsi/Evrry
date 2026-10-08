@@ -24,6 +24,9 @@ export default function KitchenDisplayPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedKdsOrder, setSelectedKdsOrder] = useState<KdsOrderTicket | null>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [orderToReject, setOrderToReject] = useState<KdsOrderTicket | null>(null);
+  const [rejectReason, setRejectReason] = useState<string>("Kitchen at peak capacity / high backlog");
+  const [customRejectNote, setCustomRejectNote] = useState<string>("");
   const [actionAlert, setActionAlert] = useState<string | null>(null);
 
   const loadOrders = async () => {
@@ -176,7 +179,7 @@ export default function KitchenDisplayPage() {
 
                         <button
                           type="button"
-                          onClick={() => handleUpdateStatus(order.id, "REJECTED")}
+                          onClick={() => setOrderToReject(order)}
                           className="px-3 py-1.5 border border-rose-200 hover:bg-rose-50 text-rose-700 rounded-lg text-xs font-semibold transition-colors"
                         >
                           Reject
@@ -388,6 +391,101 @@ export default function KitchenDisplayPage() {
                 className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Order Modal */}
+      {orderToReject && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-2.5 text-rose-600 pb-2 border-b border-slate-100">
+              <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Reject Order #{orderToReject.displayNumber}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Customer: {orderToReject.customerName} • Rs {orderToReject.totalNpr}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-slate-700 block">
+                Select Reason for Rejection:
+              </label>
+              <div className="space-y-2">
+                {[
+                  "Kitchen at peak capacity / high backlog",
+                  "Key ingredient(s) out of stock (86'd)",
+                  "Store closing / shift changeover",
+                  "Special preparation instructions cannot be fulfilled",
+                  "Rider inaccessible / location outside delivery zone",
+                ].map((reason) => (
+                  <label
+                    key={reason}
+                    className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
+                      rejectReason === reason
+                        ? "border-rose-400 bg-rose-50/50 text-slate-900 font-medium"
+                        : "border-slate-200 hover:bg-slate-50 text-slate-600"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="rejectReason"
+                      value={reason}
+                      checked={rejectReason === reason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      className="text-rose-600 focus:ring-rose-500"
+                    />
+                    <span>{reason}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                  Optional Operator Note:
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Run out of buffalo meat for momo"
+                  value={customRejectNote}
+                  onChange={(e) => setCustomRejectNote(e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const id = orderToReject.id;
+                  const num = orderToReject.displayNumber;
+                  handleUpdateStatus(id, "REJECTED");
+                  setOrderToReject(null);
+                  setCustomRejectNote("");
+                  setActionAlert(`Order #${num} rejected (${rejectReason})`);
+                }}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+              >
+                Confirm Rejection & Notify Customer
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOrderToReject(null);
+                  setCustomRejectNote("");
+                }}
+                className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold"
+              >
+                Cancel
               </button>
             </div>
           </div>

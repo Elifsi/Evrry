@@ -22,7 +22,7 @@ export default function MenuItemRow({ item, onRestaurantSwitch }: { item: Catalo
           )}
         </div>
         <p className="mt-1 text-sm font-semibold text-ink">{item.title}</p>
-        <p className="mt-0.5 text-xs font-medium text-ink/70">₹{item.price.toLocaleString("en-IN")}</p>
+        <p className="mt-0.5 text-xs font-medium text-ink/70">Rs {item.price.toLocaleString("en-IN")}</p>
         {item.subtitle && <p className="mt-1 line-clamp-2 text-xs text-ink/45">{item.subtitle}</p>}
       </div>
 

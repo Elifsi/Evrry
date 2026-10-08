@@ -32,7 +32,7 @@ export const createHotelBookingSlice: StateCreator<AppState, [], [], HotelBookin
           action: "purchase_blocked",
           resourceType: "booking",
           policyDecision: "blocked",
-          detail: `Insufficient wallet balance for ₹${total} booking (PRD §8 policy check).`,
+          detail: `Insufficient wallet balance for Rs ${total} booking (PRD §8 policy check).`,
         });
         return { ok: false as const, reason: "insufficient_balance" as const };
       }
@@ -55,7 +55,7 @@ export const createHotelBookingSlice: StateCreator<AppState, [], [], HotelBookin
       itemTitle: `${item.title} · ${nightsLabel}`,
       providerName: item.providerName,
       amount: total,
-      currency: "INR",
+      currency: "NPR",
       createdAt: now,
       updatedAt: now,
       meta: { card: sourceLabel, checkIn, checkOut, guests: String(guests), nights: String(nights) },
@@ -90,7 +90,7 @@ export const createHotelBookingSlice: StateCreator<AppState, [], [], HotelBookin
       resourceType: "booking",
       resourceId: tx.id,
       policyDecision: "allowed",
-      detail: `User confirmed ₹${total} booking for ${item.title} (${checkIn} to ${checkOut}, ${guests} guest${
+      detail: `User confirmed Rs ${total} booking for ${item.title} (${checkIn} to ${checkOut}, ${guests} guest${
         guests > 1 ? "s" : ""
       }) on ${sourceLabel}.`,
     });
@@ -101,7 +101,7 @@ export const createHotelBookingSlice: StateCreator<AppState, [], [], HotelBookin
         resourceType: "booking",
         resourceId: tx.id,
         policyDecision: "allowed",
-        detail: `Booked ${item.title} at ${item.providerName} — ₹${total}.`,
+        detail: `Booked ${item.title} at ${item.providerName} — Rs ${total}.`,
       });
     }
 

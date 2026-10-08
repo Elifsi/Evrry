@@ -32,7 +32,7 @@ export default function CartFloatingBar() {
       >
         <span className="inline-flex items-center gap-2 text-sm font-medium">
           <ShoppingBag size={16} className="text-brand" />
-          {count} item{count > 1 ? "s" : ""} · ₹{total.toLocaleString("en-IN")}
+          {count} item{count > 1 ? "s" : ""} · Rs {total.toLocaleString("en-IN")}
         </span>
         <span className="text-sm font-semibold text-brand">View Cart →</span>
       </Link>

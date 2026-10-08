@@ -10,7 +10,7 @@ export interface ButtonProps
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", ...props }, ref) => {
     const variantStyles = {
-      default: "bg-teal-600 text-white hover:bg-teal-700 shadow-sm",
+      default: "bg-brand-600 text-white hover:bg-brand-700 shadow-sm",
       secondary: "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200",
       outline: "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/80 shadow-sm",
       ghost: "text-slate-700 hover:bg-slate-100",
@@ -29,7 +29,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={clsx(
-          "inline-flex items-center justify-center gap-1.5 font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none select-none focus:outline-none focus:ring-2 focus:ring-teal-500/20",
+          "inline-flex items-center justify-center gap-1.5 font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none select-none focus:outline-none focus:ring-2 focus:ring-brand-500/20",
           variantStyles[variant],
           sizeStyles[size],
           className

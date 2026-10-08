@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { nextTier, pointsForAmount, progressToNextTier, tierForPoints } from "@/lib/loyalty";
 
 describe("pointsForAmount", () => {
-  it("awards 1 point per ₹10 spent, floored", () => {
+  it("awards 1 point per Rs 10 spent, floored", () => {
     expect(pointsForAmount(100)).toBe(10);
     expect(pointsForAmount(95)).toBe(9);
     expect(pointsForAmount(0)).toBe(0);

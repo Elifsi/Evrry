@@ -59,7 +59,11 @@ export default function PartnerLoginPage() {
   };
 
   const handleQuickDemoRole = (role: string) => {
-    router.push("/");
+    if (role === "restaurant") router.push("/kds");
+    else if (role === "grocery") router.push("/grocery");
+    else if (role === "hotel") router.push("/hotel");
+    else if (role === "landlord") router.push("/rentals");
+    else router.push("/");
   };
 
   return (

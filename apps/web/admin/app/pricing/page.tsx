@@ -126,7 +126,7 @@ export default function PricingControlPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <Percent className="w-5 h-5 text-teal-600" />
+              <Percent className="w-5 h-5 text-brand-600" />
               Platform Pricing & Take-Rate Governance
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -143,7 +143,7 @@ export default function PricingControlPage() {
             </button>
             <button
               onClick={() => setShowDeployModal(true)}
-              className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+              className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
             >
               <Save className="w-3.5 h-3.5" />
               Deploy Pricing Version
@@ -163,7 +163,7 @@ export default function PricingControlPage() {
                 className="w-full p-4 flex items-center justify-between bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
                     <Truck className="w-4 h-4" />
                   </div>
                   <div className="text-left">
@@ -195,7 +195,7 @@ export default function PricingControlPage() {
                             baseDeliveryRadiusMeters: Math.round(Number(e.target.value) * 1000),
                           })
                         }
-                        className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                        className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                       />
                       <span className="absolute right-3 top-2 text-xs text-slate-400 font-bold">km</span>
                     </div>
@@ -218,7 +218,7 @@ export default function PricingControlPage() {
                             baseDeliveryFeePaisa: Math.round(Number(e.target.value) * 100),
                           })
                         }
-                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                       />
                     </div>
                     <p className="text-[10px] text-slate-500 mt-1">Standard rate charged within base radius (Default: Rs 50).</p>
@@ -240,7 +240,7 @@ export default function PricingControlPage() {
                             extraDistanceFeePerKmPaisa: Math.round(Number(e.target.value) * 100),
                           })
                         }
-                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                       />
                       <span className="absolute right-3 top-2 text-xs text-slate-400 font-bold">/km</span>
                     </div>
@@ -263,7 +263,7 @@ export default function PricingControlPage() {
                             freeDeliveryThresholdPaisa: Math.round(Number(e.target.value) * 100),
                           })
                         }
-                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                       />
                     </div>
                     <p className="text-[10px] text-slate-500 mt-1">Baskets &ge; this receive 100% free delivery (Default: Rs 1,200).</p>
@@ -280,7 +280,7 @@ export default function PricingControlPage() {
                 className="w-full p-4 flex items-center justify-between bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
                     <DollarSign className="w-4 h-4" />
                   </div>
                   <div className="text-left">
@@ -313,7 +313,7 @@ export default function PricingControlPage() {
                             platformFeePaisa: Math.round(Number(e.target.value) * 100),
                           })
                         }
-                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                       />
                     </div>
                     <p className="text-[10px] text-slate-500 mt-1">Charged on every food, mart, and parcel checkout (Default: Rs 10).</p>
@@ -336,7 +336,7 @@ export default function PricingControlPage() {
                           })
                         }
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          settings.platformFeeWaiver ? "bg-teal-600" : "bg-slate-300"
+                          settings.platformFeeWaiver ? "bg-brand-600" : "bg-slate-300"
                         }`}
                       >
                         <span
@@ -360,7 +360,7 @@ export default function PricingControlPage() {
                         Statutory VAT itemized on taxable digital platform revenue.
                       </p>
                     </div>
-                    <span className="font-mono font-bold text-xs bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200/70">
+                    <span className="font-mono font-bold text-xs bg-brand-50 text-brand-800 px-2.5 py-1 rounded-lg border border-brand-200/70">
                       {(settings.vatBps / 100).toFixed(1)}% (1300 bps)
                     </span>
                   </div>
@@ -376,7 +376,7 @@ export default function PricingControlPage() {
                 className="w-full p-4 flex items-center justify-between bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div className="text-left">
@@ -411,7 +411,7 @@ export default function PricingControlPage() {
                               driverBaseSharePaisa: Math.round(Number(e.target.value) * 100),
                             })
                           }
-                          className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                         />
                       </div>
                       <p className="text-[10px] text-slate-500 mt-1">Guaranteed rider pay per completed drop (Default: Rs 40).</p>
@@ -434,7 +434,7 @@ export default function PricingControlPage() {
                               driverExtraDistanceShareBps: Math.round(Number(e.target.value) * 100),
                             })
                           }
-                          className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 font-bold text-slate-900"
+                          className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                         />
                         <span className="absolute right-3 top-2 text-xs text-slate-400 font-bold">%</span>
                       </div>
@@ -455,7 +455,7 @@ export default function PricingControlPage() {
                       <div key={item.key} className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1.5">
                         <div className="flex items-center justify-between text-xs font-bold">
                           <span className="text-slate-800">{item.name}</span>
-                          <span className="text-teal-700 font-mono text-[11px] bg-teal-50 px-2 py-0.5 rounded border border-teal-200/60">
+                          <span className="text-brand-700 font-mono text-[11px] bg-brand-50 px-2 py-0.5 rounded border border-brand-200/60">
                             {(item.val / 100).toFixed(1)}%
                           </span>
                         </div>
@@ -474,7 +474,7 @@ export default function PricingControlPage() {
                               },
                             })
                           }
-                          className="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                          className="w-full accent-brand-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                         />
                       </div>
                     ))}
@@ -489,7 +489,7 @@ export default function PricingControlPage() {
             <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5 sticky top-20">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
                     <TrendingUp className="w-4 h-4" />
                   </div>
                   <div>
@@ -497,7 +497,7 @@ export default function PricingControlPage() {
                     <p className="text-[11px] text-slate-500">Live parametric formula validator</p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[10px] bg-brand-50 text-brand-700 border border-brand-200 px-2 py-0.5 rounded-full font-bold">
                   Live
                 </span>
               </div>
@@ -508,7 +508,7 @@ export default function PricingControlPage() {
                 <div className="space-y-1.5">
                   <div className="flex justify-between font-semibold">
                     <span className="text-slate-700">Distance Slider:</span>
-                    <span className="font-mono font-bold text-teal-700">{simDistanceKm} km</span>
+                    <span className="font-mono font-bold text-brand-700">{simDistanceKm} km</span>
                   </div>
                   <input
                     type="range"
@@ -517,7 +517,7 @@ export default function PricingControlPage() {
                     step="1"
                     value={simDistanceKm}
                     onChange={(e) => setSimDistanceKm(Number(e.target.value))}
-                    className="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                    className="w-full accent-brand-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400 font-mono">
                     <span>1 km</span>
@@ -531,7 +531,7 @@ export default function PricingControlPage() {
                 <div className="space-y-1.5">
                   <div className="flex justify-between font-semibold">
                     <span className="text-slate-700">Cart Basket Size:</span>
-                    <span className="font-mono font-bold text-teal-700">Rs {simOrderAmountNpr.toLocaleString()}</span>
+                    <span className="font-mono font-bold text-brand-700">Rs {simOrderAmountNpr.toLocaleString()}</span>
                   </div>
                   <input
                     type="range"
@@ -540,7 +540,7 @@ export default function PricingControlPage() {
                     step="100"
                     value={simOrderAmountNpr}
                     onChange={(e) => setSimOrderAmountNpr(Number(e.target.value))}
-                    className="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                    className="w-full accent-brand-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400 font-mono">
                     <span>Rs 300</span>
@@ -571,7 +571,7 @@ export default function PricingControlPage() {
                   </div>
                   <div className="flex justify-between font-bold text-slate-900 pt-1">
                     <span>Total Customer Pays:</span>
-                    <span className="font-mono text-sm text-teal-700">
+                    <span className="font-mono text-sm text-brand-700">
                       Rs {(totalCustomerPaysPaisa / 100).toFixed(0)}
                     </span>
                   </div>
@@ -624,7 +624,7 @@ export default function PricingControlPage() {
                   </div>
                   <div className="flex justify-between font-bold text-slate-900 pt-1 bg-white p-2 rounded-lg border border-slate-200">
                     <span>Net EVRRY Revenue:</span>
-                    <span className="font-mono text-sm text-teal-800 font-extrabold">
+                    <span className="font-mono text-sm text-brand-800 font-extrabold">
                       Rs {(totalPlatformNetRevenuePaisa / 100).toFixed(0)}
                     </span>
                   </div>
@@ -634,7 +634,7 @@ export default function PricingControlPage() {
               {/* Primary Action Button */}
               <button
                 onClick={() => setShowDeployModal(true)}
-                className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Deploy Pricing Version
@@ -677,7 +677,7 @@ export default function PricingControlPage() {
                 value={deployAuditNote}
                 onChange={(e) => setDeployAuditNote(e.target.value)}
                 placeholder="e.g. Revised monsoon delivery tariffs approved by VP Operations"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
             </div>
 
@@ -691,7 +691,7 @@ export default function PricingControlPage() {
               <button
                 onClick={handleConfirmDeploy}
                 disabled={!deployAuditNote.trim() || isDeploying}
-                className="px-5 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-sm disabled:opacity-50"
+                className="px-5 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm disabled:opacity-50"
               >
                 {isDeploying ? "Deploying..." : "Confirm & Deploy"}
               </button>

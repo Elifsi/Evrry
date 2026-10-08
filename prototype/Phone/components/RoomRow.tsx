@@ -47,7 +47,7 @@ export default function RoomRow({
 
       <div className="mt-3 flex items-end justify-between">
         <div>
-          <p className="text-base font-bold text-ink">₹{room.price.toLocaleString("en-IN")}</p>
+          <p className="text-base font-bold text-ink">Rs {room.price.toLocaleString("en-IN")}</p>
           <p className="text-[10px] text-ink/40">per night, excl. taxes</p>
         </div>
         {fits ? (

@@ -1,9 +1,9 @@
 interface BillRow {
   label: string;
   amount: number;
-  /** Rendered green ("−₹x") instead of the default ink color. */
+  /** Rendered green ("−Rs x") instead of the default ink color. */
   isDiscount?: boolean;
-  /** Rendered as "FREE" instead of ₹0. */
+  /** Rendered as "FREE" instead of Rs 0. */
   freeIfZero?: boolean;
 }
 
@@ -17,14 +17,14 @@ export default function BillSummary({ rows, total }: { rows: BillRow[]; total: n
             <span>{row.label}</span>
             <span className={row.isDiscount ? "font-medium text-emerald-600" : "text-ink"}>
               {row.isDiscount ? "−" : ""}
-              {row.freeIfZero && row.amount === 0 ? "FREE" : `₹${Math.abs(row.amount).toLocaleString("en-IN")}`}
+              {row.freeIfZero && row.amount === 0 ? "FREE" : `Rs ${Math.abs(row.amount).toLocaleString("en-IN")}`}
             </span>
           </div>
         ))}
       </div>
       <div className="mt-3 flex items-center justify-between border-t border-dashed border-black/10 pt-3 text-sm font-bold text-ink">
         <span>To Pay</span>
-        <span>₹{total.toLocaleString("en-IN")}</span>
+        <span>Rs {total.toLocaleString("en-IN")}</span>
       </div>
     </div>
   );

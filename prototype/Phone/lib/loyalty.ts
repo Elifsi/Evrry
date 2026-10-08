@@ -6,7 +6,7 @@ export interface Tier {
   colorTo: string;
 }
 
-// Lifetime points, 1 point per ₹10 spent on any completed order, booking or
+// Lifetime points, 1 point per Rs 10 spent on any completed order, booking or
 // ride (charged at the same moment the wallet is debited — see
 // useAppStore's placeOrderFromCart/bookHotel/completeRide).
 export const TIERS: Tier[] = [

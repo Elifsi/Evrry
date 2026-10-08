@@ -31,7 +31,7 @@ export const createWalletSlice: StateCreator<AppState, [], [], WalletSlice> = (s
       action: "balance_topped_up",
       resourceType: "wallet",
       policyDecision: "allowed",
-      detail: `Added ₹${amount.toLocaleString("en-IN")} via ${sourceLabel}.`,
+      detail: `Added Rs ${amount.toLocaleString("en-IN")} via ${sourceLabel}.`,
     });
   },
 });

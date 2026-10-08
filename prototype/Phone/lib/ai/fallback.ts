@@ -22,7 +22,7 @@ const CATEGORY_KEYWORDS: { category: CatalogItem["category"]; words: string[] }[
 ];
 
 function extractBudget(text: string): number | undefined {
-  const match = text.match(/(?:under|budget(?: of| is| around)?|around|₹|rs\.?)\s*([\d,]{3,7})/i);
+  const match = text.match(/(?:under|budget(?: of| is| around)?|around|Rs |rs\.?)\s*([\d,]{3,7})/i);
   if (match) return Number(match[1].replace(/,/g, ""));
   const bare = text.match(/\b(\d{4,6})\b/);
   return bare ? Number(bare[1]) : undefined;
@@ -55,9 +55,9 @@ export function runFallbackAgent(messages: ChatMessage[]): FallbackResult {
   }
 
   const top = candidates.slice(0, 3);
-  const budgetNote = budget ? ` within your ~₹${budget.toLocaleString("en-IN")} budget` : "";
+  const budgetNote = budget ? ` within your ~Rs ${budget.toLocaleString("en-IN")} budget` : "";
   const reasonBits = top
-    .map((c) => `**${c.title}** (₹${c.price.toLocaleString("en-IN")}, ${c.rating ?? "—"}★) — ${c.subtitle ?? ""}`)
+    .map((c) => `**${c.title}** (Rs ${c.price.toLocaleString("en-IN")}, ${c.rating ?? "—"}★) — ${c.subtitle ?? ""}`)
     .join("\n");
 
   return {

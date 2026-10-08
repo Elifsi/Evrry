@@ -36,7 +36,7 @@ export const createOrdersSlice: StateCreator<AppState, [], [], OrdersSlice> = (s
           action: "purchase_blocked",
           resourceType: "order",
           policyDecision: "blocked",
-          detail: `Insufficient wallet balance for ₹${total} order (PRD §8 policy check).`,
+          detail: `Insufficient wallet balance for Rs ${total} order (PRD §8 policy check).`,
         });
         return { ok: false as const, reason: "insufficient_balance" as const };
       }
@@ -63,7 +63,7 @@ export const createOrdersSlice: StateCreator<AppState, [], [], OrdersSlice> = (s
       itemTitle: titleSummary,
       providerName: providerNames.join(", "),
       amount: total,
-      currency: "INR",
+      currency: "NPR",
       createdAt: now,
       updatedAt: now,
       meta: { card: sourceLabel },
@@ -101,7 +101,7 @@ export const createOrdersSlice: StateCreator<AppState, [], [], OrdersSlice> = (s
       resourceType: "order",
       resourceId: tx.id,
       policyDecision: "allowed",
-      detail: `User confirmed ₹${total} order via the AI concierge, charged to ${sourceLabel} (PRD §8).`,
+      detail: `User confirmed Rs ${total} order via the AI concierge, charged to ${sourceLabel} (PRD §8).`,
     });
     get().logAudit({
       actorType: "AI_AGENT",
@@ -109,7 +109,7 @@ export const createOrdersSlice: StateCreator<AppState, [], [], OrdersSlice> = (s
       resourceType: "order",
       resourceId: tx.id,
       policyDecision: "allowed",
-      detail: `Placed order for ${titleSummary} — ₹${total}.`,
+      detail: `Placed order for ${titleSummary} — Rs ${total}.`,
     });
 
     return { ok: true as const, transaction: tx };

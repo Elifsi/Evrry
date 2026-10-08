@@ -17,7 +17,7 @@ export const createTransactionsSlice: StateCreator<AppState, [], [], Transaction
       itemTitle: item.title,
       providerName: item.providerName,
       amount: item.price,
-      currency: "INR",
+      currency: "NPR",
       createdAt: now,
       updatedAt: now,
       history: [{ status: "draft", at: now }],
@@ -49,7 +49,7 @@ export const createTransactionsSlice: StateCreator<AppState, [], [], Transaction
           resourceType: tx.type.toLowerCase(),
           resourceId: tx.id,
           policyDecision: "blocked",
-          detail: `Insufficient wallet balance for ₹${tx.amount} (PRD §8 policy check).`,
+          detail: `Insufficient wallet balance for Rs ${tx.amount} (PRD §8 policy check).`,
         });
         return { ok: false as const, reason: "insufficient_balance" as const };
       }
@@ -109,7 +109,7 @@ export const createTransactionsSlice: StateCreator<AppState, [], [], Transaction
       resourceType: tx.type.toLowerCase(),
       resourceId: tx.id,
       policyDecision: "allowed",
-      detail: `User explicitly confirmed ₹${tx.amount} for ${tx.itemTitle} on ${sourceLabel} (PRD §8).`,
+      detail: `User explicitly confirmed Rs ${tx.amount} for ${tx.itemTitle} on ${sourceLabel} (PRD §8).`,
     });
     return { ok: true as const };
   },

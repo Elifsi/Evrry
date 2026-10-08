@@ -34,7 +34,7 @@ export default function WalletCard() {
             <Wallet size={14} /> Wallet balance
           </span>
         </div>
-        <p className="mt-2 text-3xl font-bold">₹{walletBalance.toLocaleString("en-IN")}</p>
+        <p className="mt-2 text-3xl font-bold">Rs {walletBalance.toLocaleString("en-IN")}</p>
         {!showTopUp && (
           <button
             onClick={() => setShowTopUp(true)}
@@ -60,7 +60,7 @@ export default function WalletCard() {
                     : "border-black/15 text-ink/70 hover:border-ink/40"
                 )}
               >
-                ₹{v.toLocaleString("en-IN")}
+                Rs {v.toLocaleString("en-IN")}
               </button>
             ))}
           </div>
@@ -111,7 +111,7 @@ export default function WalletCard() {
               disabled={!Number(topUpAmount)}
               className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Add ₹{Number(topUpAmount || 0).toLocaleString("en-IN")}
+              Add Rs {Number(topUpAmount || 0).toLocaleString("en-IN")}
             </button>
             <button
               type="button"

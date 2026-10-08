@@ -29,7 +29,7 @@ export interface Transaction {
   itemTitle: string;
   providerName: string;
   amount: number;
-  currency: "INR";
+  currency: "NPR" | "INR";
   createdAt: number;
   updatedAt: number;
   meta?: Record<string, string>;

@@ -31,7 +31,7 @@ export const createRideSlice: StateCreator<AppState, [], [], RideSlice> = (set, 
           action: "purchase_blocked",
           resourceType: "ride",
           policyDecision: "blocked",
-          detail: `Insufficient wallet balance for ₹${total} ride (PRD §8 policy check).`,
+          detail: `Insufficient wallet balance for Rs ${total} ride (PRD §8 policy check).`,
         });
         return { ok: false as const, reason: "insufficient_balance" as const };
       }
@@ -52,7 +52,7 @@ export const createRideSlice: StateCreator<AppState, [], [], RideSlice> = (set, 
       itemTitle: `${rideType.label} · ${pickup} → ${drop}`,
       providerName: rideType.label,
       amount: total,
-      currency: "INR",
+      currency: "NPR",
       createdAt: now,
       updatedAt: now,
       meta: { card: sourceLabel, pickup, drop, distanceKm: String(distanceKm) },
@@ -100,7 +100,7 @@ export const createRideSlice: StateCreator<AppState, [], [], RideSlice> = (set, 
       resourceType: "ride",
       resourceId: tx.id,
       policyDecision: "allowed",
-      detail: `Requested a ₹${total} ${rideType.label} ride (${pickup} to ${drop}) on ${sourceLabel}.`,
+      detail: `Requested a Rs ${total} ${rideType.label} ride (${pickup} to ${drop}) on ${sourceLabel}.`,
     });
 
     return { ok: true as const, transactionId: tx.id };
@@ -231,8 +231,8 @@ export const createRideSlice: StateCreator<AppState, [], [], RideSlice> = (set, 
       resourceId: ride.transactionId,
       policyDecision: "allowed",
       detail: paid
-        ? `Ride completed — charged ₹${ride.fare} on ${sourceLabel}.`
-        : `Ride completed but the payment source was no longer valid — ₹${ride.fare} not captured.`,
+        ? `Ride completed — charged Rs ${ride.fare} on ${sourceLabel}.`
+        : `Ride completed but the payment source was no longer valid — Rs ${ride.fare} not captured.`,
     });
   },
 

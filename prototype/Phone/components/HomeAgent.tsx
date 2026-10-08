@@ -793,7 +793,7 @@ export default function HomeAgent() {
                     <span className="inline-flex items-center gap-1.5 text-slate-600">
                       <ShoppingBag size={13} className="text-[#005EFF]" /> {cartCount} item{cartCount > 1 ? "s" : ""} in cart
                     </span>
-                    <span className="font-semibold text-[#005EFF]">₹{cartTotal.toLocaleString("en-IN")}</span>
+                    <span className="font-semibold text-[#005EFF]">Rs {cartTotal.toLocaleString("en-IN")}</span>
                   </div>
                 )}
               </div>

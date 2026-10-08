@@ -112,14 +112,14 @@ export function AdminSidebar() {
             isCollapsed && "justify-center w-full"
           )}
         >
-          <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white font-bold text-base shadow-sm shrink-0 group-hover:bg-teal-700 transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold text-base shadow-sm shrink-0 group-hover:bg-brand-700 transition-colors">
             E
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
               <div className="text-slate-900 font-bold text-sm tracking-tight flex items-center gap-1.5 truncate">
                 EVRRY
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-teal-50 text-teal-700 border border-teal-200/60">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-brand-50 text-brand-700 border border-brand-200/60">
                   Admin
                 </span>
               </div>
@@ -155,7 +155,7 @@ export function AdminSidebar() {
                         ? "justify-center p-2.5"
                         : "justify-between px-3 py-2.5",
                       isActive
-                        ? "bg-teal-50 text-teal-800 shadow-sm border border-teal-200/60"
+                        ? "bg-brand-50 text-brand-800 shadow-sm border border-brand-200/60"
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     )}
                   >
@@ -164,7 +164,7 @@ export function AdminSidebar() {
                         className={clsx(
                           "w-4 h-4 shrink-0 transition-colors",
                           isActive
-                            ? "text-teal-600 font-bold"
+                            ? "text-brand-600 font-bold"
                             : "text-slate-400 group-hover:text-slate-600"
                         )}
                       />
@@ -175,11 +175,11 @@ export function AdminSidebar() {
                         className={clsx(
                           "text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0",
                           isActive
-                            ? "bg-teal-600 text-white border-teal-600"
+                            ? "bg-brand-600 text-white border-brand-600"
                             : item.badgeVariant === "warning"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
                             : item.badgeVariant === "brand"
-                            ? "bg-teal-50 text-teal-700 border-teal-200"
+                            ? "bg-brand-50 text-brand-700 border-brand-200"
                             : "bg-slate-100 text-slate-600 border-slate-200"
                         )}
                       >
@@ -221,7 +221,7 @@ export function AdminSidebar() {
           )}
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+            <div className="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
               {admin?.displayName ? admin.displayName.charAt(0) : "S"}
             </div>
             {!isCollapsed && (
@@ -229,7 +229,7 @@ export function AdminSidebar() {
                 <div className="text-xs font-bold text-slate-900 truncate">
                   {admin?.displayName || "Suman Adhikari"}
                 </div>
-                <div className="text-[10px] text-teal-700 font-semibold truncate uppercase">
+                <div className="text-[10px] text-brand-700 font-semibold truncate uppercase">
                   {admin?.role || "superadmin"}
                 </div>
               </div>

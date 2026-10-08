@@ -255,7 +255,7 @@ export default function DisputesPage() {
                 placeholder="Search ticket, order, customer..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
               />
             </div>
 
@@ -294,7 +294,7 @@ export default function DisputesPage() {
                   onClick={() => handleSelectDispute(d)}
                   className={`w-full text-left p-3.5 transition-all flex flex-col gap-1.5 ${
                     isSelected
-                      ? "bg-teal-50/50 border-l-4 border-l-teal-600 bg-white"
+                      ? "bg-brand-50/50 border-l-4 border-l-brand-600 bg-white"
                       : "hover:bg-slate-50/70"
                   }`}
                 >
@@ -342,7 +342,7 @@ export default function DisputesPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded border border-teal-200/60 uppercase font-mono">
+                      <span className="text-[10px] font-bold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded border border-brand-200/60 uppercase font-mono">
                         {selectedDispute.id}
                       </span>
                       <h3 className="text-sm font-bold text-slate-900">
@@ -367,7 +367,7 @@ export default function DisputesPage() {
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase">Store / Merchant</span>
                     <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                      <Store className="w-3.5 h-3.5 text-teal-600" />
+                      <Store className="w-3.5 h-3.5 text-brand-600" />
                       <span>{selectedDispute.vendorName}</span>
                     </div>
                   </div>
@@ -375,7 +375,7 @@ export default function DisputesPage() {
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase">Assigned Rider</span>
                     <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                      <Bike className="w-3.5 h-3.5 text-teal-600" />
+                      <Bike className="w-3.5 h-3.5 text-brand-600" />
                       <span>{selectedDispute.assignedRider}</span>
                     </div>
                   </div>
@@ -385,7 +385,7 @@ export default function DisputesPage() {
               {/* Customer Statement */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
                 <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <MessageSquare className="w-4 h-4 text-teal-600" />
+                  <MessageSquare className="w-4 h-4 text-brand-600" />
                   <span>Customer Statement & Complaint</span>
                 </div>
                 <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-700 italic">
@@ -398,7 +398,7 @@ export default function DisputesPage() {
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <FileText className="w-4 h-4 text-teal-600" />
+                      <FileText className="w-4 h-4 text-brand-600" />
                       <span>Photo Evidence Carousel ({selectedDispute.photos.length} photos)</span>
                     </div>
                     {selectedDispute.photos.length > 1 && (
@@ -448,7 +448,7 @@ export default function DisputesPage() {
                 {/* Timeline */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
                   <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-teal-600" />
+                    <Clock className="w-4 h-4 text-brand-600" />
                     <span>Incident Timeline</span>
                   </div>
                   <div className="space-y-3 text-xs pl-2 border-l-2 border-slate-200 text-slate-600 font-mono">
@@ -470,7 +470,7 @@ export default function DisputesPage() {
                 {/* Line Items Snapshot */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
                   <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <Receipt className="w-4 h-4 text-teal-600" />
+                    <Receipt className="w-4 h-4 text-brand-600" />
                     <span>Line Items Snapshot</span>
                   </div>
                   <div className="divide-y divide-slate-100 text-xs">
@@ -492,7 +492,7 @@ export default function DisputesPage() {
               <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-teal-600" />
+                    <DollarSign className="w-4 h-4 text-brand-600" />
                     1-Click Fintech Refund Action Bar
                   </h4>
                   <span className="text-[11px] text-slate-500 font-mono">Instant Gateway Webhook</span>
@@ -512,7 +512,7 @@ export default function DisputesPage() {
                           step="10"
                           value={refundAmountNpr}
                           onChange={(e) => setRefundAmountNpr(Number(e.target.value))}
-                          className="w-full pl-9 pr-3 py-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-slate-900"
+                          className="w-full pl-9 pr-3 py-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-900"
                         />
                       </div>
                     </div>
@@ -525,7 +525,7 @@ export default function DisputesPage() {
                       <select
                         value={refundDestination}
                         onChange={(e) => setRefundDestination(e.target.value as any)}
-                        className="w-full px-3 py-2 text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-slate-900"
+                        className="w-full px-3 py-2 text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-900"
                       >
                         <option value="gateway">Original Gateway ({selectedDispute.paymentMethod})</option>
                         <option value="wallet">Evrry Wallet Balance (Instant)</option>
@@ -536,7 +536,7 @@ export default function DisputesPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleDispatchRefund}
-                        className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5"
+                        className="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5"
                       >
                         <DollarSign className="w-4 h-4" />
                         Dispatch Refund & Close

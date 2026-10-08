@@ -10,12 +10,12 @@ export function describeOrderResult(orderResult: ReturnType<typeof executePlaceO
   if (!orderResult) return null;
   if (orderResult.ok) {
     const etaText = typeof orderResult.eta_minutes === "number" ? `, arriving in about ${orderResult.eta_minutes} minutes` : "";
-    return `Done — ordered for ₹${orderResult.total.toLocaleString("en-IN")}${etaText}. You can track it in Activity.`;
+    return `Done — ordered for Rs ${orderResult.total.toLocaleString("en-IN")}${etaText}. You can track it in Activity.`;
   }
   if (orderResult.reason === "insufficient_balance") {
-    return `Your wallet has ₹${orderResult.walletBalance.toLocaleString("en-IN")}, which isn't enough for the ₹${orderResult.total.toLocaleString(
+    return `Your wallet has Rs ${orderResult.walletBalance.toLocaleString("en-IN")}, which isn't enough for the Rs ${orderResult.total.toLocaleString(
       "en-IN"
-    )} total — add ₹${orderResult.shortfall.toLocaleString("en-IN")} more from the Payments tab and I can place it right away.`;
+    )} total — add Rs ${orderResult.shortfall.toLocaleString("en-IN")} more from the Payments tab and I can place it right away.`;
   }
   if (orderResult.reason === "empty_cart") {
     return "Your cart's empty — tell me what you'd like and I'll add it first.";

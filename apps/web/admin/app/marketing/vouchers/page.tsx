@@ -100,7 +100,7 @@ export default function VouchersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <Ticket className="w-5 h-5 text-teal-600" />
+              <Ticket className="w-5 h-5 text-brand-600" />
               Promotional Campaigns & Coupon Codes ({vouchers.length})
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -109,7 +109,7 @@ export default function VouchersPage() {
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+            className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Create New Campaign
@@ -119,7 +119,7 @@ export default function VouchersPage() {
         {/* Campaign Cards Grid */}
         {loading ? (
           <div className="bg-white p-12 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-center gap-2 text-slate-500 text-xs">
-            <Loader2 className="w-4 h-4 animate-spin text-teal-600" />
+            <Loader2 className="w-4 h-4 animate-spin text-brand-600" />
             <span>Loading marketing campaigns...</span>
           </div>
         ) : vouchers.length === 0 ? (
@@ -143,7 +143,7 @@ export default function VouchersPage() {
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-1 bg-teal-50 text-teal-800 font-mono font-bold text-xs rounded-lg border border-teal-200/60 tracking-wider">
+                      <span className="px-2.5 py-1 bg-brand-50 text-brand-800 font-mono font-bold text-xs rounded-lg border border-brand-200/60 tracking-wider">
                         {v.code}
                       </span>
                       <span
@@ -201,7 +201,7 @@ export default function VouchersPage() {
                               ? "bg-rose-500"
                               : burnPercent >= 70
                               ? "bg-amber-500"
-                              : "bg-teal-600"
+                              : "bg-brand-600"
                           }`}
                           style={{ width: `${burnPercent}%` }}
                         />
@@ -228,7 +228,7 @@ export default function VouchersPage() {
                           className={`p-1.5 rounded-lg border text-xs font-semibold transition-colors flex items-center gap-1 ${
                             v.status === "active"
                               ? "text-amber-800 border-amber-200 bg-amber-50 hover:bg-amber-100"
-                              : "text-teal-800 border-teal-200 bg-teal-50 hover:bg-teal-100"
+                              : "text-brand-800 border-brand-200 bg-brand-50 hover:bg-brand-100"
                           }`}
                           title={v.status === "active" ? "Pause Campaign" : "Resume Campaign"}
                         >
@@ -260,7 +260,7 @@ export default function VouchersPage() {
           <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Ticket className="w-4 h-4 text-teal-600" />
+                <Ticket className="w-4 h-4 text-brand-600" />
                 <h3 className="text-sm font-bold text-slate-900">
                   Launch New Voucher Campaign
                 </h3>
@@ -283,7 +283,7 @@ export default function VouchersPage() {
                     placeholder="e.g. MONSOON2026"
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value.toUpperCase())}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
 
@@ -295,7 +295,7 @@ export default function VouchersPage() {
                       onClick={() => setDiscountType("flat")}
                       className={`py-1.5 text-xs font-semibold rounded-lg border transition-all ${
                         discountType === "flat"
-                          ? "bg-teal-600 text-white border-teal-600 shadow-sm"
+                          ? "bg-brand-600 text-white border-brand-600 shadow-sm"
                           : "bg-slate-50 text-slate-600 border-slate-200"
                       }`}
                     >
@@ -306,7 +306,7 @@ export default function VouchersPage() {
                       onClick={() => setDiscountType("percentage")}
                       className={`py-1.5 text-xs font-semibold rounded-lg border transition-all ${
                         discountType === "percentage"
-                          ? "bg-teal-600 text-white border-teal-600 shadow-sm"
+                          ? "bg-brand-600 text-white border-brand-600 shadow-sm"
                           : "bg-slate-50 text-slate-600 border-slate-200"
                       }`}
                     >
@@ -324,7 +324,7 @@ export default function VouchersPage() {
                   placeholder="e.g. Free Delivery & Flat 100 Off on Food"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                 />
               </div>
 
@@ -335,7 +335,7 @@ export default function VouchersPage() {
                   placeholder="e.g. Valid on all restaurant orders above Rs 400."
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                 />
               </div>
 
@@ -350,7 +350,7 @@ export default function VouchersPage() {
                     required
                     value={discountVal}
                     onChange={(e) => setDiscountVal(Number(e.target.value))}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
 
@@ -362,7 +362,7 @@ export default function VouchersPage() {
                     required
                     value={minOrder}
                     onChange={(e) => setMinOrder(Number(e.target.value))}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
 
@@ -374,7 +374,7 @@ export default function VouchersPage() {
                     required
                     value={maxDiscount}
                     onChange={(e) => setMaxDiscount(Number(e.target.value))}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
               </div>
@@ -388,7 +388,7 @@ export default function VouchersPage() {
                     required
                     value={budgetNpr}
                     onChange={(e) => setBudgetNpr(Number(e.target.value))}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
 
@@ -400,7 +400,7 @@ export default function VouchersPage() {
                     required
                     value={totalClaims}
                     onChange={(e) => setTotalClaims(Number(e.target.value))}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
               </div>
@@ -415,7 +415,7 @@ export default function VouchersPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-all"
+                  className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-sm transition-all"
                 >
                   Launch Voucher
                 </button>

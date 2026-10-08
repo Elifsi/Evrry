@@ -34,7 +34,7 @@ export default function RestaurantCard({ restaurant }: { restaurant: Restaurant 
             <Clock size={11} /> {restaurant.deliveryEtaMinutes} min
           </span>
           <span>·</span>
-          <span>₹{restaurant.priceForTwo} for two</span>
+          <span>Rs {restaurant.priceForTwo} for two</span>
           <span>·</span>
           <span className="truncate">{restaurant.area}</span>
         </div>

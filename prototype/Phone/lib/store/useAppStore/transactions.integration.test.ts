@@ -13,7 +13,7 @@ describe("useAppStore transaction lifecycle", () => {
   });
 
   it("moves a wallet-funded order from draft through to completed, debiting the wallet and logging both", () => {
-    const item = findById("food-001")!; // North Indian Thali, ₹249
+    const item = findById("food-001")!; // North Indian Thali, Rs 249
     useAppStore.getState().addBalance(1000);
 
     const draft = useAppStore.getState().createDraft(item, "ORDER");
@@ -47,7 +47,7 @@ describe("useAppStore transaction lifecycle", () => {
   });
 
   it("blocks authorization and logs a blocked audit entry when the wallet balance is insufficient", () => {
-    const item = findById("food-001")!; // ₹249
+    const item = findById("food-001")!; // Rs 249
     useAppStore.getState().addBalance(100); // not enough
 
     const draft = useAppStore.getState().createDraft(item, "ORDER");

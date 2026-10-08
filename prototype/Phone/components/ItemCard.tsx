@@ -59,7 +59,7 @@ export default function ItemCard({
             <p className="truncate text-sm font-semibold text-ink">{item.title}</p>
             <p className="truncate text-xs text-ink/50">{item.providerName}{item.subtitle ? ` · ${item.subtitle}` : ""}</p>
           </div>
-          <p className="shrink-0 text-sm font-semibold text-ink">₹{item.price.toLocaleString("en-IN")}</p>
+          <p className="shrink-0 text-sm font-semibold text-ink">Rs {item.price.toLocaleString("en-IN")}</p>
         </div>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-ink/50">

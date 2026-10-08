@@ -11,7 +11,7 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const variantStyles = {
-    default: "bg-teal-600 text-white",
+    default: "bg-brand-600 text-white",
     secondary: "bg-slate-100 text-slate-800 border border-slate-200",
     destructive: "bg-rose-50 text-rose-700 border border-rose-200",
     outline: "bg-transparent text-slate-700 border border-slate-300",

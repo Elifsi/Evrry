@@ -111,7 +111,7 @@ export default function HotelBookingView({ hotel }: { hotel: Hotel }) {
       <div className="mt-4">
         <BillSummary
           rows={[
-            { label: `₹${room!.price.toLocaleString("en-IN")} × ${nights} night${nights > 1 ? "s" : ""}`, amount: roomTotal },
+            { label: `Rs ${room!.price.toLocaleString("en-IN")} × ${nights} night${nights > 1 ? "s" : ""}`, amount: roomTotal },
             { label: "Taxes and fees", amount: taxesAndFees },
           ]}
           total={total}
@@ -129,7 +129,7 @@ export default function HotelBookingView({ hotel }: { hotel: Hotel }) {
               source === "wallet" ? "border-ink bg-ink text-white" : "border-black/15 bg-white text-ink/70 hover:border-ink/40"
             )}
           >
-            <Wallet size={11} /> Wallet ₹{walletBalance.toLocaleString("en-IN")}
+            <Wallet size={11} /> Wallet Rs {walletBalance.toLocaleString("en-IN")}
           </button>
           {paymentMethods.map((m) => (
             <button
@@ -162,7 +162,7 @@ export default function HotelBookingView({ hotel }: { hotel: Hotel }) {
         disabled={!source || placing}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {placing ? "Confirming…" : `Complete booking · ₹${total.toLocaleString("en-IN")}`}
+        {placing ? "Confirming…" : `Complete booking · Rs ${total.toLocaleString("en-IN")}`}
       </button>
     </div>
   );

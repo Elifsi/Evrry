@@ -36,7 +36,7 @@ describe("cart -> checkout integration", () => {
   });
 
   it("refuses checkout when the wallet balance can't cover the priced total, leaving the cart intact", () => {
-    useAppStore.getState().addToCart("food-001", 1); // ₹249 + fees
+    useAppStore.getState().addToCart("food-001", 1); // Rs 249 + fees
     useAppStore.getState().addBalance(10); // nowhere near enough
 
     const result = useAppStore.getState().placeOrderFromCart("wallet", { placedBy: "USER" });

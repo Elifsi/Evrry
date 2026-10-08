@@ -35,7 +35,7 @@ export default function OrderHistory() {
                 <span>{t.meta?.card ?? "—"}</span>
                 <span>{new Date(t.updatedAt).toLocaleDateString()}</span>
               </div>
-              <p className="mt-1 text-sm font-semibold text-ink">₹{t.amount.toLocaleString("en-IN")}</p>
+              <p className="mt-1 text-sm font-semibold text-ink">Rs {t.amount.toLocaleString("en-IN")}</p>
             </div>
           ))}
         </div>

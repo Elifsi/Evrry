@@ -10,7 +10,8 @@ export type ServiceCategory =
   | "fashion"
   | "hotels"
   | "rides"
-  | "services";
+  | "services"
+  | "rentals";
 
 export interface CatalogItem {
   id: string;
@@ -20,7 +21,7 @@ export interface CatalogItem {
   title: string;
   subtitle?: string;
   price: number;
-  currency: "INR";
+  currency: "NPR" | "INR";
   attributes: Record<string, string | number | boolean>;
   rating?: number;
   etaMinutes?: number;
@@ -81,6 +82,30 @@ export interface Hotel {
   amenities: string[];
   description: string;
   /** Placeholder banner gradient — no real photos in this prototype. */
+  gradientFrom: string;
+  gradientTo: string;
+}
+
+export interface RentalProperty {
+  id: string;
+  title: string;
+  propertyType: "1BHK" | "2BHK" | "3BHK" | "Studio" | "Single Room";
+  monthlyRentNpr: number;
+  depositNpr: number;
+  area: string;
+  address: string;
+  furnishing: "Fully Furnished" | "Semi-Furnished" | "Unfurnished";
+  bedrooms: number;
+  bathrooms: number;
+  floor: string;
+  amenities: string[];
+  waterSupply: string;
+  parking: string;
+  landlordName: string;
+  landlordPhone: string;
+  isVerified: boolean;
+  availableFrom: string;
+  description: string;
   gradientFrom: string;
   gradientTo: string;
 }

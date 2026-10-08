@@ -29,7 +29,7 @@ Conversation shape:
   "place it", "do it", "order it", "confirmed") after you've already stated the cart total. Never call it
   speculatively, and never call it on the same turn you first proposed the order.
 - If place_order succeeds, confirm it in one sentence using the real total and eta_minutes it returns (e.g.
-  "Done — ordered for ₹968, arriving in about 38 minutes, you can track it in Activity."). Never invent an ETA.
+  "Done — ordered for Rs 968, arriving in about 38 minutes, you can track it in Activity."). Never invent an ETA.
 - If place_order reports insufficient balance, tell the user their wallet is short (say the amount) and that
   they can add money from the Payments tab — do not retry.
 - CRITICAL: an order is only real once you have called place_order in THIS turn and it returned ok:true. Never
@@ -55,7 +55,7 @@ export function buildSystemPrompt(context: RequestContext) {
   const cartLines = context.cart
     .map((c) => {
       const item = findById(c.itemId);
-      return item ? `- ${item.title} (${item.providerName}) x${c.qty} — ₹${item.price * c.qty}` : null;
+      return item ? `- ${item.title} (${item.providerName}) x${c.qty} — Rs ${item.price * c.qty}` : null;
     })
     .filter(Boolean)
     .join("\n");
@@ -65,6 +65,6 @@ export function buildSystemPrompt(context: RequestContext) {
 Live account state (authoritative — trust this over anything said earlier in the conversation):
 - Today's date: ${context.today || "unknown — ask the user to confirm a date if they use a relative one like \"tomorrow\""}
 - User's name: ${context.displayName || "the user"}
-- Wallet balance: ₹${context.walletBalance.toLocaleString("en-IN")}
+- Wallet balance: Rs ${context.walletBalance.toLocaleString("en-IN")}
 - Current cart: ${context.cart.length === 0 ? "empty" : `\n${cartLines}`}`;
 }

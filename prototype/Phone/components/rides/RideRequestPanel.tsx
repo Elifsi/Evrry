@@ -32,7 +32,7 @@ export default function RideRequestPanel() {
   const requestRide = useAppStore((s) => s.requestRide);
 
   const [step, setStep] = useState<Step>("pickup");
-  const [pickupLabel, setPickupLabel] = useState("Current Location");
+  const [pickupLabel, setPickupLabel] = useState("Jhamsikhel Chowk, Lalitpur");
   const [editingPickup, setEditingPickup] = useState(false);
   const [dropLabel, setDropLabel] = useState("");
   const [dropInput, setDropInput] = useState("");
@@ -179,7 +179,7 @@ export default function RideRequestPanel() {
                 autoFocus
                 value={dropInput}
                 onChange={(e) => setDropInput(e.target.value)}
-                placeholder="Search for a drop location"
+                placeholder="Search drop location (e.g. Airport, Thamel...)"
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-ink/35"
               />
               <button
@@ -190,6 +190,33 @@ export default function RideRequestPanel() {
                 Set
               </button>
             </form>
+
+            <div className="mt-3 space-y-1.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-ink/40">Popular Destinations</p>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { name: "Tribhuvan Int'l Airport (TIA)", km: 8 },
+                  { name: "Thamel Tourist Center", km: 5 },
+                  { name: "Patan Durbar Square", km: 2 },
+                  { name: "Boudhanath Stupa", km: 9 },
+                  { name: "New Baneshwor Chowk", km: 4 },
+                ].map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => {
+                      setDropLabel(preset.name);
+                      setDistanceKm(preset.km);
+                      setDropPoint({ x: 65, y: 35 });
+                      setStep("choose");
+                    }}
+                    className="text-[11px] px-2.5 py-1 rounded-lg bg-white border border-black/8 text-ink/70 hover:border-brand hover:text-brand transition-colors text-left font-medium"
+                  >
+                    📍 {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </>
         )}
 
@@ -220,7 +247,7 @@ export default function RideRequestPanel() {
                       <p className="text-sm font-semibold text-ink">{rt.label}</p>
                       <p className="truncate text-xs text-ink/45">{rt.subtitle} · {rt.etaMinutes} min away</p>
                     </div>
-                    <p className="text-base font-bold text-ink">₹{rtTotal.toLocaleString("en-IN")}</p>
+                    <p className="text-base font-bold text-ink">Rs {rtTotal.toLocaleString("en-IN")}</p>
                   </button>
                 );
               })}
@@ -237,7 +264,7 @@ export default function RideRequestPanel() {
                     source === "wallet" ? "border-ink bg-ink text-white" : "border-black/15 bg-white text-ink/70 hover:border-ink/40"
                   )}
                 >
-                  <Wallet size={11} /> Wallet ₹{walletBalance.toLocaleString("en-IN")}
+                  <Wallet size={11} /> Wallet Rs {walletBalance.toLocaleString("en-IN")}
                 </button>
                 {paymentMethods.map((m) => (
                   <button
@@ -261,7 +288,7 @@ export default function RideRequestPanel() {
               disabled={!source}
               className="mt-4 flex w-full items-center justify-center rounded-full bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Request {selectedType.label} · ₹{total.toLocaleString("en-IN")}
+              Request {selectedType.label} · Rs {total.toLocaleString("en-IN")}
             </button>
           </>
         )}

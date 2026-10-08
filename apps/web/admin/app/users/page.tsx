@@ -148,7 +148,7 @@ export default function UsersModerationPage() {
                 type="button"
                 onClick={() => handleToggleCod(row.original)}
                 className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  isEnabled ? "bg-teal-600" : "bg-slate-300"
+                  isEnabled ? "bg-brand-600" : "bg-slate-300"
                 }`}
                 title={isEnabled ? "Click to Disable COD" : "Click to Enable COD"}
               >
@@ -326,7 +326,7 @@ export default function UsersModerationPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Role:</span>
-                    <span className="font-bold text-teal-700 uppercase">{selectedUserForAction.role}</span>
+                    <span className="font-bold text-brand-700 uppercase">{selectedUserForAction.role}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Registered:</span>
@@ -370,7 +370,7 @@ export default function UsersModerationPage() {
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
                     placeholder="e.g. Excessive COD delivery refusals resulting in vendor loss."
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
 

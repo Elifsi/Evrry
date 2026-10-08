@@ -239,7 +239,7 @@ export function describeCartState(cart: CartItem[]): string {
   if (summary.length === 0) return "Your cart is empty now.";
   const lines = summary.map((i) => `${i.qty > 1 ? `${i.qty}x ` : ""}${i.title} (${i.provider})`).join(", ");
   const total = summary.reduce((sum, i) => sum + i.price * i.qty, 0);
-  return `Your cart now has: ${lines} — total ₹${total.toLocaleString("en-IN")}. Want me to place the order?`;
+  return `Your cart now has: ${lines} — total Rs ${total.toLocaleString("en-IN")}. Want me to place the order?`;
 }
 
 export function executePlaceOrder(cart: CartItem[], walletBalance: number) {
@@ -325,12 +325,12 @@ export function describeHotelBookingResult(result: ReturnType<typeof executeBook
   if (result.ok) {
     return `Done — booked ${result.title} at ${result.hotel} for ${result.check_in} to ${result.check_out} (${result.nights} night${
       result.nights > 1 ? "s" : ""
-    }), ₹${result.total.toLocaleString("en-IN")} total. You can see it in Activity.`;
+    }), Rs ${result.total.toLocaleString("en-IN")} total. You can see it in Activity.`;
   }
   if (result.reason === "insufficient_balance") {
-    return `Your wallet has ₹${result.walletBalance.toLocaleString("en-IN")}, which isn't enough for the ₹${result.total.toLocaleString(
+    return `Your wallet has Rs ${result.walletBalance.toLocaleString("en-IN")}, which isn't enough for the Rs ${result.total.toLocaleString(
       "en-IN"
-    )} total — add ₹${result.shortfall.toLocaleString("en-IN")} more from the Payments tab and I can book it right away.`;
+    )} total — add Rs ${result.shortfall.toLocaleString("en-IN")} more from the Payments tab and I can book it right away.`;
   }
   if (result.reason === "invalid") return result.error ?? "That booking didn't go through — let's try again.";
   return "That booking didn't go through — let's try again.";

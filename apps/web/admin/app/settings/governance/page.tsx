@@ -74,7 +74,7 @@ export default function GovernancePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-teal-600" />
+                <Building2 className="w-4 h-4 text-brand-600" />
                 Inland Revenue Department (IRD) 13% VAT Activation
               </h2>
               <p className="text-xs text-slate-500 mt-1">
@@ -88,7 +88,7 @@ export default function GovernancePage() {
                 type="button"
                 onClick={() => setVatEnabled(!vatEnabled)}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  vatEnabled ? "bg-teal-600" : "bg-slate-300"
+                  vatEnabled ? "bg-brand-600" : "bg-slate-300"
                 }`}
               >
                 <span
@@ -125,7 +125,7 @@ export default function GovernancePage() {
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
           <div className="border-b border-slate-100 pb-4">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <CloudRain className="w-4 h-4 text-teal-600" />
+              <CloudRain className="w-4 h-4 text-brand-600" />
               Monsoon & Severe Weather Multiplier
             </h2>
             <p className="text-xs text-slate-500 mt-1">
@@ -137,7 +137,7 @@ export default function GovernancePage() {
           <div className="space-y-3 pt-1">
             <div className="flex items-center justify-between text-xs font-semibold">
               <span className="text-slate-800">Weather Multiplier:</span>
-              <span className="text-teal-700 font-mono text-base font-bold">
+              <span className="text-brand-700 font-mono text-base font-bold">
                 {weatherMultiplier.toFixed(1)}x {weatherMultiplier > 1 ? "(Active Surge)" : "(Normal Weather)"}
               </span>
             </div>
@@ -149,7 +149,7 @@ export default function GovernancePage() {
               step="0.1"
               value={weatherMultiplier}
               onChange={(e) => setWeatherMultiplier(Number(e.target.value))}
-              className="w-full accent-teal-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
+              className="w-full accent-brand-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
             />
 
             <div className="flex justify-between text-[11px] text-slate-400 font-mono">
@@ -208,7 +208,7 @@ export default function GovernancePage() {
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
             <button
               onClick={handleSaveGovernance}
-              className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm"
+              className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm"
             >
               <Save className="w-4 h-4" />
               Apply Governance Parameters

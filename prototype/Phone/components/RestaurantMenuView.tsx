@@ -57,7 +57,7 @@ export default function RestaurantMenuView({ restaurant, items }: { restaurant: 
           <span className="inline-flex items-center gap-1">
             <MapPin size={12} /> {restaurant.area}
           </span>
-          <span>₹{restaurant.priceForTwo} for two</span>
+          <span>Rs {restaurant.priceForTwo} for two</span>
         </div>
         {restaurant.offer && (
           <p className="mt-2 inline-block rounded-full bg-brandSoft px-3 py-1 text-xs font-semibold text-brand">{restaurant.offer}</p>

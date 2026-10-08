@@ -94,7 +94,7 @@ export default function CartPage() {
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-ink">{l.item.title}</p>
               <p className="text-xs text-ink/45">
-                ₹{l.item.price.toLocaleString("en-IN")}
+                Rs {l.item.price.toLocaleString("en-IN")}
                 {l.item.weight ? ` · ${l.item.weight}` : ""}
               </p>
             </div>
@@ -126,7 +126,7 @@ export default function CartPage() {
               source === "wallet" ? "border-ink bg-ink text-white" : "border-black/15 bg-white text-ink/70 hover:border-ink/40"
             )}
           >
-            <Wallet size={11} /> Wallet ₹{walletBalance.toLocaleString("en-IN")}
+            <Wallet size={11} /> Wallet Rs {walletBalance.toLocaleString("en-IN")}
           </button>
           {paymentMethods.map((m) => (
             <button
@@ -159,7 +159,7 @@ export default function CartPage() {
         disabled={!source || placing}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {placing ? "Placing order…" : `Place order · ₹${total.toLocaleString("en-IN")}`}
+        {placing ? "Placing order…" : `Place order · Rs ${total.toLocaleString("en-IN")}`}
       </button>
     </div>
   );

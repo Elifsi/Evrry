@@ -154,9 +154,9 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
 
         {/* System Cluster Status */}
         <div className="hidden lg:flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full text-xs">
-          <div className="flex items-center gap-1.5 text-teal-700 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-            <Activity className="w-3.5 h-3.5 text-teal-600" />
+          <div className="flex items-center gap-1.5 text-brand-700 font-semibold">
+            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
+            <Activity className="w-3.5 h-3.5 text-brand-600" />
             <span>Cluster Live</span>
           </div>
           <span className="text-slate-300">|</span>
@@ -174,17 +174,17 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
             title="Refresh Data"
             disabled={isRefreshing}
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-teal-600" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-brand-600" : ""}`} />
           </button>
         )}
 
         {/* Push Broadcast Console Button */}
         <button
           onClick={() => setShowBroadcastModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 rounded-xl transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 border border-brand-200/80 rounded-xl transition-colors"
           title="Dispatch Push Broadcast via Edge Function"
         >
-          <Radio className="w-3.5 h-3.5 text-teal-600" />
+          <Radio className="w-3.5 h-3.5 text-brand-600" />
           <span className="hidden sm:inline">Push Broadcast</span>
         </button>
 
@@ -194,7 +194,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
             onClick={() => setShowNotifications(!showNotifications)}
             className={`p-2 rounded-xl transition-colors relative border ${
               showNotifications
-                ? "bg-slate-100 text-teal-700 border-slate-300"
+                ? "bg-slate-100 text-brand-700 border-slate-300"
                 : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-slate-200/60"
             }`}
             title="Operational Alerts"
@@ -222,7 +222,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="text-[11px] text-teal-700 hover:text-teal-800 font-semibold"
+                    className="text-[11px] text-brand-700 hover:text-brand-800 font-semibold"
                   >
                     Mark all read
                   </button>
@@ -239,7 +239,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                     <div
                       key={n.id}
                       className={`p-4 transition-colors ${
-                        n.read ? "bg-white opacity-60" : "bg-teal-50/30"
+                        n.read ? "bg-white opacity-60" : "bg-brand-50/30"
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -249,7 +249,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                           ) : n.type === "kyc" ? (
                             <ShieldCheck className="w-4 h-4 text-amber-600" />
                           ) : n.type === "payout" ? (
-                            <FileText className="w-4 h-4 text-teal-600" />
+                            <FileText className="w-4 h-4 text-brand-600" />
                           ) : (
                             <AlertTriangle className="w-4 h-4 text-amber-600" />
                           )}
@@ -274,7 +274,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                                   handleMarkRead(n.id);
                                   setShowNotifications(false);
                                 }}
-                                className="text-[11px] font-semibold text-teal-700 hover:text-teal-800 flex items-center gap-1"
+                                className="text-[11px] font-semibold text-brand-700 hover:text-brand-800 flex items-center gap-1"
                               >
                                 {n.actionLabel || "Review"} &rarr;
                               </Link>
@@ -335,7 +335,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                     className="w-full flex items-center justify-between p-2.5 rounded-xl text-left hover:bg-slate-50 text-xs text-slate-700 transition-colors group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-teal-600 transition-colors" />
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition-colors" />
                       <span className="font-semibold text-slate-900">{cmd.name}</span>
                     </div>
                     <span className="text-[10px] font-mono text-slate-400 uppercase">
@@ -355,7 +355,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
           <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Radio className="w-4 h-4 text-teal-600" />
+                <Radio className="w-4 h-4 text-brand-600" />
                 <h3 className="text-sm font-bold text-slate-900">
                   Dispatch Operational Push Notification
                 </h3>
@@ -389,7 +389,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                       onClick={() => setBroadcastTarget(t)}
                       className={`py-1.5 px-2 rounded-xl font-semibold uppercase text-[10px] border transition-all ${
                         broadcastTarget === t
-                          ? "bg-teal-600 text-white border-teal-600 shadow-sm"
+                          ? "bg-brand-600 text-white border-brand-600 shadow-sm"
                           : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                       }`}
                     >
@@ -407,7 +407,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                   placeholder="e.g. Kathmandu Valley Monsoon Advisory"
                   value={broadcastTitle}
                   onChange={(e) => setBroadcastTitle(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-900"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-900"
                 />
               </div>
 
@@ -419,7 +419,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                   placeholder="e.g. Heavy rainfall reported in Ring Road corridor. Expect minor delivery delays."
                   value={broadcastBody}
                   onChange={(e) => setBroadcastBody(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-900"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-900"
                 />
               </div>
 
@@ -434,7 +434,7 @@ export function AdminHeader({ title, subtitle, onRefresh, isRefreshing }: AdminH
                 <button
                   type="submit"
                   disabled={isBroadcasting}
-                  className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
                   {isBroadcasting ? "Sending..." : "Dispatch Broadcast"}

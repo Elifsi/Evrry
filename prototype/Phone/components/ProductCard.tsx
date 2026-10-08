@@ -20,8 +20,8 @@ export default function ProductCard({ item }: { item: CatalogItem }) {
       {item.weight && <p className="mt-0.5 text-[11px] text-ink/45">{item.weight}</p>}
 
       <div className="mt-1.5 flex items-baseline gap-1.5">
-        <p className="text-sm font-bold text-ink">₹{item.price.toLocaleString("en-IN")}</p>
-        {discountPct > 0 && <p className="text-[10px] text-ink/35 line-through">₹{item.mrp!.toLocaleString("en-IN")}</p>}
+        <p className="text-sm font-bold text-ink">Rs {item.price.toLocaleString("en-IN")}</p>
+        {discountPct > 0 && <p className="text-[10px] text-ink/35 line-through">Rs {item.mrp!.toLocaleString("en-IN")}</p>}
       </div>
 
       <div className="mt-2">

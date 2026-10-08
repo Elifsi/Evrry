@@ -100,7 +100,7 @@ export function DataTable<TData, TValue>({
               placeholder={searchPlaceholder}
               value={globalFilter ?? ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors"
+              className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-colors"
             />
           </div>
 
@@ -127,7 +127,7 @@ export function DataTable<TData, TValue>({
                     onClick={() => handleFacetedFilter(opt.value)}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors shrink-0 ${
                       isSelected
-                        ? "bg-teal-600 text-white shadow-sm"
+                        ? "bg-brand-600 text-white shadow-sm"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
@@ -179,7 +179,7 @@ export function DataTable<TData, TValue>({
                         type="checkbox"
                         checked={column.getIsVisible()}
                         onChange={column.getToggleVisibilityHandler()}
-                        className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                       />
                       <span className="capitalize">{column.id.replace(/_/g, " ")}</span>
                     </label>

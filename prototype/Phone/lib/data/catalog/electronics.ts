@@ -10,7 +10,7 @@ export const ELECTRONICS_ITEMS: CatalogItem[] = [
     title: "Acer Aspire 7 (Ryzen 5, 16GB/512GB, RTX 2050)",
     subtitle: "14\" FHD · 2.1kg",
     price: 68990,
-    currency: "INR",
+    currency: "NPR",
     attributes: {
       cpu: "Ryzen 5 7535HS",
       ram_gb: 16,
@@ -30,7 +30,7 @@ export const ELECTRONICS_ITEMS: CatalogItem[] = [
     title: "ASUS Vivobook 15 (i5, 16GB/512GB)",
     subtitle: "15.6\" FHD · 1.7kg",
     price: 58990,
-    currency: "INR",
+    currency: "NPR",
     attributes: {
       cpu: "Intel i5-1334U",
       ram_gb: 16,
@@ -50,7 +50,7 @@ export const ELECTRONICS_ITEMS: CatalogItem[] = [
     title: "Lenovo IdeaPad Slim 5 (Ryzen 7, 16GB/1TB)",
     subtitle: "14\" 2.2K OLED · 1.6kg",
     price: 79990,
-    currency: "INR",
+    currency: "NPR",
     attributes: {
       cpu: "Ryzen 7 7735HS",
       ram_gb: 16,
@@ -70,7 +70,7 @@ export const ELECTRONICS_ITEMS: CatalogItem[] = [
     title: "HP Pavilion Gaming (i5, RTX 3050, 16GB/512GB)",
     subtitle: "15.6\" 144Hz · 2.3kg",
     price: 74990,
-    currency: "INR",
+    currency: "NPR",
     attributes: {
       cpu: "Intel i5-12500H",
       ram_gb: 16,

@@ -55,7 +55,7 @@ export default function HotelCard({
           <p className="text-[11px] text-ink/40">{hotel.reviewCount.toLocaleString("en-IN")} reviews</p>
           <div className="text-right">
             <p className="text-[10px] text-ink/40">per night from</p>
-            <p className="text-base font-bold text-ink">₹{fromPrice.toLocaleString("en-IN")}</p>
+            <p className="text-base font-bold text-ink">Rs {fromPrice.toLocaleString("en-IN")}</p>
           </div>
         </div>
       </div>

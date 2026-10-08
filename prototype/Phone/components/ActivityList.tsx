@@ -53,7 +53,7 @@ export default function ActivityList() {
               <StatusBadge status={t.status} />
             </div>
 
-            <p className="mt-2 text-sm font-medium text-ink">₹{t.amount.toLocaleString("en-IN")}</p>
+            <p className="mt-2 text-sm font-medium text-ink">Rs {t.amount.toLocaleString("en-IN")}</p>
             {t.meta?.card && (
               <p className="text-xs text-ink/40">
                 {/* Rides charge on completion, not on request — meta.card is only the chosen source until then. */}
@@ -82,7 +82,7 @@ export default function ActivityList() {
               {t.status === "draft" && confirmingId === t.id && (
                 <div className="w-full rounded-xl bg-brandSoft p-3">
                   <p className="text-xs text-ink/70">
-                    Confirm ₹{t.amount.toLocaleString("en-IN")} to {t.providerName}? This is the explicit
+                    Confirm Rs {t.amount.toLocaleString("en-IN")} to {t.providerName}? This is the explicit
                     authorization step the AI can never skip (PRD §8).
                   </p>
 
@@ -98,7 +98,7 @@ export default function ActivityList() {
                             : "border-black/15 bg-white text-ink/70 hover:border-ink/40"
                         )}
                       >
-                        <Wallet size={11} /> Wallet ₹{walletBalance.toLocaleString("en-IN")}
+                        <Wallet size={11} /> Wallet Rs {walletBalance.toLocaleString("en-IN")}
                       </button>
                       {paymentMethods.map((m) => (
                         <button
@@ -139,7 +139,7 @@ export default function ActivityList() {
                       disabled={!hasAnyOption || !selected}
                       className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      Confirm ₹{t.amount.toLocaleString("en-IN")}
+                      Confirm Rs {t.amount.toLocaleString("en-IN")}
                     </button>
                     <button
                       onClick={() => {
