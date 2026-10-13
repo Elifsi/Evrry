@@ -13,6 +13,8 @@ public struct SnapReviewView: View {
     @State private var isEditingCaption: Bool = false
     @State private var showSendSheet: Bool = false
     @State private var confirmationMessage: String? = nil
+    @State private var timerSeconds: Int = 5
+    @State private var sendAsSnap: Bool = true
 
     public init(
         dataUrl: String,
@@ -95,6 +97,23 @@ public struct SnapReviewView: View {
                 Spacer()
 
                 HStack(spacing: 10) {
+                    // Ephemeral timer duration button (cycles 3s -> 5s -> 10s)
+                    Button(action: {
+                        timerSeconds = timerSeconds == 3 ? 5 : (timerSeconds == 5 ? 10 : 3)
+                    }) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "timer")
+                                .font(.system(size: 13, weight: .bold))
+                            Text("\(timerSeconds)s")
+                                .font(.system(size: 12, weight: .bold))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .frame(height: 40)
+                        .background(Color.black.opacity(0.55))
+                        .clipShape(Capsule())
+                    }
+
                     // Caption button
                     Button(action: {
                         withAnimation { isEditingCaption.toggle() }
@@ -299,12 +318,26 @@ public struct SnapReviewView: View {
     private var sendToFriendSheet: some View {
         NavigationView {
             List {
+                Section(header: Text("Media Format")) {
+                    Picker("Format", selection: $sendAsSnap) {
+                        Text("🔥 Snap (\(timerSeconds)s Ephemeral)").tag(true)
+                        Text("📷 Photo (Permanent)").tag(false)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.vertical, 4)
+                }
+
                 Section(header: Text("Share via WhatsApp-grade E2EE Chat")) {
                     ForEach(chatViewModel.chats) { chat in
                         Button(action: {
-                            chatViewModel.sendImage(chatId: chat.id, imageUrl: dataUrl, caption: caption)
+                            if sendAsSnap {
+                                chatViewModel.sendSnap(chatId: chat.id, imageUrl: dataUrl, caption: caption, timerSeconds: timerSeconds)
+                                flashAndClose(msg: "Sent snap to \(chat.title)! 🔥")
+                            } else {
+                                chatViewModel.sendImage(chatId: chat.id, imageUrl: dataUrl, caption: caption)
+                                flashAndClose(msg: "Sent photo to \(chat.title)! 📷")
+                            }
                             showSendSheet = false
-                            flashAndClose(msg: "Sent to \(chat.title)! 🚀")
                             onNavigateToChat?(chat.id)
                         }) {
                             HStack(spacing: 12) {

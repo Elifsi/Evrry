@@ -560,6 +560,42 @@ struct MessageBubbleView: View {
                             }
                         }
                         .padding(2)
+                    } else if msg.messageType == "IMAGE", let mediaUrl = msg.mediaUrl {
+                        VStack(alignment: .leading, spacing: 4) {
+                            AsyncImage(url: URL(string: mediaUrl)) { phase in
+                                if let img = phase.image {
+                                    img.resizable().aspectRatio(contentMode: .fill)
+                                        .frame(maxWidth: 240, maxHeight: 220)
+                                        .clipped()
+                                        .cornerRadius(12)
+                                } else {
+                                    ProgressView().frame(width: 140, height: 140)
+                                }
+                            }
+                            if !msg.text.isEmpty && msg.text != "Photo" {
+                                Text(msg.text)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(msg.isMe ? .white : .evrryDarkCharcoal)
+                            }
+                        }
+                    } else if msg.messageType == "SNAP" {
+                        HStack(spacing: 8) {
+                            Image(systemName: "flame.fill")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(msg.text.isEmpty ? "Snap" : msg.text)
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.white)
+                                Text("Tap to view • Ephemeral")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.85))
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(msg.isMe ? Color(red: 0.94, green: 0.27, blue: 0.27) : Color(red: 0.55, green: 0.36, blue: 0.96))
+                        .cornerRadius(12)
                     } else {
                         Text(msg.text)
                             .font(.system(size: 14))

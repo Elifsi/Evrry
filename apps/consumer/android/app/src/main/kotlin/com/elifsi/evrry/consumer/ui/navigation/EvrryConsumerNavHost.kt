@@ -388,6 +388,10 @@ fun EvrryConsumerNavHost(
                                         activeOrderId = refId
                                         previousSubRoute = "chat_room"
                                         inSubRoute = "order_detail"
+                                    },
+                                    onCameraClick = {
+                                        previousSubRoute = "chat_room"
+                                        inSubRoute = "camera"
                                     }
                                 )
                             } else {

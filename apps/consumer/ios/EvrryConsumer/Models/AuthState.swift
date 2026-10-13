@@ -29,12 +29,14 @@ public enum OtpChannel: String, Codable, CaseIterable {
 
 public struct UserProfile: Codable, Identifiable {
     public let id: String
-    public let phone: String
+    public var phone: String
+    public var email: String
     public var fullName: String
     public var username: String
     public var avatarUrl: String?
     public var bioStatus: String
     public var loyaltyPoints: Int
+    public var isPhoneVerified: Bool
     public var kycVerified: Bool
     public var allowPhoneDiscovery: Bool
     public var readReceiptsEnabled: Bool
@@ -42,24 +44,28 @@ public struct UserProfile: Codable, Identifiable {
     
     public init(
         id: String = "usr_nepal_001",
-        phone: String = "+9779812345678",
+        phone: String = "+977 9812345678",
+        email: String = "",
         fullName: String = "Rahul Sharma",
         username: String = "rahul_evrry",
         avatarUrl: String? = nil,
         bioStatus: String = "Available on Evrry",
         loyaltyPoints: Int = 420,
-        kycVerified: Bool = true,
+        isPhoneVerified: Bool = true,
+        kycVerified: Bool = false,
         allowPhoneDiscovery: Bool = false,
         readReceiptsEnabled: Bool = true,
         lastSeenPrivacy: String = "Everyone"
     ) {
         self.id = id
         self.phone = phone
+        self.email = email
         self.fullName = fullName
         self.username = username
         self.avatarUrl = avatarUrl
         self.bioStatus = bioStatus
         self.loyaltyPoints = loyaltyPoints
+        self.isPhoneVerified = isPhoneVerified
         self.kycVerified = kycVerified
         self.allowPhoneDiscovery = allowPhoneDiscovery
         self.readReceiptsEnabled = readReceiptsEnabled

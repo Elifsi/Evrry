@@ -16,13 +16,15 @@ enum class OtpChannel(val label: String, val badge: String) {
 @Serializable
 data class UserProfile(
     val id: String,
-    val phone: String,
+    val phone: String = "",
+    val email: String = "",
     val fullName: String = "Rahul Sharma",
     val username: String = "rahul_evrry",
     val avatarUrl: String? = null,
     val bioStatus: String = "Available on Evrry",
     val loyaltyPoints: Int = 420,
-    val kycVerified: Boolean = true,
+    val isPhoneVerified: Boolean = false,
+    val kycVerified: Boolean = false,
     val allowPhoneDiscovery: Boolean = false,
     val readReceiptsEnabled: Boolean = true,
     val lastSeenPrivacy: String = "Everyone" // "Everyone", "Connections", "Nobody"

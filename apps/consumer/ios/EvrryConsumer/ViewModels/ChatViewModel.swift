@@ -536,6 +536,28 @@ public class ChatViewModel: ObservableObject {
         }
     }
 
+    public func sendSnap(chatId: String, imageUrl: String, caption: String = "", timerSeconds: Int = 5) {
+        let newId = "snap-" + UUID().uuidString.prefix(8)
+        let plainText = caption.isEmpty ? "🔥 Snap (\(timerSeconds)s)" : "🔥 Snap: \(caption) (\(timerSeconds)s)"
+        let msg = SocialMessage(
+            id: String(newId),
+            chatId: chatId,
+            senderId: "me",
+            senderName: "Me",
+            isMe: true,
+            text: plainText,
+            messageType: "SNAP",
+            mediaUrl: imageUrl,
+            status: "delivered"
+        )
+        messages[chatId, default: []].append(msg)
+        if let idx = chats.firstIndex(where: { $0.id == chatId }) {
+            chats[idx].lastMessage = "🔥 Snap (\(timerSeconds)s)"
+            chats[idx].lastMessageTime = "Just now"
+            chats[idx].lastMessageStatus = "delivered"
+        }
+    }
+
     public func postStory(mediaUrl: String, caption: String = "") {
         if let idx = stories.firstIndex(where: { $0.id == "story-self" }) {
             stories[idx].hasUnseenStory = true

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.elifsi.evrry.consumer.model.*
@@ -34,6 +35,7 @@ import com.elifsi.evrry.consumer.ui.theme.*
 import com.elifsi.evrry.consumer.ui.components.EvrryLiveTrackingMap
 import com.elifsi.evrry.consumer.ui.components.VehicleType
 import com.elifsi.evrry.consumer.viewmodel.ChatViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -54,7 +56,8 @@ fun ChatRoomScreen(
     onBack: () -> Unit,
     onAudioCallClick: () -> Unit = {},
     onVideoCallClick: () -> Unit = {},
-    onViewOrderOrRide: (String) -> Unit = {}
+    onViewOrderOrRide: (String) -> Unit = {},
+    onCameraClick: () -> Unit = {}
 ) {
     val messages = remember(chat.id, chatViewModel.chats) {
         chatViewModel.getMessagesForChat(chat.id)
@@ -72,6 +75,8 @@ fun ChatRoomScreen(
     var profileNotice by remember { mutableStateOf<String?>(null) }
     var replyingToMessage by remember { mutableStateOf<SocialMessage?>(null) }
     var selectedMessageForAction by remember { mutableStateOf<SocialMessage?>(null) }
+    var viewingImageUrl by remember { mutableStateOf<String?>(null) }
+    var viewingSnap by remember { mutableStateOf<SocialMessage?>(null) }
     val listState = rememberLazyListState()
 
     // Sync wallpaper from ViewModel (restored across sessions)
@@ -401,6 +406,8 @@ fun ChatRoomScreen(
                             msg = msg,
                             onCallBack = onAudioCallClick,
                             onMessageClick = { selectedMessageForAction = msg },
+                            onImageClick = { url -> viewingImageUrl = url },
+                            onSnapClick = { snap -> viewingSnap = snap },
                             onStopLiveLocation = { msgId -> chatViewModel.stopSharingLiveLocation(chat.id, msgId) }
                         )
                     }
@@ -1244,6 +1251,155 @@ fun ChatRoomScreen(
             }
         }
     }
+
+    // 4. FULL-SCREEN IMAGE VIEWER
+    if (viewingImageUrl != null) {
+        Dialog(
+            onDismissRequest = { viewingImageUrl = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            ) {
+                AsyncImage(
+                    model = viewingImageUrl,
+                    contentDescription = "Full Image View",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+                IconButton(
+                    onClick = { viewingImageUrl = null },
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(16.dp)
+                        .align(Alignment.TopEnd)
+                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                }
+            }
+        }
+    }
+
+    // 5. SNAPCHAT FULL-SCREEN EPHEMERAL SNAP VIEWER WITH COUNTDOWN TIMER
+    if (viewingSnap != null) {
+        val snap = viewingSnap!!
+        var countdown by remember { mutableStateOf(snap.audioDurationSeconds ?: 5) }
+        LaunchedEffect(snap.id) {
+            while (countdown > 0) {
+                delay(1000)
+                countdown--
+            }
+            viewingSnap = null
+        }
+
+        Dialog(
+            onDismissRequest = { viewingSnap = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .clickable { viewingSnap = null }
+            ) {
+                AsyncImage(
+                    model = snap.mediaUrl ?: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&auto=format&fit=crop&q=80",
+                    contentDescription = "Snap image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Top Header: Sender name + Countdown Timer
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = snap.senderName,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "• Snap",
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 13.sp
+                        )
+                    }
+
+                    // Countdown Ring
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                            .border(2.dp, Color(0xFFEF4444), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "$countdown",
+                            color = Color.White,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                // Bottom Caption & Reply
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 36.dp, start = 20.dp, end = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (snap.text.isNotBlank() && !snap.text.startsWith("Snap")) {
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.7f),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(
+                                text = snap.text,
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+
+                    Surface(
+                        onClick = {
+                            viewingSnap = null
+                            onCameraClick()
+                        },
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.25f),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Default.PhotoCamera, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            Text("Double-tap or tap to reply with Snap 📸", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 }
 
@@ -1252,6 +1408,8 @@ private fun MessageBubbleRow(
     msg: SocialMessage,
     onCallBack: () -> Unit = {},
     onMessageClick: () -> Unit = {},
+    onImageClick: (String) -> Unit = {},
+    onSnapClick: (SocialMessage) -> Unit = {},
     onStopLiveLocation: (String) -> Unit = {}
 ) {
     if (msg.messageType == "CALL_LOG") {
@@ -1326,6 +1484,68 @@ private fun MessageBubbleRow(
                 }
 
                 when (msg.messageType) {
+                    "IMAGE" -> {
+                        Column {
+                            if (msg.mediaUrl != null) {
+                                val context = LocalContext.current
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data(msg.mediaUrl)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = "Image preview",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 240.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable { onImageClick(msg.mediaUrl) },
+                                    contentScale = ContentScale.Crop
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                            if (msg.text.isNotBlank() && msg.text != "Photo") {
+                                Text(
+                                    text = msg.text,
+                                    fontSize = 14.sp,
+                                    color = if (isMe) Color.White else EvrryDarkCharcoal,
+                                    lineHeight = 19.sp
+                                )
+                            }
+                        }
+                    }
+                    "SNAP" -> {
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (isMe) Color(0xFFEF4444) else Color(0xFF8B5CF6),
+                            modifier = Modifier.clickable { onSnapClick(msg) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (msg.status == "read") Icons.Default.CheckCircle else Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Column {
+                                    Text(
+                                        text = if (isMe) "Delivered Snap" else if (msg.status == "read") "Opened Snap" else "New Snap • Tap to view (${msg.audioDurationSeconds ?: 5}s)",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = if (msg.status == "read") "Double-tap to reply 📸" else "Disappears after viewing",
+                                        fontSize = 10.sp,
+                                        color = Color.White.copy(alpha = 0.85f)
+                                    )
+                                }
+                            }
+                        }
+                    }
                     "VOICE_NOTE" -> {
                         VoiceNoteBubbleContent(msg = msg, isMe = isMe)
                     }

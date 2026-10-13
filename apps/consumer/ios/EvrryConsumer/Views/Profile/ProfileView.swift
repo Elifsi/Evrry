@@ -33,6 +33,12 @@ public struct ProfileView: View {
     @State private var showDeleteAlert: Bool = false
     @State private var allowPhoneDiscovery: Bool = false
 
+    @State private var inputPhone: String = ""
+    @State private var inputOtp: String = ""
+    @State private var verifyPhoneError: String? = nil
+    @State private var verifyPhoneSuccess: String? = nil
+    @State private var otpChannel: OtpChannel = .whatsapp
+
     public init(
         authViewModel: AuthViewModel,
         loyaltyViewModel: LoyaltyViewModel = LoyaltyViewModel(),
@@ -57,6 +63,10 @@ public struct ProfileView: View {
         authViewModel.userProfile
     }
 
+    private var needsPhoneVerification: Bool {
+        userProfile.phone.trimmingCharacters(in: .whitespaces).isEmpty || !userProfile.isPhoneVerified
+    }
+
     private var loyaltyState: UserLoyaltyState {
         loyaltyViewModel.loyaltyState
     }
@@ -67,6 +77,21 @@ public struct ProfileView: View {
 
     private var referralInfo: ReferralInfo {
         loyaltyViewModel.referralInfo
+    }
+
+    private func tierRingColors(_ league: LoyaltyLeague) -> [Color] {
+        switch league {
+        case .copper:
+            return [Color(red: 0.72, green: 0.45, blue: 0.20), Color(red: 0.85, green: 0.60, blue: 0.35), Color(red: 0.72, green: 0.45, blue: 0.20)]
+        case .bronze:
+            return [Color(red: 0.80, green: 0.50, blue: 0.20), Color(red: 0.90, green: 0.65, blue: 0.35), Color(red: 0.80, green: 0.50, blue: 0.20)]
+        case .silver:
+            return [Color(red: 0.58, green: 0.64, blue: 0.72), Color(red: 0.80, green: 0.85, blue: 0.92), Color(red: 0.58, green: 0.64, blue: 0.72)]
+        case .platinum:
+            return [Color(red: 0.22, green: 0.74, blue: 0.97), Color(red: 0.01, green: 0.52, blue: 0.78), Color(red: 0.22, green: 0.74, blue: 0.97)]
+        case .diamond:
+            return [Color(red: 0.66, green: 0.33, blue: 0.97), Color(red: 0.49, green: 0.23, blue: 0.93), Color(red: 0.66, green: 0.33, blue: 0.97)]
+        }
     }
 
     private func toggleSection(_ id: String) {
@@ -92,7 +117,41 @@ public struct ProfileView: View {
                 }
                 .padding(.top, 16)
 
-                // 2. TIER-COLORED GRADIENT HEADER BANNER
+                // ACTION REQUIRED: COMPLETE PROFILE ALERT BANNER (MISSING / UNVERIFIED PHONE)
+                if needsPhoneVerification {
+                    HStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(red: 0.96, green: 0.62, blue: 0.04))
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Action Required: Complete Profile")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.evrryDarkCharcoal)
+                            Text("Add & verify your mobile number so drivers and couriers can call or reach you.")
+                                .font(.system(size: 11))
+                                .foregroundColor(.evrryMutedText)
+                        }
+
+                        Spacer()
+
+                        Button(action: { showEditAccountSheet = true }) {
+                            Text("Verify")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.evrryPrimaryBlue)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                    }
+                    .padding(14)
+                    .background(Color(red: 1.0, green: 0.98, blue: 0.92))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(red: 0.99, green: 0.88, blue: 0.62), lineWidth: 1))
+                }
+
+                // 2. TIER-COLORED GRADIENT HEADER BANNER (Tapping opens Account Details)
                 ZStack {
                     LinearGradient(
                         colors: [Color(red: 0.12, green: 0.23, blue: 0.54), Color(red: 0.23, green: 0.51, blue: 0.96)],
@@ -101,32 +160,31 @@ public struct ProfileView: View {
                     )
 
                     HStack(spacing: 14) {
-                        // Avatar Circle
-                        ZStack {
-                            Circle()
-                                .fill(Color.white.opacity(0.25))
-                                .frame(width: 54, height: 54)
-                            Text(String(userProfile.fullName.prefix(1)).uppercased())
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.white)
-                        }
+                        // Tapping avatar/name opens Account Details
+                        Button(action: { showEditAccountSheet = true }) {
+                            HStack(spacing: 14) {
+                                // Avatar Circle
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white.opacity(0.25))
+                                        .frame(width: 54, height: 54)
+                                    Text(String(userProfile.fullName.prefix(1)).uppercased())
+                                        .font(.system(size: 22, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
 
-                        // Name & Username
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text(userProfile.fullName)
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(.white)
-                                if userProfile.kycVerified {
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(Color(red: 0.58, green: 0.88, blue: 0.70))
+                                // Name & Username
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(userProfile.fullName)
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.white)
+                                    Text("@\(userProfile.username.isEmpty ? "rahul_evrry" : userProfile.username)")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.white.opacity(0.85))
                                 }
                             }
-                            Text("@\(userProfile.username.isEmpty ? "rahul_evrry" : userProfile.username)")
-                                .font(.system(size: 12))
-                                .foregroundColor(.white.opacity(0.85))
                         }
+                        .buttonStyle(PlainButtonStyle())
 
                         Spacer()
 
@@ -158,14 +216,6 @@ public struct ProfileView: View {
                 .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
 
                 // 3. GROUPED NAVIGATION ROWS (Dedicated Screen Navigation)
-
-                // 1. Account Details
-                ProfileNavRow(
-                    icon: "person.fill",
-                    title: "Account Details",
-                    subtitle: "@\(userProfile.username.isEmpty ? "rahul_evrry" : userProfile.username) • \(userProfile.phone)",
-                    onClick: { showEditAccountSheet = true }
-                )
 
                 // 2. Payment Methods (eSewa, Khalti, Fonepay, Cards)
                 ProfileNavRow(
@@ -340,70 +390,231 @@ public struct ProfileView: View {
         }
         // EDIT ACCOUNT SHEET
         .sheet(isPresented: $showEditAccountSheet) {
-            VStack(spacing: 16) {
-                Text("Account Details")
-                    .font(.system(size: 17, weight: .bold))
-                    .padding(.top, 20)
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Account Details")
+                        .font(.system(size: 17, weight: .bold))
+                        .padding(.top, 20)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Full Name")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.evrryMutedText)
-                        Spacer()
-                        Text(userProfile.fullName)
-                            .font(.system(size: 14, weight: .bold))
+                    // Profile Avatar with Animated/Loyalty Tier Ring
+                    VStack(spacing: 8) {
+                        ZStack {
+                            Circle()
+                                .stroke(
+                                    AngularGradient(
+                                        gradient: Gradient(colors: tierRingColors(loyaltyState.league)),
+                                        center: .center
+                                    ),
+                                    lineWidth: 4
+                                )
+                                .frame(width: 80, height: 80)
+
+                            Circle()
+                                .fill(Color.evrryPrimaryBlue.opacity(0.12))
+                                .frame(width: 70, height: 70)
+
+                            Text(String(userProfile.fullName.prefix(1)).uppercased())
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.evrryPrimaryBlue)
+                        }
+
+                        // League Tier Pill
+                        Text("\(loyaltyState.league.label.uppercased()) LEAGUE")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(
+                                LinearGradient(
+                                    colors: tierRingColors(loyaltyState.league),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(Capsule())
                     }
-                    Divider()
-                    HStack {
-                        Text("Username")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.evrryMutedText)
-                        Spacer()
-                        Text("@\(userProfile.username)")
-                            .font(.system(size: 14, weight: .bold))
+
+                    // Account Information Card
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("Full Name")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.evrryMutedText)
+                            Spacer()
+                            Text(userProfile.fullName)
+                                .font(.system(size: 14, weight: .bold))
+                        }
+                        Divider()
+                        HStack {
+                            Text("Username")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.evrryMutedText)
+                            Spacer()
+                            Text("@\(userProfile.username)")
+                                .font(.system(size: 14, weight: .bold))
+                        }
+                        if !userProfile.email.isEmpty {
+                            Divider()
+                            HStack {
+                                Text("Email")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.evrryMutedText)
+                                Spacer()
+                                Text(userProfile.email)
+                                    .font(.system(size: 13, weight: .semibold))
+                            }
+                        }
+                        Divider()
+                        HStack {
+                            Text("Mobile Number")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.evrryMutedText)
+                            Spacer()
+                            if needsPhoneVerification {
+                                Text("Unverified")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(Color(red: 0.94, green: 0.27, blue: 0.27))
+                            } else {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Color(red: 0.06, green: 0.73, blue: 0.51))
+                                    Text(userProfile.phone)
+                                        .font(.system(size: 14, weight: .bold))
+                                }
+                            }
+                        }
                     }
-                    Divider()
-                    HStack {
-                        Text("Phone Number")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.evrryMutedText)
-                        Spacer()
-                        Text(userProfile.phone)
-                            .font(.system(size: 14, weight: .bold))
+                    .padding(16)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+                    .padding(.horizontal, 20)
+
+                    // In-Screen Phone Verification Section (if missing / unverified)
+                    if needsPhoneVerification {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "phone.badge.checkmark")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.evrryPrimaryBlue)
+                                Text("Verify & Link Phone Number")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.evrryDarkCharcoal)
+                            }
+
+                            Text("Required for drivers & delivery couriers to contact you via direct calling during in-progress trips.")
+                                .font(.system(size: 11))
+                                .foregroundColor(.evrryMutedText)
+
+                            // Phone input
+                            HStack(spacing: 8) {
+                                Text("🇳🇵 +977")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 10)
+                                    .background(Color(red: 0.95, green: 0.96, blue: 0.98))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                                TextField("98XXXXXXXX", text: $inputPhone)
+                                    .font(.system(size: 13))
+                                    .keyboardType(.phonePad)
+                                    .padding(10)
+                                    .background(Color(red: 0.97, green: 0.98, blue: 0.99))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+                            }
+
+                            // OTP Channel selection
+                            HStack(spacing: 8) {
+                                ForEach(OtpChannel.allCases, id: \.self) { channel in
+                                    Button(action: { otpChannel = channel }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: channel == .whatsapp ? "message.fill" : "phone.fill")
+                                                .font(.system(size: 11))
+                                            Text(channel.label)
+                                                .font(.system(size: 11, weight: .semibold))
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 32)
+                                        .foregroundColor(otpChannel == channel ? .evrryPrimaryBlue : .evrryMutedText)
+                                        .background(otpChannel == channel ? Color.evrryPrimaryBlue.opacity(0.1) : Color(red: 0.96, green: 0.96, blue: 0.98))
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    }
+                                }
+                            }
+
+                            // OTP Code input
+                            TextField("Enter 6-digit OTP (e.g. 123456)", text: $inputOtp)
+                                .font(.system(size: 13))
+                                .keyboardType(.numberPad)
+                                .padding(10)
+                                .background(Color(red: 0.97, green: 0.98, blue: 0.99))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+
+                            if let err = verifyPhoneError {
+                                Text(err)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Color(red: 0.94, green: 0.27, blue: 0.27))
+                            }
+
+                            if let succ = verifyPhoneSuccess {
+                                Text(succ)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Color(red: 0.06, green: 0.73, blue: 0.51))
+                            }
+
+                            Button(action: {
+                                guard inputPhone.count >= 10 else {
+                                    verifyPhoneError = "Please enter valid 10-digit mobile number."
+                                    return
+                                }
+                                guard inputOtp.count == 6 else {
+                                    verifyPhoneError = "Please enter 6-digit verification code."
+                                    return
+                                }
+                                verifyPhoneError = nil
+                                authViewModel.linkAndVerifyPhone(phone: "+977 \(inputPhone)", code: inputOtp, onSuccess: {
+                                    verifyPhoneSuccess = "Phone number verified successfully!"
+                                    inputPhone = ""
+                                    inputOtp = ""
+                                }, onError: { err in
+                                    verifyPhoneError = err
+                                })
+                            }) {
+                                Text("Verify & Link Phone Number")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 42)
+                                    .background(Color.evrryPrimaryBlue)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
+                        .padding(16)
+                        .background(Color(red: 0.97, green: 0.98, blue: 1.0))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.evrryPrimaryBlue.opacity(0.3), lineWidth: 1))
+                        .padding(.horizontal, 20)
                     }
-                    Divider()
-                    HStack {
-                        Text("KYC Verification")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.evrryMutedText)
-                        Spacer()
-                        Text(userProfile.kycVerified ? "Verified (Nagarik App)" : "Pending")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(userProfile.kycVerified ? Color(red: 0.06, green: 0.73, blue: 0.51) : .orange)
+
+                    Spacer(minLength: 20)
+
+                    Button(action: { showEditAccountSheet = false }) {
+                        Text("Close")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(Color.evrryPrimaryBlue)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
                 }
-                .padding(16)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.evrrySubtleBorder, lineWidth: 1))
-                .padding(.horizontal, 20)
-
-                Spacer()
-
-                Button(action: { showEditAccountSheet = false }) {
-                    Text("Close")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(Color.evrryPrimaryBlue)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
-            .presentationDetents([.fraction(0.5)])
+            .presentationDetents([.fraction(0.85), .large])
         }
         // PAYMENT METHODS DEDICATED SHEET
         .sheet(isPresented: $showPaymentMethodsSheet) {

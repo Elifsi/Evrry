@@ -637,6 +637,33 @@ class ChatViewModel : ViewModel() {
         }
     }
 
+    fun sendSnap(chatId: String, imageUrl: String, caption: String = "", timerSeconds: Int = 5) {
+        val newMsgId = "snap-" + UUID.randomUUID().toString().take(8)
+        val plainText = caption.ifBlank { "Snap (${timerSeconds}s)" }
+        val outgoingMsg = SocialMessage(
+            id = newMsgId,
+            chatId = chatId,
+            senderId = "me",
+            senderName = "Me",
+            isMe = true,
+            text = plainText,
+            messageType = "SNAP",
+            mediaUrl = imageUrl,
+            audioDurationSeconds = timerSeconds,
+            status = "sent",
+            timestampMs = System.currentTimeMillis()
+        )
+        val currentList = _messages.value[chatId] ?: emptyList()
+        _messages.value = _messages.value + (chatId to (currentList + outgoingMsg))
+        _chats.value = _chats.value.map { c ->
+            if (c.id == chatId) c.copy(
+                lastMessage = "🔥 Snap",
+                lastMessageTime = "Just now",
+                lastMessageStatus = "sent"
+            ) else c
+        }
+    }
+
     fun postStory(mediaUrl: String, caption: String = "") {
         _stories.value = _stories.value.map { s ->
             if (s.id == "story-self") {

@@ -38,7 +38,9 @@ class AuthViewModel(
             val user = _userProfile.value.copy(
                 fullName = "Rahul Sharma",
                 username = "rahul_google",
-                phone = "+977 9812345678"
+                email = "rahul.sharma@gmail.com",
+                phone = "",
+                isPhoneVerified = false
             )
             _userProfile.value = user
             _state.value = AuthScreenState.Authenticated(user)
@@ -54,7 +56,9 @@ class AuthViewModel(
             val user = _userProfile.value.copy(
                 fullName = "Rahul Sharma",
                 username = "rahul_apple",
-                phone = "+977 9812345678"
+                email = "rahul.apple@privaterelay.appleid.com",
+                phone = "",
+                isPhoneVerified = false
             )
             _userProfile.value = user
             _state.value = AuthScreenState.Authenticated(user)
@@ -71,7 +75,9 @@ class AuthViewModel(
             val user = _userProfile.value.copy(
                 fullName = name,
                 username = email.substringBefore("@"),
-                phone = "+977 9812345678"
+                email = email,
+                phone = "",
+                isPhoneVerified = false
             )
             _userProfile.value = user
             _state.value = AuthScreenState.Authenticated(user)
@@ -88,13 +94,14 @@ class AuthViewModel(
             val name = if (isEmail) identifier.substringBefore("@").replace(".", " ").replaceFirstChar { it.uppercase() } else "Evrry User"
             val phone = if (!isEmail) {
                 if (identifier.startsWith("+")) identifier else "+977 $identifier"
-            } else {
-                "+977 9812345678"
-            }
+            } else ""
+            val email = if (isEmail) identifier else ""
             val user = _userProfile.value.copy(
                 fullName = name,
                 username = identifier.substringBefore("@").filter { it.isLetterOrDigit() }.ifBlank { "user" },
-                phone = phone
+                email = email,
+                phone = phone,
+                isPhoneVerified = phone.isNotBlank()
             )
             _userProfile.value = user
             _state.value = AuthScreenState.Authenticated(user)
@@ -110,13 +117,14 @@ class AuthViewModel(
             val isEmail = identifier.contains("@")
             val phone = if (!isEmail) {
                 if (identifier.startsWith("+")) identifier else "+977 $identifier"
-            } else {
-                "+977 9812345678"
-            }
+            } else ""
+            val email = if (isEmail) identifier else ""
             val user = _userProfile.value.copy(
                 fullName = fullName.ifBlank { "New Evrry User" },
                 username = identifier.substringBefore("@").filter { it.isLetterOrDigit() }.ifBlank { "user" },
-                phone = phone
+                email = email,
+                phone = phone,
+                isPhoneVerified = phone.isNotBlank()
             )
             _userProfile.value = user
             _state.value = AuthScreenState.Authenticated(user)
@@ -204,11 +212,75 @@ class AuthViewModel(
             delay(600)
             _isLoading.value = false
             val user = _userProfile.value.copy(
-                phone = "+977${_phoneNumber.value.ifEmpty { "9812345678" }}"
+                phone = "+977${_phoneNumber.value.ifEmpty { "9812345678" }}",
+                isPhoneVerified = true
             )
             _userProfile.value = user
             _state.value = AuthScreenState.Authenticated(user)
             onSuccess()
+        }
+    }
+
+    fun linkAndVerifyPhone(
+        phone: String,
+        code: String,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {}
+    ) {
+        val clean = phone.filter { it.isDigit() }.takeLast(10)
+        if (clean.length < 10) {
+            onError("Please enter a valid 10-digit mobile number.")
+            return
+        }
+        if (code.length != 6) {
+            onError("Please enter the 6-digit verification code.")
+            return
+        }
+        viewModelScope.launch {
+            _isLoading.value = true
+            delay(500)
+            _isLoading.value = false
+            val formattedPhone = "+977 $clean"
+            _userProfile.value = _userProfile.value.copy(
+                phone = formattedPhone,
+                isPhoneVerified = true
+            )
+            onSuccess()
+        }
+    }
+
+    fun changePassword(
+        current: String,
+        new: String,
+        confirm: String,
+        onResult: (Boolean, String) -> Unit
+    ) {
+        if (current.isBlank()) {
+            onResult(false, "Please enter your current password")
+            return
+        }
+        if (new.length < 6) {
+            onResult(false, "New password must be at least 6 characters")
+            return
+        }
+        if (new != confirm) {
+            onResult(false, "New password and confirmation do not match")
+            return
+        }
+        viewModelScope.launch {
+            _isLoading.value = true
+            delay(400)
+            _isLoading.value = false
+            onResult(true, "Password updated successfully!")
+        }
+    }
+
+    fun requestPasswordReset(onResult: (String) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            delay(400)
+            _isLoading.value = false
+            onResult("Password reset verification link & OTP sent to your registered contact.")
         }
     }
 

@@ -16,6 +16,10 @@ public struct PrivacySecurityView: View {
     @State private var allowPhoneDiscovery: Bool = true
     @State private var readReceiptsEnabled: Bool = true
     @State private var showDeleteConfirm: Bool = false
+    @State private var currentPassword: String = ""
+    @State private var newPassword: String = ""
+    @State private var confirmPassword: String = ""
+    @State private var passwordFeedback: String? = nil
 
     public init(authViewModel: AuthViewModel, onBack: (() -> Void)? = nil) {
         self.authViewModel = authViewModel
@@ -110,6 +114,179 @@ public struct PrivacySecurityView: View {
                             Spacer()
                             Toggle("", isOn: $readReceiptsEnabled)
                                 .labelsHidden()
+                        }
+                    }
+                    .padding(16)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
+
+                    // Change Password Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "key.fill")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.evrryPrimaryBlue)
+                            Text("Change Password")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.evrryDarkCharcoal)
+                        }
+
+                        VStack(spacing: 10) {
+                            SecureField("Current Password", text: $currentPassword)
+                                .font(.system(size: 13))
+                                .padding(12)
+                                .background(Color(red: 0.97, green: 0.98, blue: 0.99))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+
+                            SecureField("New Password (min 6 chars)", text: $newPassword)
+                                .font(.system(size: 13))
+                                .padding(12)
+                                .background(Color(red: 0.97, green: 0.98, blue: 0.99))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+
+                            SecureField("Confirm New Password", text: $confirmPassword)
+                                .font(.system(size: 13))
+                                .padding(12)
+                                .background(Color(red: 0.97, green: 0.98, blue: 0.99))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+                        }
+
+                        if let feedback = passwordFeedback {
+                            Text(feedback)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(feedback.contains("success") ? Color(red: 0.06, green: 0.73, blue: 0.51) : Color(red: 0.94, green: 0.27, blue: 0.27))
+                        }
+
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                authViewModel.changePassword(current: currentPassword, new: newPassword, confirm: confirmPassword) { success, msg in
+                                    passwordFeedback = msg
+                                    if success {
+                                        currentPassword = ""
+                                        newPassword = ""
+                                        confirmPassword = ""
+                                    }
+                                }
+                            }) {
+                                Text("Update Password")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 42)
+                                    .background(Color.evrryPrimaryBlue)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+
+                            Button(action: {
+                                authViewModel.requestPasswordReset { _, msg in
+                                    passwordFeedback = msg
+                                }
+                            }) {
+                                Text("Forgot Password?")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.evrryPrimaryBlue)
+                                    .frame(height: 42)
+                                    .padding(.horizontal, 12)
+                                    .background(Color.evrryPrimaryBlue.opacity(0.08))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
+
+                    // WhatsApp-Grade Google Drive & iCloud Chat Backup Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "icloud.and.arrow.up.fill")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.evrryPrimaryBlue)
+                            Text("Google Drive & iCloud Chat Backup")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.evrryDarkCharcoal)
+                        }
+
+                        Text("Back up your chat history, voice notes, and media safely to the cloud. End-to-end encrypted with your private key.")
+                            .font(.system(size: 11))
+                            .foregroundColor(.evrryMutedText)
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Last Backup")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.evrryDarkCharcoal)
+                                Text("\(authViewModel.chatBackupState.lastBackupTimestamp) • \(String(format: "%.1f MB", authViewModel.chatBackupState.totalBackupSizeMb))")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.evrryMutedText)
+                            }
+                            Spacer()
+                            Button(action: {
+                                authViewModel.startChatBackup()
+                            }) {
+                                HStack(spacing: 4) {
+                                    if authViewModel.chatBackupState.isBackingUp {
+                                        ProgressView()
+                                            .scaleEffect(0.8)
+                                    }
+                                    Text(authViewModel.chatBackupState.isBackingUp ? "\(authViewModel.chatBackupState.backupProgressPercent)%" : "Back Up Now")
+                                        .font(.system(size: 12, weight: .bold))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(Color.evrryPrimaryBlue)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .disabled(authViewModel.chatBackupState.isBackingUp)
+                        }
+                        .padding(12)
+                        .background(Color(red: 0.97, green: 0.98, blue: 0.99))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+
+                        Divider()
+
+                        HStack {
+                            Text("Auto-Backup Frequency")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.evrryDarkCharcoal)
+                            Spacer()
+                            Picker("", selection: Binding(
+                                get: { authViewModel.chatBackupState.autoBackupFrequency },
+                                set: { authViewModel.updateBackupFrequency($0) }
+                            )) {
+                                Text("Daily").tag("Daily")
+                                Text("Weekly").tag("Weekly")
+                                Text("Monthly").tag("Monthly")
+                                Text("Off").tag("Off")
+                            }
+                            .pickerStyle(.menu)
+                        }
+
+                        HStack {
+                            Text("Include Videos")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.evrryDarkCharcoal)
+                            Spacer()
+                            Toggle("", isOn: Binding(
+                                get: { authViewModel.chatBackupState.includeVideos },
+                                set: { authViewModel.updateIncludeVideos($0) }
+                            ))
+                            .labelsHidden()
+                        }
+
+                        HStack(spacing: 6) {
+                            Image(systemName: "lock.shield.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(Color(red: 0.06, green: 0.73, blue: 0.51))
+                            Text("Backups are end-to-end encrypted with zero server visibility.")
+                                .font(.system(size: 10))
+                                .foregroundColor(.evrryMutedText)
                         }
                     }
                     .padding(16)

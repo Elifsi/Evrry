@@ -36,10 +36,14 @@ public final class AuthViewModel: ObservableObject {
             self.isLoading = false
             let user = UserProfile(
                 id: "usr_google_nepal",
-                phone: "+9779812345678",
+                phone: "",
+                email: "rahul.sharma@gmail.com",
                 fullName: "Rahul Sharma",
-                username: "rahul_google"
+                username: "rahul_google",
+                isPhoneVerified: false,
+                kycVerified: false
             )
+            self.userProfile = user
             self.state = .authenticated(user: user)
             onSuccess()
         }
@@ -53,10 +57,14 @@ public final class AuthViewModel: ObservableObject {
             self.isLoading = false
             let user = UserProfile(
                 id: "usr_apple_nepal",
-                phone: "+9779812345678",
+                phone: "",
+                email: "rahul.apple@privaterelay.appleid.com",
                 fullName: "Rahul Sharma",
-                username: "rahul_apple"
+                username: "rahul_apple",
+                isPhoneVerified: false,
+                kycVerified: false
             )
+            self.userProfile = user
             self.state = .authenticated(user: user)
             onSuccess()
         }
@@ -71,10 +79,14 @@ public final class AuthViewModel: ObservableObject {
             let prefix = email.components(separatedBy: "@").first ?? "user"
             let user = UserProfile(
                 id: "usr_email_nepal",
-                phone: "+9779812345678",
+                phone: "",
+                email: email,
                 fullName: prefix.capitalized,
-                username: prefix
+                username: prefix,
+                isPhoneVerified: false,
+                kycVerified: false
             )
+            self.userProfile = user
             self.state = .authenticated(user: user)
             onSuccess()
         }
@@ -88,13 +100,18 @@ public final class AuthViewModel: ObservableObject {
             self.isLoading = false
             let isEmail = identifier.contains("@")
             let prefix = isEmail ? (identifier.components(separatedBy: "@").first ?? "user") : "user"
-            let phone = isEmail ? "+9779812345678" : (identifier.hasPrefix("+") ? identifier : "+977\(identifier)")
+            let phone = isEmail ? "" : (identifier.hasPrefix("+") ? identifier : "+977\(identifier)")
+            let email = isEmail ? identifier : ""
             let user = UserProfile(
                 id: "usr_pass_\(Int(Date().timeIntervalSince1970))",
                 phone: phone,
+                email: email,
                 fullName: prefix.capitalized,
-                username: prefix
+                username: prefix,
+                isPhoneVerified: !phone.isEmpty,
+                kycVerified: false
             )
+            self.userProfile = user
             self.state = .authenticated(user: user)
             onSuccess()
         }
@@ -108,13 +125,18 @@ public final class AuthViewModel: ObservableObject {
             self.isLoading = false
             let isEmail = identifier.contains("@")
             let prefix = isEmail ? (identifier.components(separatedBy: "@").first ?? "user") : "user"
-            let phone = isEmail ? "+9779812345678" : (identifier.hasPrefix("+") ? identifier : "+977\(identifier)")
+            let phone = isEmail ? "" : (identifier.hasPrefix("+") ? identifier : "+977\(identifier)")
+            let email = isEmail ? identifier : ""
             let user = UserProfile(
                 id: "usr_pass_\(Int(Date().timeIntervalSince1970))",
                 phone: phone,
+                email: email,
                 fullName: fullName.isEmpty ? prefix.capitalized : fullName,
-                username: prefix
+                username: prefix,
+                isPhoneVerified: !phone.isEmpty,
+                kycVerified: false
             )
+            self.userProfile = user
             self.state = .authenticated(user: user)
             onSuccess()
         }
@@ -268,8 +290,57 @@ public final class AuthViewModel: ObservableObject {
             username: "deleted",
             avatarUrl: nil
         )
-        self.dataManagementState = DataManagementState(cacheSizeMb: 0.0, aiMemoryFactsCount = 0, isCacheCleared: true)
+        self.dataManagementState = DataManagementState(cacheSizeMb: 0.0, aiMemoryFactsCount: 0, isCacheCleared: true)
         resetToPhoneInput()
+    }
+
+    public func scheduleAccountDeletion() {
+        deleteAccount()
+    }
+
+    // --- PHONE NUMBER LINK & VERIFICATION FOR GOOGLE/EMAIL USERS ---
+    public func linkAndVerifyPhone(phone: String, code: String, onSuccess: @escaping () -> Void = {}, onError: @escaping (String) -> Void = { _ in }) {
+        guard code.count == 6 else {
+            onError("Please enter valid 6-digit verification code.")
+            return
+        }
+        self.isLoading = true
+        Task {
+            try? await Task.sleep(nanoseconds: 600_000_000)
+            self.isLoading = false
+            self.userProfile.phone = phone
+            self.userProfile.isPhoneVerified = true
+            self.state = .authenticated(user: self.userProfile)
+            onSuccess()
+        }
+    }
+
+    // --- CHANGE PASSWORD ---
+    public func changePassword(current: String, new: String, confirm: String, onResult: @escaping (Bool, String) -> Void) {
+        guard !current.isEmpty, !new.isEmpty, !confirm.isEmpty else {
+            onResult(false, "All fields are required.")
+            return
+        }
+        guard new.count >= 6 else {
+            onResult(false, "New password must be at least 6 characters.")
+            return
+        }
+        guard new == confirm else {
+            onResult(false, "New password and confirmation do not match.")
+            return
+        }
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            onResult(true, "Password updated successfully!")
+        }
+    }
+
+    public func requestPasswordReset(onResult: @escaping (Bool, String) -> Void) {
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            let target = userProfile.email.isEmpty ? userProfile.phone : userProfile.email
+            onResult(true, "Password reset instructions sent to \(target)!")
+        }
     }
 
     public func resetToPhoneInput() {

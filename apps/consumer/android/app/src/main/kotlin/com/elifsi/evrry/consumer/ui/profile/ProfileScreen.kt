@@ -216,17 +216,68 @@ fun ProfileScreen(
             }
         }
 
-        // 3. DEDICATED CARDS / ROWS
-
-        // 1. Account Details
-        item {
-            ProfileNavRow(
-                icon = Icons.Default.Person,
-                title = "Account Details",
-                subtitle = "@${userProfile.username.ifEmpty { "rahul_evrry" }} • ${userProfile.phone}",
-                onClick = onNavigateToAccount
-            )
+        // 2.5 ACTION REQUIRED BANNER (Missing / Unverified Phone)
+        if (userProfile.phone.isBlank() || !userProfile.isPhoneVerified) {
+            item {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFFFEF2F2),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFECACA)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNavigateToAccount() }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFFFEE2E2),
+                            modifier = Modifier.size(38.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = Color(0xFFDC2626),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Action Required: Complete Profile",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = Color(0xFF991B1B)
+                            )
+                            Text(
+                                text = "Add and verify your mobile number so drivers and couriers can call you during rides & orders.",
+                                fontSize = 11.sp,
+                                color = Color(0xFFB91C1C),
+                                lineHeight = 15.sp
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFDC2626)
+                        ) {
+                            Text(
+                                text = "Verify",
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
+
+        // 3. DEDICATED CARDS / ROWS
 
         // 2. Payment Methods (eSewa, Khalti, Fonepay, Cards)
         item {

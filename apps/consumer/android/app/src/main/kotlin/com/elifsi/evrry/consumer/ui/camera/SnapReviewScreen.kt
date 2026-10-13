@@ -52,6 +52,8 @@ fun SnapReviewScreen(
     var isEditingCaption by remember { mutableStateOf(false) }
     var showSendSheet by remember { mutableStateOf(false) }
     var confirmationMessage by remember { mutableStateOf<String?>(null) }
+    var snapTimerSeconds by remember { mutableStateOf(5) }
+    var sendAsEphemeralSnap by remember { mutableStateOf(true) }
 
     LaunchedEffect(confirmationMessage) {
         if (confirmationMessage != null) {
@@ -99,6 +101,30 @@ fun SnapReviewScreen(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Snapchat Ephemeral Timer Cycle Button
+                Surface(
+                    onClick = {
+                        snapTimerSeconds = when (snapTimerSeconds) {
+                            3 -> 5
+                            5 -> 10
+                            10 -> 3
+                            else -> 5
+                        }
+                    },
+                    shape = CircleShape,
+                    color = Color.Black.copy(alpha = 0.5f),
+                    modifier = Modifier.size(42.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "⏱️ ${snapTimerSeconds}s",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFDE047)
+                        )
+                    }
+                }
+
                 // Add / Edit Caption Button
                 IconButton(
                     onClick = { isEditingCaption = !isEditingCaption },
@@ -375,7 +401,49 @@ fun SnapReviewScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // SNAP vs PHOTO MODE TOGGLE PILL
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.1f))
+                                .padding(3.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Surface(
+                                onClick = { sendAsEphemeralSnap = true },
+                                shape = RoundedCornerShape(10.dp),
+                                color = if (sendAsEphemeralSnap) Color(0xFFEF4444) else Color.Transparent,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("🔥 Snap (${snapTimerSeconds}s)", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                }
+                            }
+
+                            Surface(
+                                onClick = { sendAsEphemeralSnap = false },
+                                shape = RoundedCornerShape(10.dp),
+                                color = if (!sendAsEphemeralSnap) EvrryPrimaryBlue else Color.Transparent,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("📷 Photo", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -388,9 +456,14 @@ fun SnapReviewScreen(
                                         .clip(RoundedCornerShape(14.dp))
                                         .background(Color.White.copy(alpha = 0.08f))
                                         .clickable {
-                                            chatViewModel.sendImage(chat.id, dataUrl, caption)
+                                            if (sendAsEphemeralSnap) {
+                                                chatViewModel.sendSnap(chat.id, dataUrl, caption, snapTimerSeconds)
+                                                confirmationMessage = "Sent Snap to ${chat.title}! 🔥"
+                                            } else {
+                                                chatViewModel.sendImage(chat.id, dataUrl, caption)
+                                                confirmationMessage = "Sent Photo to ${chat.title}! 🚀"
+                                            }
                                             showSendSheet = false
-                                            confirmationMessage = "Sent to ${chat.title}! 🚀"
                                             onNavigateToChat?.invoke(chat.id)
                                         }
                                         .padding(12.dp),
