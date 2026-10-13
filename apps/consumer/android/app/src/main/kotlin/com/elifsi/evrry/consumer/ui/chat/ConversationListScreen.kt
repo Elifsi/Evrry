@@ -526,6 +526,8 @@ fun ConversationListScreen(
 
     var showCreateGroupDialog by remember { mutableStateOf(false) }
 
+    var showNewContactDialog by remember { mutableStateOf(false) }
+
     if (showSelectContactSheet) {
         SelectContactBottomSheet(
             contacts = phoneContacts,
@@ -543,6 +545,65 @@ fun ConversationListScreen(
             onCreateGroup = {
                 showSelectContactSheet = false
                 showCreateGroupDialog = true
+            },
+            onScanQrCode = {
+                showSelectContactSheet = false
+                onCameraClick()
+            },
+            onNewContact = {
+                showSelectContactSheet = false
+                showNewContactDialog = true
+            }
+        )
+    }
+
+    if (showNewContactDialog) {
+        var contactName by remember { mutableStateOf("") }
+        var contactPhone by remember { mutableStateOf("") }
+
+        AlertDialog(
+            onDismissRequest = { showNewContactDialog = false },
+            title = { Text("New Contact", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Add a friend or business partner in Nepal to chat instantly.", fontSize = 12.sp, color = EvrryMutedText)
+                    OutlinedTextField(
+                        value = contactName,
+                        onValueChange = { contactName = it },
+                        label = { Text("Full Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = contactPhone,
+                        onValueChange = { contactPhone = it.filter { c -> c.isDigit() || c == '+' }.take(14) },
+                        label = { Text("Phone Number (+977)") },
+                        placeholder = { Text("+977 98XXXXXXXX") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (contactPhone.isNotBlank()) {
+                            showNewContactDialog = false
+                            val phone = if (contactPhone.startsWith("+")) contactPhone else "+977$contactPhone"
+                            val chat = chatViewModel.openOrCreateChatByPhoneNumber(phone)
+                            onChatClick(chat)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = EvrryPrimaryBlue),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Start Chat", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNewContactDialog = false }) {
+                    Text("Cancel")
+                }
             }
         )
     }
@@ -595,7 +656,9 @@ fun SelectContactBottomSheet(
     onDismiss: () -> Unit,
     onSelectContact: (PhoneContactItem) -> Unit,
     onDirectPhoneChat: (String) -> Unit,
-    onCreateGroup: () -> Unit = {}
+    onCreateGroup: () -> Unit = {},
+    onScanQrCode: () -> Unit = {},
+    onNewContact: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -763,13 +826,13 @@ fun SelectContactBottomSheet(
                             icon = Icons.Default.PersonAdd,
                             title = "New contact",
                             subtitle = "Add to phonebook",
-                            onClick = { /* New contact */ }
+                            onClick = onNewContact
                         )
                         QuickActionRow(
                             icon = Icons.Default.QrCode,
                             title = "Scan QR Code",
                             subtitle = "Scan friend's personal QR to add instantly",
-                            onClick = { /* Scan QR */ }
+                            onClick = onScanQrCode
                         )
                     }
                     HorizontalDivider(

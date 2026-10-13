@@ -43,7 +43,7 @@ fun LocationPickerSheet(
     title: String = "Select Location",
     initialPoint: LocationPoint? = null,
     locationService: LocationService = remember { LocationService() },
-    savedAddressRepository: SavedAddressRepository = remember { SavedAddressRepository() },
+    savedAddressRepository: SavedAddressRepository = remember { SavedAddressRepository.shared },
     onLocationSelected: (LocationPoint) -> Unit,
     onDismiss: () -> Unit
 ) {

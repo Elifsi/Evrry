@@ -35,7 +35,7 @@ sealed class AuthScreenState {
     data class OtpRequested(
         val phone: String,
         val channel: OtpChannel,
-        val retryAfterSeconds: Int = 45,
+        val retryAfterSeconds: Int = 60,
         val mockOtp: String? = null
     ) : AuthScreenState()
     data class Authenticated(val user: UserProfile) : AuthScreenState()

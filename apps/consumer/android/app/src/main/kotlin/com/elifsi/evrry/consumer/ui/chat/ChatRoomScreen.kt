@@ -1731,6 +1731,15 @@ private fun ChatInputBar(
                 )
             }
 
+            // WALLPAPER THEME BUTTON
+            IconButton(onClick = onWallpaperClick) {
+                Icon(
+                    imageVector = Icons.Default.Palette,
+                    contentDescription = "Chat Wallpaper",
+                    tint = if (wallpaperActive) EvrryPrimaryBlue else EvrryMutedText
+                )
+            }
+
             // TEXT FIELD
             OutlinedTextField(
                 value = text,

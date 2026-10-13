@@ -104,7 +104,7 @@ fun GroceryHomeScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "Explore Verticals",
+                        text = "Back",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = EvrryDarkCharcoal

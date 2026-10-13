@@ -36,7 +36,7 @@ import com.elifsi.evrry.consumer.ui.theme.*
  */
 @Composable
 fun AddressBookScreen(
-    repository: SavedAddressRepository = remember { SavedAddressRepository() },
+    repository: SavedAddressRepository = remember { SavedAddressRepository.shared },
     onBack: () -> Unit
 ) {
     val addresses by repository.addresses.collectAsState()
@@ -74,7 +74,7 @@ fun AddressBookScreen(
             }
 
             Text(
-                text = "SAVED ADDRESSES (${addresses.size})",
+                text = "SAVED ADDRESSES (${addresses.size}) • TAP TO SET DEFAULT",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 color = EvrryMutedText
@@ -90,7 +90,12 @@ fun AddressBookScreen(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, EvrrySubtleBorder, RoundedCornerShape(16.dp))
+                            .border(
+                                width = if (address.isDefault) 1.5.dp else 1.dp,
+                                color = if (address.isDefault) EvrryPrimaryBlue else EvrrySubtleBorder,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .clickable { repository.setDefault(address.id) }
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),

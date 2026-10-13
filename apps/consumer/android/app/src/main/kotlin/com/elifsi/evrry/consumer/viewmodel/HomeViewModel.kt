@@ -20,31 +20,56 @@ data class ChatMessage(
 enum class VoiceState { IDLE, LISTENING, THINKING, SPEAKING }
 
 class HomeViewModel : ViewModel() {
-    private val _activeModel = MutableStateFlow<VoiceAgentModel>(VoiceAgentRegistry.ellieMini)
+    private val _activeModel = MutableStateFlow<VoiceAgentModel>(VoiceAgentRegistry.ellie)
     val activeModel: StateFlow<VoiceAgentModel> = _activeModel.asStateFlow()
 
-    private val _messages = MutableStateFlow<List<ChatMessage>>(
-        listOf(
-            ChatMessage(
-                isUser = false,
-                text = "Namaste! Ellie here. Food, ride, or grocery — what can I do for you today?"
-            )
-        )
-    )
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
     private val _voiceState = MutableStateFlow(VoiceState.IDLE)
     val voiceState: StateFlow<VoiceState> = _voiceState.asStateFlow()
+
+    private val _aiMode = MutableStateFlow<String>("chat") // "chat" | "assistant"
+    val aiMode: StateFlow<String> = _aiMode.asStateFlow()
+
+    private val _caption = MutableStateFlow<String>("")
+    val caption: StateFlow<String> = _caption.asStateFlow()
+
+    private val _isMuted = MutableStateFlow<Boolean>(false)
+    val isMuted: StateFlow<Boolean> = _isMuted.asStateFlow()
 
     private val _inputText = MutableStateFlow("")
     val inputText: StateFlow<String> = _inputText.asStateFlow()
 
     fun selectModel(model: VoiceAgentModel) {
         _activeModel.value = model
-        _messages.value = _messages.value + ChatMessage(
-            isUser = false,
-            text = "Switched to ${model.name} (${model.badge})."
-        )
+        if (_messages.value.isNotEmpty()) {
+            _messages.value = _messages.value + ChatMessage(
+                isUser = false,
+                text = "Switched to ${model.name} (${model.badge})."
+            )
+        }
+    }
+
+    fun setAiMode(mode: String) {
+        _aiMode.value = mode
+        if (mode == "assistant") {
+            _voiceState.value = VoiceState.LISTENING
+            _caption.value = ""
+        } else {
+            _voiceState.value = VoiceState.IDLE
+        }
+    }
+
+    fun toggleMute() {
+        _isMuted.value = !_isMuted.value
+    }
+
+    fun clearChat() {
+        _messages.value = emptyList()
+        _inputText.value = ""
+        _caption.value = ""
+        _voiceState.value = VoiceState.IDLE
     }
 
     fun updateInputText(text: String) {
@@ -60,12 +85,14 @@ class HomeViewModel : ViewModel() {
         _inputText.value = ""
 
         _voiceState.value = VoiceState.THINKING
+        _caption.value = trimmed
 
         viewModelScope.launch {
             delay(800)
             _voiceState.value = VoiceState.SPEAKING
             val replyText = generateAutonomousReply(trimmed, _activeModel.value)
             _messages.value = _messages.value + ChatMessage(isUser = false, text = replyText)
+            _caption.value = replyText
             delay(1500)
             _voiceState.value = VoiceState.IDLE
         }

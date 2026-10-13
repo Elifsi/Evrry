@@ -35,7 +35,7 @@ fun EvrryTopBar(
     onBack: (() -> Unit)? = null,
     onBackClick: () -> Unit = {},
     isHome: Boolean = false,
-    activeModel: VoiceAgentModel = VoiceAgentRegistry.ellieMini,
+    activeModel: VoiceAgentModel = VoiceAgentRegistry.ellie,
     onSelectModel: (VoiceAgentModel) -> Unit = {},
     onMenuClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
@@ -278,51 +278,101 @@ fun EvrryTopBar(
 }
 
 /**
- * 5-Tab In-App Bottom Navigation Bar
+ * 5-Slot In-App Bottom Navigation Bar matching prototype BottomNav.tsx
+ * [ AI | Explore | 📷 SNAP | Chat | Profile ]
  */
 @Composable
 fun EvrryBottomBar(
     currentRoute: String,
     onNavigate: (String) -> Unit,
-    chatsUnreadCount: Int = 3
+    chatsUnreadCount: Int = 0
 ) {
     Surface(
-        color = Color.White,
-        shadowElevation = 8.dp,
+        color = Color.White.copy(alpha = 0.95f),
+        shadowElevation = 10.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(vertical = 4.dp),
+            contentAlignment = Alignment.Center
         ) {
-            val tabs = listOf(
-                Triple("home", "AI", Icons.Default.Star),
-                Triple("explore", "Explore", Icons.Default.Search),
-                Triple("chats", "Chats", Icons.Default.ChatBubble),
-                Triple("rides", "Rides", Icons.Default.Place),
-                Triple("activity", "Activity", Icons.Default.ReceiptLong),
-                Triple("settings", "Profile", Icons.Default.Person)
-            )
-
-            tabs.forEach { (route, label, icon) ->
-                val isSelected = currentRoute == route
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 1. AI Tab
+                val isAiSelected = currentRoute == "home"
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .clickable { onNavigate(route) }
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                        .weight(1f)
+                        .clickable { onNavigate("home") }
+                        .padding(vertical = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = "AI",
+                        tint = if (isAiSelected) EvrryPrimaryBlue else EvrryMutedText,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "AI",
+                        fontSize = 10.sp,
+                        fontWeight = if (isAiSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isAiSelected) EvrryPrimaryBlue else EvrryMutedText
+                    )
+                }
+
+                // 2. Explore Tab
+                val isExploreSelected = currentRoute == "explore"
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onNavigate("explore") }
+                        .padding(vertical = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Explore,
+                        contentDescription = "Explore",
+                        tint = if (isExploreSelected) EvrryPrimaryBlue else EvrryMutedText,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Explore",
+                        fontSize = 10.sp,
+                        fontWeight = if (isExploreSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isExploreSelected) EvrryPrimaryBlue else EvrryMutedText
+                    )
+                }
+
+                // 3. Center Elevated SNAP Camera Slot (Spacer for layout)
+                Spacer(modifier = Modifier.weight(1f))
+
+                // 4. Chat Tab
+                val isChatSelected = currentRoute == "chats"
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onNavigate("chats") }
+                        .padding(vertical = 4.dp)
                 ) {
                     Box(contentAlignment = Alignment.TopEnd) {
                         Icon(
-                            imageVector = icon,
-                            contentDescription = label,
-                            tint = if (isSelected) EvrryPrimaryBlue else EvrryMutedText,
+                            imageVector = Icons.Default.ChatBubble,
+                            contentDescription = "Chat",
+                            tint = if (isChatSelected) EvrryPrimaryBlue else EvrryMutedText,
                             modifier = Modifier.size(22.dp)
                         )
-                        if (route == "chats" && chatsUnreadCount > 0) {
+                        if (chatsUnreadCount > 0) {
                             Box(
                                 modifier = Modifier
                                     .offset(x = 6.dp, y = (-4).dp)
@@ -342,10 +392,56 @@ fun EvrryBottomBar(
                     }
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = label,
+                        text = "Chat",
                         fontSize = 10.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) EvrryPrimaryBlue else EvrryMutedText
+                        fontWeight = if (isChatSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isChatSelected) EvrryPrimaryBlue else EvrryMutedText
+                    )
+                }
+
+                // 5. Profile Tab
+                val isProfileSelected = currentRoute == "profile" || currentRoute == "settings"
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onNavigate("profile") }
+                        .padding(vertical = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        tint = if (isProfileSelected) EvrryPrimaryBlue else EvrryMutedText,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Profile",
+                        fontSize = 10.sp,
+                        fontWeight = if (isProfileSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isProfileSelected) EvrryPrimaryBlue else EvrryMutedText
+                    )
+                }
+            }
+
+            // ELEVATED CENTER SNAP BUTTON (-16dp elevation above the bar, 54dp circle)
+            val isSnapSelected = currentRoute == "camera"
+            Surface(
+                onClick = { onNavigate("camera") },
+                shape = CircleShape,
+                color = if (isSnapSelected) EvrryDarkCharcoal else EvrryPrimaryBlue,
+                shadowElevation = 8.dp,
+                modifier = Modifier
+                    .offset(y = (-18).dp)
+                    .size(54.dp)
+                    .border(3.dp, Color.White, CircleShape)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.PhotoCamera,
+                        contentDescription = "Snap Camera",
+                        tint = Color.White,
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }

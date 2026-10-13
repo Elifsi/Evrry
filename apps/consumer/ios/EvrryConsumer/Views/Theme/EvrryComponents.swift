@@ -27,7 +27,7 @@ public struct EvrryTopBar: View {
         canGoBack: Bool = false,
         onBackClick: @escaping () -> Void = {},
         isHome: Bool = false,
-        activeModel: VoiceAgentModel = VoiceAgentRegistry.ellieMini,
+        activeModel: VoiceAgentModel = VoiceAgentRegistry.ellie,
         onSelectModel: @escaping (VoiceAgentModel) -> Void = { _ in },
         onMenuClick: @escaping () -> Void = {},
         onProfileClick: @escaping () -> Void = {},
@@ -175,25 +175,42 @@ public struct EvrryBottomBar: View {
     }
     
     public var body: some View {
-        HStack {
-            tabItem(route: "home", label: "AI", systemImage: "sparkles")
-            Spacer()
-            tabItem(route: "explore", label: "Explore", systemImage: "safari")
-            Spacer()
-            tabItem(route: "chats", label: "Chats", systemImage: "bubble.left.and.bubble.right.fill", badge: chatsUnreadCount)
-            Spacer()
-            tabItem(route: "rides", label: "Rides", systemImage: "car.fill")
-            Spacer()
-            tabItem(route: "activity", label: "Activity", systemImage: "list.bullet.rectangle.portrait")
-            Spacer()
-            tabItem(route: "settings", label: "Profile", systemImage: "person.crop.circle")
+        ZStack {
+            HStack {
+                tabItem(route: "home", label: "AI", systemImage: "sparkles")
+                Spacer()
+                tabItem(route: "explore", label: "Explore", systemImage: "safari")
+                Spacer()
+                // Spacer for center elevated camera button
+                Color.clear.frame(width: 54, height: 40)
+                Spacer()
+                tabItem(route: "chats", label: "Chat", systemImage: "bubble.left.and.bubble.right.fill", badge: chatsUnreadCount)
+                Spacer()
+                tabItem(route: "profile", label: "Profile", systemImage: "person.crop.circle")
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            .padding(.bottom, 22)
+            .background(Color.white.opacity(0.95))
+            .overlay(Rectangle().frame(height: 1).foregroundColor(.evrrySubtleBorder), alignment: .top)
+            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: -3)
+
+            // Center elevated Snap camera button (-18pt offset)
+            Button(action: { onNavigate("camera") }) {
+                ZStack {
+                    Circle()
+                        .fill(currentRoute == "camera" ? Color.evrryDarkCharcoal : Color.evrryPrimaryBlue)
+                        .frame(width: 54, height: 54)
+                        .overlay(Circle().stroke(Color.white, lineWidth: 3))
+                        .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
+
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            .offset(y: -16)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 10)
-        .padding(.bottom, 22)
-        .background(Color.white)
-        .overlay(Rectangle().frame(height: 1).foregroundColor(.evrrySubtleBorder), alignment: .top)
-        .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: -2)
     }
     
     private func tabItem(route: String, label: String, systemImage: String, badge: Int = 0) -> some View {

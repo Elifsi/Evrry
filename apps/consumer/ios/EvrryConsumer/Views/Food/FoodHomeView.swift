@@ -42,7 +42,7 @@ public struct FoodHomeView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "chevron.left")
                                     .font(.system(size: 15, weight: .semibold))
-                                Text("Explore Verticals")
+                                Text("Back")
                                     .font(.system(size: 13, weight: .semibold))
                             }
                             .foregroundColor(.evrryDarkCharcoal)

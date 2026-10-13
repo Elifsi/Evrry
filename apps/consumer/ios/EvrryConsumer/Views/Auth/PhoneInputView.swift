@@ -3,8 +3,7 @@
 //  EvrryConsumer
 //
 //  Elifsi Technologies Private Limited
-//  Mobile Phone Login Screen (Nepal +977 WhatsApp / SMS OTP)
-//  + 1-Tap Social Sign-In (Google, Apple, Email)
+//  Universal Registration & Login Screen (Nepal +977 WhatsApp OTP & Email/Password)
 //
 
 import SwiftUI
@@ -13,8 +12,16 @@ public struct PhoneInputView: View {
     @ObservedObject public var viewModel: AuthViewModel
     public let onContinue: () -> Void
     
-    @State private var showEmailAlert: Bool = false
-    @State private var emailText: String = ""
+    // 1. User arrives at the Register screen by default
+    @State private var isSignUp: Bool = true
+    
+    // 2. Default is Phone Number input; tap "Continue with Email" switches to Email mode
+    @State private var isEmailAuth: Bool = false
+    
+    @State private var phoneInput: String = ""
+    @State private var emailInput: String = ""
+    @State private var passwordInput: String = ""
+    @State private var showPassword: Bool = false
     
     public init(viewModel: AuthViewModel, onContinue: @escaping () -> Void) {
         self.viewModel = viewModel
@@ -24,7 +31,6 @@ public struct PhoneInputView: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Content
                 VStack(alignment: .leading, spacing: 0) {
                     Spacer().frame(height: 16)
                     
@@ -44,107 +50,198 @@ public struct PhoneInputView: View {
                     
                     Spacer().frame(height: 24)
                     
-                    Text("Welcome to evrry")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.evrryDarkCharcoal)
-                    
-                    Text("Enter your Nepal mobile number to sign in or register your account.")
-                        .font(.system(size: 13))
-                        .foregroundColor(.evrryMutedText)
-                        .padding(.top, 6)
+                    // Title & Subtitle
+                    if isSignUp {
+                        Text("Create your Account")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.evrryDarkCharcoal)
+                        Text(isEmailAuth ? "Sign up with your email and password to get started." : "Enter your Nepal mobile number and password to register.")
+                            .font(.system(size: 13))
+                            .foregroundColor(.evrryMutedText)
+                            .padding(.top, 6)
+                    } else {
+                        Text("Welcome to evrry")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.evrryDarkCharcoal)
+                        Text(isEmailAuth ? "Sign in with your email and password to access your account." : "Sign in with your Nepal mobile number to access your account.")
+                            .font(.system(size: 13))
+                            .foregroundColor(.evrryMutedText)
+                            .padding(.top, 6)
+                    }
                     
                     Spacer().frame(height: 28)
                     
-                    // Mobile Input Field with 🇳🇵 +977
-                    Text("MOBILE NUMBER")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.evrryMutedText)
-                    
-                    Spacer().frame(height: 8)
-                    
-                    HStack(spacing: 10) {
-                        Text("🇳🇵 +977")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.evrryDarkCharcoal)
+                    if !isEmailAuth {
+                        // PHONE NUMBER INPUT
+                        Text("NEPAL MOBILE NUMBER")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.evrryMutedText)
                         
-                        Rectangle()
-                            .frame(width: 1, height: 24)
-                            .foregroundColor(.evrrySubtleBorder)
+                        Spacer().frame(height: 8)
                         
-                        TextField("98XXXXXXXX", text: Binding(
-                            get: { viewModel.phoneNumber },
-                            set: { viewModel.updatePhoneNumber($0) }
-                        ))
-                        .keyboardType(.numberPad)
-                        .font(.system(size: 16))
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 14)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.evrrySubtleBorder, lineWidth: 1.5))
-                    
-                    Spacer().frame(height: 20)
-                    
-                    // Channel Selector (WhatsApp vs Domestic SMS)
-                    Text("VERIFICATION CHANNEL")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.evrryMutedText)
-                    
-                    Spacer().frame(height: 8)
-                    
-                    HStack(spacing: 10) {
-                        ForEach(OtpChannel.allCases, id: \.self) { channel in
-                            let isSelected = viewModel.selectedChannel == channel
-                            Button(action: { viewModel.selectChannel(channel) }) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(channel.label)
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundColor(isSelected ? .evrryPrimaryBlue : .evrryDarkCharcoal)
-                                    Text(channel.badge)
-                                        .font(.system(size: 10))
-                                        .foregroundColor(isSelected ? .evrryPrimaryBlue.opacity(0.8) : .evrryMutedText)
+                        HStack(spacing: 10) {
+                            Text("🇳🇵 +977")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.evrryDarkCharcoal)
+                            
+                            Rectangle()
+                                .frame(width: 1, height: 24)
+                                .foregroundColor(.evrrySubtleBorder)
+                            
+                            TextField("98XXXXXXXX", text: Binding(
+                                get: { phoneInput.isEmpty ? viewModel.phoneNumber : phoneInput },
+                                set: {
+                                    phoneInput = $0
+                                    viewModel.updatePhoneNumber($0)
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(12)
-                                .background(isSelected ? Color.blue.opacity(0.06) : Color.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .overlay(RoundedRectangle(cornerRadius: 14).stroke(isSelected ? Color.evrryPrimaryBlue : Color.evrrySubtleBorder, lineWidth: isSelected ? 1.5 : 1))
+                            ))
+                            .keyboardType(.numberPad)
+                            .font(.system(size: 16))
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 14)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.evrrySubtleBorder, lineWidth: 1.5))
+                        
+                        Spacer().frame(height: 16)
+                        
+                        // PASSWORD INPUT
+                        Text("PASSWORD")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.evrryMutedText)
+                        
+                        Spacer().frame(height: 8)
+                        
+                        HStack(spacing: 10) {
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(.evrryMutedText)
+                                .frame(width: 20)
+                            if showPassword {
+                                TextField("••••••••", text: $passwordInput)
+                                    .font(.system(size: 15))
+                            } else {
+                                SecureField("••••••••", text: $passwordInput)
+                                    .font(.system(size: 15))
+                            }
+                            Button(action: { showPassword.toggle() }) {
+                                Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
+                                    .foregroundColor(.evrryMutedText)
                             }
                         }
-                    }
-                    
-                    if let error = viewModel.errorMessage {
-                        Text(error)
-                            .font(.system(size: 12))
-                            .foregroundColor(.evrryRedDestructive)
-                            .padding(.top, 12)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 14)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1.2))
+                        
+                        Spacer().frame(height: 22)
+                        
+                        // PRIMARY CTA: Sends WhatsApp OTP on phone number
+                        let isPhoneValid = viewModel.phoneNumber.count == 10 && passwordInput.count >= 6
+                        Button(action: {
+                            viewModel.selectChannel(.whatsapp)
+                            viewModel.requestOtp()
+                            onContinue()
+                        }) {
+                            HStack {
+                                if viewModel.isLoading {
+                                    ProgressView().tint(.white)
+                                } else {
+                                    Text(isSignUp ? "Create Account" : "Sign In")
+                                        .font(.system(size: 15, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(isPhoneValid && !viewModel.isLoading ? Color.evrryPrimaryBlue : Color.evrryPrimaryBlue.opacity(0.4))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        }
+                        .disabled(!isPhoneValid || viewModel.isLoading)
+                        
+                    } else {
+                        // EMAIL INPUT MODE
+                        Text("EMAIL ADDRESS")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.evrryMutedText)
+                        
+                        Spacer().frame(height: 8)
+                        
+                        HStack(spacing: 10) {
+                            Image(systemName: "envelope.fill")
+                                .foregroundColor(.evrryMutedText)
+                                .frame(width: 20)
+                            TextField("name@example.com", text: $emailInput)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                                .font(.system(size: 15))
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 14)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1.2))
+                        
+                        Spacer().frame(height: 16)
+                        
+                        // PASSWORD INPUT
+                        Text("PASSWORD")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.evrryMutedText)
+                        
+                        Spacer().frame(height: 8)
+                        
+                        HStack(spacing: 10) {
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(.evrryMutedText)
+                                .frame(width: 20)
+                            if showPassword {
+                                TextField("••••••••", text: $passwordInput)
+                                    .font(.system(size: 15))
+                            } else {
+                                SecureField("••••••••", text: $passwordInput)
+                                    .font(.system(size: 15))
+                            }
+                            Button(action: { showPassword.toggle() }) {
+                                Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
+                                    .foregroundColor(.evrryMutedText)
+                            }
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 14)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1.2))
+                        
+                        Spacer().frame(height: 22)
+                        
+                        let isEmailValid = emailInput.contains("@") && emailInput.contains(".") && passwordInput.count >= 6
+                        Button(action: {
+                            if isSignUp {
+                                viewModel.signUpWithPassword(fullName: "", identifier: emailInput, password: passwordInput)
+                            } else {
+                                viewModel.signInWithPassword(identifier: emailInput, password: passwordInput)
+                            }
+                        }) {
+                            HStack {
+                                if viewModel.isLoading {
+                                    ProgressView().tint(.white)
+                                } else {
+                                    Text(isSignUp ? "Create Account" : "Sign In")
+                                        .font(.system(size: 15, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(isEmailValid && !viewModel.isLoading ? Color.evrryPrimaryBlue : Color.evrryPrimaryBlue.opacity(0.4))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        }
+                        .disabled(!isEmailValid || viewModel.isLoading)
                     }
                     
                     Spacer().frame(height: 24)
-                    
-                    // Primary Continue CTA
-                    Button(action: {
-                        viewModel.requestOtp()
-                        onContinue()
-                    }) {
-                        HStack {
-                            if viewModel.isLoading {
-                                ProgressView().tint(.white)
-                            } else {
-                                Text("Get Verification Code")
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(viewModel.phoneNumber.count == 10 ? Color.evrryPrimaryBlue : Color.evrryPrimaryBlue.opacity(0.4))
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                    }
-                    .disabled(viewModel.phoneNumber.count != 10 || viewModel.isLoading)
-                    
-                    Spacer().frame(height: 28)
                     
                     // OR CONTINUE WITH Divider
                     HStack {
@@ -160,11 +257,53 @@ public struct PhoneInputView: View {
                             .frame(height: 1)
                     }
                     
-                    Spacer().frame(height: 20)
+                    Spacer().frame(height: 18)
                     
                     // Social Sign-In Buttons
                     VStack(spacing: 10) {
-                        // Google
+                        if !isEmailAuth {
+                            // CONTINUE WITH EMAIL BUTTON
+                            Button(action: {
+                                isEmailAuth = true
+                            }) {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "envelope.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.evrryMutedText)
+                                    
+                                    Text("Continue with Email")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.evrryDarkCharcoal)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+                            }
+                        } else {
+                            // CONTINUE WITH PHONE NUMBER BUTTON
+                            Button(action: {
+                                isEmailAuth = false
+                            }) {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "phone.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.evrryPrimaryBlue)
+                                    
+                                    Text("Continue with Phone Number")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.evrryDarkCharcoal)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+                            }
+                        }
+                        
+                        // CONTINUE WITH GOOGLE
                         Button(action: {
                             viewModel.signInWithGoogle()
                         }) {
@@ -186,48 +325,27 @@ public struct PhoneInputView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1))
                         }
-                        
-                        // Apple
-                        Button(action: {
-                            viewModel.signInWithApple()
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "applelogo")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.white)
-                                
-                                Text("Continue with Apple")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color(red: 15/255, green: 23/255, blue: 42/255))
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                        }
-                        
-                        // Email
-                        Button(action: {
-                            showEmailAlert = true
-                        }) {
-                            HStack(spacing: 10) {
-                                Image(systemName: "envelope.fill")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.evrryMutedText)
-                                
-                                Text("Continue with Email")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.evrryDarkCharcoal)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1))
-                        }
                     }
                     
                     Spacer().frame(height: 28)
+                    
+                    // Switch Footer: Register now <-> Login here
+                    HStack(spacing: 4) {
+                        Spacer()
+                        Text(isSignUp ? "Already on Evrry?" : "New on Evrry?")
+                            .font(.system(size: 13))
+                            .foregroundColor(.evrryDarkCharcoal)
+                        Button(action: {
+                            isSignUp.toggle()
+                        }) {
+                            Text(isSignUp ? "Login here" : "Register now")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.evrryPrimaryBlue)
+                        }
+                        Spacer()
+                    }
+                    
+                    Spacer().frame(height: 12)
                     
                     // Terms & Privacy
                     HStack {
@@ -244,17 +362,5 @@ public struct PhoneInputView: View {
             }
         }
         .background(Color.evrryBgTop.ignoresSafeArea())
-        .alert("Sign in with Email", isPresented: $showEmailAlert) {
-            TextField("name@example.com", text: $emailText)
-                .textInputAutocapitalization(.never)
-            Button("Continue") {
-                if emailText.contains("@") && emailText.contains(".") {
-                    viewModel.signInWithEmail(emailText)
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Enter your email address to sign in. A Nepal phone number will be attached for dispatches.")
-        }
     }
 }

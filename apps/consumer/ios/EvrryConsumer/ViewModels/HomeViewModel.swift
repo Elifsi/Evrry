@@ -32,18 +32,42 @@ public enum VoiceState {
 
 @MainActor
 public final class HomeViewModel: ObservableObject {
-    @Published public var activeModel: VoiceAgentModel = VoiceAgentRegistry.ellieMini
-    @Published public var messages: [ChatMessage] = [
-        ChatMessage(isUser: false, text: "Namaste! Ellie here. Food, ride, or grocery — what can I do for you today?")
-    ]
+    @Published public var activeModel: VoiceAgentModel = VoiceAgentRegistry.ellie
+    @Published public var messages: [ChatMessage] = []
     @Published public var voiceState: VoiceState = .idle
+    @Published public var aiMode: String = "chat" // "chat" | "assistant"
+    @Published public var caption: String = ""
+    @Published public var isMuted: Bool = false
     @Published public var inputText: String = ""
     
     public init() {}
     
     public func selectModel(_ model: VoiceAgentModel) {
         self.activeModel = model
-        self.messages.append(ChatMessage(isUser: false, text: "Switched to \(model.name) (\(model.badge))."))
+        if !self.messages.isEmpty {
+            self.messages.append(ChatMessage(isUser: false, text: "Switched to \(model.name) (\(model.badge))."))
+        }
+    }
+
+    public func setAiMode(_ mode: String) {
+        self.aiMode = mode
+        if mode == "assistant" {
+            self.voiceState = .listening
+            self.caption = ""
+        } else {
+            self.voiceState = .idle
+        }
+    }
+
+    public func toggleMute() {
+        self.isMuted.toggle()
+    }
+
+    public func clearChat() {
+        self.messages = []
+        self.inputText = ""
+        self.caption = ""
+        self.voiceState = .idle
     }
     
     public func sendMessage(_ text: String? = nil) {

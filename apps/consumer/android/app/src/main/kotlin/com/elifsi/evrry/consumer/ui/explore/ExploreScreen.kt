@@ -3,315 +3,683 @@ package com.elifsi.evrry.consumer.ui.explore
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.elifsi.evrry.consumer.model.ServiceVertical
-import com.elifsi.evrry.consumer.ui.components.EvrryTopBar
+import com.elifsi.evrry.consumer.location.AddressType
+import com.elifsi.evrry.consumer.location.SavedAddress
+import com.elifsi.evrry.consumer.location.SavedAddressRepository
+import com.elifsi.evrry.consumer.ui.location.LocationPickerSheet
 import com.elifsi.evrry.consumer.ui.theme.*
 import com.elifsi.evrry.consumer.viewmodel.ExploreViewModel
 
+/**
+ * Explore Services Hub matching prototype/Phone/app/explore/page.tsx
+ * Strictly limited to the 3 live verticals:
+ * 1. City Rides (Cab & Bike)
+ * 2. Food Delivery
+ * 3. Grocery Quick Mart
+ * (Hotels & Room Rentals strictly excluded from user navigation per release scope)
+ * Elifsi Technologies Private Limited
+ */
 @Composable
 fun ExploreScreen(
     viewModel: ExploreViewModel,
     onNavigateToCart: () -> Unit,
     onNavigateToFood: () -> Unit = {},
     onNavigateToGrocery: () -> Unit = {},
+    onNavigateToRides: () -> Unit = {},
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToCamera: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
-    val selectedVertical by viewModel.selectedVertical.collectAsState()
-    val items by viewModel.items.collectAsState()
     val cart by viewModel.cart.collectAsState()
+    val savedAddresses by SavedAddressRepository.shared.addresses.collectAsState()
+    val activeAddress = savedAddresses.find { it.isDefault } ?: savedAddresses.firstOrNull()
+    var showLocationPicker by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF9FBFF))
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
     ) {
-        // TOP APP BAR with Top-Right Cart Icon & Badge
-        EvrryTopBar(
-            title = "Explore Evrry",
-            canGoBack = false,
-            cartItemCount = cart.itemCount,
-            onCartClick = onNavigateToCart,
-            onProfileClick = onProfileClick
-        )
-
-        // CATEGORY CHIPS SCROLLER
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val allChipSelected = selectedVertical == "all"
-            Surface(
-                color = if (allChipSelected) EvrryDarkCharcoal else Color.White,
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier
-                    .border(1.dp, if (allChipSelected) EvrryDarkCharcoal else EvrrySubtleBorder, RoundedCornerShape(20.dp))
-                    .clickable { viewModel.selectVertical("all") }
+        // 1. LOCATION BAR & AI CONCIERGE CHIP
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "✨ All",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (allChipSelected) Color.White else EvrryDarkCharcoal,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                )
-            }
-
-            ServiceVertical.activeVerticals.forEach { vertical ->
-                val isSelected = selectedVertical == vertical.id
-                Surface(
-                    color = if (isSelected) EvrryDarkCharcoal else Color.White,
-                    shape = RoundedCornerShape(20.dp),
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
-                        .border(1.dp, if (isSelected) EvrryDarkCharcoal else EvrrySubtleBorder, RoundedCornerShape(20.dp))
-                        .clickable {
-                            when (vertical) {
-                                ServiceVertical.FOOD -> onNavigateToFood()
-                                ServiceVertical.GROCERY -> onNavigateToGrocery()
-                                else -> viewModel.selectVertical(vertical.id)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { showLocationPicker = true }
+                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Location",
+                        tint = EvrryPrimaryBlue,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = activeAddress?.label ?: "Kathmandu Valley",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = EvrryDarkCharcoal
+                    )
+                    Text(
+                        text = if (activeAddress != null) "(${activeAddress.address.take(16)}...)" else "(Doorstep)",
+                        fontSize = 11.sp,
+                        color = EvrryMutedText
+                    )
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Change Location",
+                        tint = EvrryMutedText,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // TOP-RIGHT CART ICON WITH BADGE (1, 2, 3...)
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .border(1.dp, EvrrySubtleBorder, CircleShape)
+                            .clickable { onNavigateToCart() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Cart",
+                            tint = if (cart.itemCount > 0) EvrryPrimaryBlue else EvrryDarkCharcoal,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        if (cart.itemCount > 0) {
+                            Surface(
+                                color = EvrryPrimaryBlue,
+                                shape = CircleShape,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 2.dp, y = (-2).dp)
+                                    .size(18.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = if (cart.itemCount > 99) "99+" else "${cart.itemCount}",
+                                        color = Color.White,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        lineHeight = 10.sp
+                                    )
+                                }
                             }
                         }
+                    }
+
+                    Surface(
+                        onClick = onNavigateToHome,
+                        color = Color(0xFFEFF6FF),
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.border(1.dp, Color(0xFFBFDBFE), RoundedCornerShape(20.dp))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "AI",
+                                tint = EvrryPrimaryBlue,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Text(
+                                text = "AI Concierge",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EvrryPrimaryBlue
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. HEADER TITLE & SUBTITLE
+        item {
+            Column {
+                Text(
+                    text = "Explore Services",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EvrryDarkCharcoal
+                )
+                Text(
+                    text = "Rides · Food · Groceries — and more coming soon across Nepal.",
+                    fontSize = 12.sp,
+                    color = EvrryMutedText,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+        }
+
+        // 3. GLOBAL SEARCH BAR
+        item {
+            Surface(
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp),
+                shadowElevation = 1.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, EvrrySubtleBorder, RoundedCornerShape(16.dp))
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = EvrryMutedText,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = {
+                            Text(
+                                "Search food, groceries, rides...",
+                                fontSize = 13.sp,
+                                color = Color(0xFF94A3B8)
+                            )
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    IconButton(
+                        onClick = onNavigateToCamera,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "Scan QR",
+                            tint = EvrryPrimaryBlue,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        // 4. "AVAILABLE NOW" SECTION HEADER
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "AVAILABLE NOW",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    color = EvrryMutedText,
+                    letterSpacing = 1.sp
+                )
+                Surface(
+                    color = Color(0xFFEFF6FF),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = "${vertical.emoji} ${vertical.title}",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (isSelected) Color.White else EvrryDarkCharcoal,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                        text = "Live",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = EvrryPrimaryBlue,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                     )
                 }
             }
         }
 
-        // CATALOG CARDS LIST
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(top = 10.dp, bottom = 80.dp)
-        ) {
-            // DEDICATED FOOD DELIVERY BANNER
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onNavigateToFood() },
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color.Transparent
+        // 5. VERTICAL 1: CITY RIDES (Car Icon, Blue/Indigo Gradient)
+        item {
+            Surface(
+                onClick = onNavigateToRides,
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White,
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFFBFDBFE), RoundedCornerShape(20.dp))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                androidx.compose.ui.graphics.Brush.horizontalGradient(
-                                    listOf(Color(0xFFF97316), Color(0xFFD97706))
-                                )
-                            )
-                            .padding(16.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(Color(0xFF2563EB), Color(0xFF4338CA))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("🥟 FRESH & HOT", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.White.copy(alpha = 0.85f))
-                                Text("Food & Restaurant Delivery", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                                Text("Kathmandu & Lalitpur top kitchens • 25 min delivery", fontSize = 11.sp, color = Color.White.copy(alpha = 0.9f))
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Surface(color = Color.White, shape = RoundedCornerShape(8.dp)) {
-                                    Text("Explore Kitchens →", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFC2410C), modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
-                                }
-                            }
-                            Text("🍲", fontSize = 38.sp)
+                            Icon(
+                                imageVector = Icons.Default.DirectionsCar,
+                                contentDescription = "Rides",
+                                tint = Color.White,
+                                modifier = Modifier.size(26.dp)
+                            )
                         }
-                    }
-                }
-            }
 
-            // DEDICATED GROCERY QUICK MART BANNER
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onNavigateToGrocery() },
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color.Transparent
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                androidx.compose.ui.graphics.Brush.horizontalGradient(
-                                    listOf(Color(0xFF059669), Color(0xFF0D9488))
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = "City Rides",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = EvrryDarkCharcoal
                                 )
-                            )
-                            .padding(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("⚡ 10-15 MIN DISPATCH", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.White.copy(alpha = 0.85f))
-                                Text("Grocery Quick Mart", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                                Text("DDC Milk, Farm Eggs, Wai Wai & Fresh Produce", fontSize = 11.sp, color = Color.White.copy(alpha = 0.9f))
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Surface(color = Color.White, shape = RoundedCornerShape(8.dp)) {
-                                    Text("Shop Quick Mart →", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF047857), modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+                                Surface(
+                                    color = Color(0xFFEFF6FF),
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "EV & Moto",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1D4ED8),
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                    )
                                 }
                             }
-                            Text("🥦", fontSize = 38.sp)
+                            Text(
+                                text = "Pathao & Uber style · Bike, Auto & Cab",
+                                fontSize = 11.sp,
+                                color = EvrryMutedText,
+                                modifier = Modifier.padding(top = 1.dp)
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.padding(top = 3.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FlashOn,
+                                    contentDescription = "ETA",
+                                    tint = Color(0xFFF59E0B),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = "3-5 min pickup",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF475569)
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFF8FAFC),
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open",
+                                tint = EvrryMutedText,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
                 }
             }
-            items(items) { item ->
-                Surface(
-                    color = Color.White,
-                    shape = RoundedCornerShape(20.dp),
-                    shadowElevation = 1.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, EvrrySubtleBorder, RoundedCornerShape(20.dp))
+        }
+
+        // 6. VERTICAL 2: FOOD DELIVERY (Restaurant Icon, Orange/Amber Gradient)
+        item {
+            Surface(
+                onClick = onNavigateToFood,
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White,
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFFFED7AA), RoundedCornerShape(20.dp))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Top
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(Color(0xFFF97316), Color(0xFFD97706))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
+                            Icon(
+                                imageVector = Icons.Default.Restaurant,
+                                contentDescription = "Food Delivery",
+                                tint = Color.White,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
                                 Text(
-                                    text = item.title,
-                                    fontWeight = FontWeight.Bold,
+                                    text = "Food Delivery",
                                     fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = EvrryDarkCharcoal
+                                )
+                                Surface(
+                                    color = Color(0xFFFFF7ED),
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "Popular",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFC2410C),
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = "Local kitchens, momo joints & restaurants",
+                                fontSize = 11.sp,
+                                color = EvrryMutedText,
+                                modifier = Modifier.padding(top = 1.dp)
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.padding(top = 3.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FlashOn,
+                                    contentDescription = "ETA",
+                                    tint = Color(0xFFF59E0B),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = "20-30 min",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF475569)
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFF8FAFC),
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open",
+                                tint = EvrryMutedText,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 7. VERTICAL 3: GROCERY MARTS (Shopping Cart Icon, Emerald/Teal Gradient)
+        item {
+            Surface(
+                onClick = onNavigateToGrocery,
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White,
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFFA7F3D0), RoundedCornerShape(20.dp))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(Color(0xFF059669), Color(0xFF0D9488))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Grocery",
+                                tint = Color.White,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = "Grocery Marts",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = EvrryDarkCharcoal
+                                )
+                                Surface(
+                                    color = Color(0xFFECFDF5),
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "Fastest",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF047857),
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = "Daily essentials & farm-fresh produce",
+                                fontSize = 11.sp,
+                                color = EvrryMutedText,
+                                modifier = Modifier.padding(top = 1.dp)
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.padding(top = 3.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FlashOn,
+                                    contentDescription = "ETA",
+                                    tint = Color(0xFFF59E0B),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = "10-15 min dispatch",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF475569)
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFF8FAFC),
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open",
+                                tint = EvrryMutedText,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 8. SECONDARY SERVICES (COMING SOON)
+        item {
+            Column(modifier = Modifier.padding(top = 6.dp)) {
+                Text(
+                    text = "MORE SERVICES COMING SOON",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EvrryMutedText,
+                    letterSpacing = 0.5.sp,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    val secondary = listOf(
+                        Triple("Electronics", "Gadgets", Icons.Default.Computer),
+                        Triple("Fashion", "Apparel", Icons.Default.Checkroom),
+                        Triple("Services", "Repairs", Icons.Default.Build)
+                    )
+
+                    secondary.forEach { (title, subtitle, icon) ->
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color.White,
+                            shadowElevation = 1.dp,
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(1.dp, EvrrySubtleBorder, RoundedCornerShape(16.dp))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = title,
+                                    tint = EvrryMutedText,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = title,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
                                     color = EvrryDarkCharcoal
                                 )
                                 Text(
-                                    text = item.subtitle,
-                                    fontSize = 12.sp,
-                                    color = EvrryMutedText,
-                                    modifier = Modifier.padding(top = 2.dp)
-                                )
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(3.dp),
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFFFEF3C7))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text("⭐", fontSize = 10.sp)
-                                Text(
-                                    text = "${item.rating}",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 11.sp,
-                                    color = Color(0xFFB45309)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(
-                                        text = "Rs ${item.priceNpr.toInt()}",
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 16.sp,
-                                        color = EvrryDarkCharcoal
-                                    )
-                                    item.originalPriceNpr?.let { orig ->
-                                        Text(
-                                            text = "Rs ${orig.toInt()}",
-                                            fontSize = 12.sp,
-                                            color = EvrryMutedText
-                                        )
-                                    }
-                                }
-                                Text(
-                                    text = "by ${item.vendorName}",
-                                    fontSize = 11.sp,
+                                    text = subtitle,
+                                    fontSize = 9.sp,
                                     color = EvrryMutedText
                                 )
                             }
-
-                            Button(
-                                onClick = { viewModel.addToCart(item) },
-                                colors = ButtonDefaults.buttonColors(containerColor = EvrryPrimaryBlue),
-                                shape = RoundedCornerShape(12.dp),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                            ) {
-                                Icon(imageVector = Icons.Default.Add, contentDescription = "Add", modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Add", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                            }
                         }
                     }
                 }
             }
         }
+    }
 
-        // FLOATING CART BAR (If cart has items)
-        if (cart.itemCount > 0) {
-            Surface(
-                color = EvrryDarkCharcoal,
-                shape = RoundedCornerShape(18.dp),
-                shadowElevation = 8.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .clickable { onNavigateToCart() }
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = "Cart", tint = Color.White)
-                        Text(
-                            text = "${cart.itemCount} items in Cart",
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
-                        )
-                    }
-                    Text(
-                        text = "View Cart · Rs ${cart.totalNpr.toInt()} →",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-        }
+    if (showLocationPicker) {
+        LocationPickerSheet(
+            title = "Choose Delivery Location",
+            savedAddressRepository = SavedAddressRepository.shared,
+            onLocationSelected = { loc ->
+                val newAddr = SavedAddress(
+                    id = "addr_${System.currentTimeMillis()}",
+                    label = loc.label.ifBlank { loc.displayTitle },
+                    address = loc.address ?: loc.label,
+                    latitude = loc.latitude,
+                    longitude = loc.longitude,
+                    type = AddressType.OTHER,
+                    isDefault = true
+                )
+                SavedAddressRepository.shared.addAddress(newAddr)
+                SavedAddressRepository.shared.setDefault(newAddr.id)
+                showLocationPicker = false
+            },
+            onDismiss = { showLocationPicker = false }
+        )
     }
 }

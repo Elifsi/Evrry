@@ -80,6 +80,46 @@ public final class AuthViewModel: ObservableObject {
         }
     }
     
+    public func signInWithPassword(identifier: String, password: String, onSuccess: @escaping () -> Void = {}) {
+        self.isLoading = true
+        self.errorMessage = nil
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            self.isLoading = false
+            let isEmail = identifier.contains("@")
+            let prefix = isEmail ? (identifier.components(separatedBy: "@").first ?? "user") : "user"
+            let phone = isEmail ? "+9779812345678" : (identifier.hasPrefix("+") ? identifier : "+977\(identifier)")
+            let user = UserProfile(
+                id: "usr_pass_\(Int(Date().timeIntervalSince1970))",
+                phone: phone,
+                fullName: prefix.capitalized,
+                username: prefix
+            )
+            self.state = .authenticated(user: user)
+            onSuccess()
+        }
+    }
+    
+    public func signUpWithPassword(fullName: String, identifier: String, password: String, onSuccess: @escaping () -> Void = {}) {
+        self.isLoading = true
+        self.errorMessage = nil
+        Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            self.isLoading = false
+            let isEmail = identifier.contains("@")
+            let prefix = isEmail ? (identifier.components(separatedBy: "@").first ?? "user") : "user"
+            let phone = isEmail ? "+9779812345678" : (identifier.hasPrefix("+") ? identifier : "+977\(identifier)")
+            let user = UserProfile(
+                id: "usr_pass_\(Int(Date().timeIntervalSince1970))",
+                phone: phone,
+                fullName: fullName.isEmpty ? prefix.capitalized : fullName,
+                username: prefix
+            )
+            self.state = .authenticated(user: user)
+            onSuccess()
+        }
+    }
+    
     public func updatePhoneNumber(_ text: String) {
         let filtered = text.filter { $0.isNumber }
         self.phoneNumber = String(filtered.prefix(10))

@@ -65,4 +65,28 @@ public final class SavedAddressService: ObservableObject {
             )
         }
     }
+    
+    public func setHomeAddress(_ address: SavedAddress) {
+        let filtered = addresses.filter { $0.type != .home }
+        let updatedHome = SavedAddress(
+            id: address.id,
+            label: address.label,
+            address: address.address,
+            latitude: address.latitude,
+            longitude: address.longitude,
+            type: .home,
+            isDefault: true
+        )
+        addresses = [updatedHome] + filtered.map {
+            SavedAddress(
+                id: $0.id,
+                label: $0.label,
+                address: $0.address,
+                latitude: $0.latitude,
+                longitude: $0.longitude,
+                type: $0.type,
+                isDefault: false
+            )
+        }
+    }
 }

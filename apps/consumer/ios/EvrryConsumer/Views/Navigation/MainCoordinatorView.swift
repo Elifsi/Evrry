@@ -194,6 +194,66 @@ public struct MainCoordinatorView: View {
                                         subRoute = "chat_room"
                                     }
                                 )
+                            case "rides":
+                                RideBookingView(
+                                    viewModel: rideViewModel,
+                                    onBack: {
+                                        subRoute = nil
+                                        previousSubRoute = nil
+                                    },
+                                    onProfileClick: {
+                                        subRoute = nil
+                                        previousSubRoute = nil
+                                        currentTab = "profile"
+                                    },
+                                    onChatClick: { driverName, driverPhone in
+                                        _ = chatViewModel.openOrCreateChatByPhoneNumber(driverPhone)
+                                        previousSubRoute = "rides"
+                                        subRoute = "chat_room"
+                                    },
+                                    onInAppCallClick: { driverName, driverPhone in
+                                        let chat = chatViewModel.openOrCreateChatByPhoneNumber(driverPhone)
+                                        callViewModel.startCall(
+                                            chatId: chat.id,
+                                            calleeName: driverName,
+                                            calleeAvatar: nil,
+                                            calleePhone: driverPhone,
+                                            callType: .audio
+                                        )
+                                        previousSubRoute = "rides"
+                                        subRoute = "voice_call"
+                                    }
+                                )
+                            case "activity":
+                                ActivityView(
+                                    viewModel: activityViewModel,
+                                    onBack: {
+                                        subRoute = nil
+                                        previousSubRoute = nil
+                                    },
+                                    onSelectOrder: { orderId in
+                                        activeOrderId = orderId
+                                        previousSubRoute = "activity"
+                                        subRoute = "order_detail"
+                                    },
+                                    onReorder: { orderItem in
+                                        exploreViewModel.reorderOrder(
+                                            vendorName: orderItem.vendorName,
+                                            title: orderItem.title,
+                                            amountRs: orderItem.amountRs,
+                                            lineItems: orderItem.lineItems
+                                        )
+                                        previousSubRoute = "activity"
+                                        subRoute = "cart"
+                                    }
+                                )
+                            case "address_book":
+                                AddressBookView(
+                                    onBack: {
+                                        subRoute = nil
+                                        previousSubRoute = nil
+                                    }
+                                )
                             case "settings":
                                 SettingsView(
                                     activeModel: homeViewModel.activeModel,
@@ -356,11 +416,11 @@ public struct MainCoordinatorView: View {
                                     viewModel: homeViewModel,
                                     onMenuClick: {
                                         previousSubRoute = nil
-                                        subRoute = "settings"
+                                        currentTab = "profile"
                                     },
                                     onProfileClick: {
                                         previousSubRoute = nil
-                                        subRoute = "settings"
+                                        currentTab = "profile"
                                     },
                                     cartItemCount: exploreViewModel.cart.itemCount,
                                     onCartClick: {
@@ -383,9 +443,44 @@ public struct MainCoordinatorView: View {
                                         previousSubRoute = nil
                                         subRoute = "grocery_home"
                                     },
+                                    onNavigateToRides: {
+                                        previousSubRoute = nil
+                                        subRoute = "rides"
+                                    },
+                                    onNavigateToHome: {
+                                        currentTab = "home"
+                                    },
+                                    onNavigateToCamera: {
+                                        previousSubRoute = nil
+                                        subRoute = "camera"
+                                    },
                                     onProfileClick: {
                                         previousSubRoute = nil
-                                        subRoute = "settings"
+                                        currentTab = "profile"
+                                    }
+                                )
+                            case "camera":
+                                CameraView(
+                                    viewModel: cameraViewModel,
+                                    onBack: { currentTab = "home" },
+                                    onOpenMemories: {
+                                        previousSubRoute = "camera"
+                                        subRoute = "memories"
+                                    },
+                                    onCaptureComplete: { url, filter in
+                                        capturedSnapUrl = url
+                                        capturedSnapFilter = filter
+                                        previousSubRoute = "camera"
+                                        subRoute = "snap_review"
+                                    },
+                                    onNavigateAction: { target in
+                                        if target.hasPrefix("/chat") || target.hasPrefix("chat_room") {
+                                            subRoute = "chat_room"
+                                        } else if target.hasPrefix("cart") {
+                                            subRoute = "cart"
+                                        } else if target.hasPrefix("restaurant_detail") {
+                                            subRoute = "restaurant_detail"
+                                        }
                                     }
                                 )
                             case "chats":
@@ -420,7 +515,7 @@ public struct MainCoordinatorView: View {
                                     },
                                     onProfileClick: {
                                         previousSubRoute = nil
-                                        subRoute = "settings"
+                                        currentTab = "profile"
                                     },
                                     onCameraClick: {
                                         previousSubRoute = nil
@@ -432,13 +527,41 @@ public struct MainCoordinatorView: View {
                                         subRoute = "camera"
                                     }
                                 )
+                            case "profile":
+                                ProfileView(
+                                    authViewModel: authViewModel,
+                                    loyaltyViewModel: loyaltyViewModel,
+                                    onNavigateToActivity: {
+                                        previousSubRoute = nil
+                                        subRoute = "activity"
+                                    },
+                                    onNavigateToAiSettings: {
+                                        previousSubRoute = nil
+                                        subRoute = "settings"
+                                    },
+                                    onNavigateToAddressBook: {
+                                        previousSubRoute = nil
+                                        subRoute = "address_book"
+                                    },
+                                    onNavigateToMemories = {
+                                        previousSubRoute = nil
+                                        subRoute = "memories"
+                                    },
+                                    onNavigateToCamera = {
+                                        previousSubRoute = nil
+                                        subRoute = "camera"
+                                    },
+                                    onLogout: {
+                                        authViewModel.resetToPhoneInput()
+                                    }
+                                )
                             case "rides":
                                 RideBookingView(
                                     viewModel: rideViewModel,
                                     onBack: { currentTab = "home" },
                                     onProfileClick: {
                                         previousSubRoute = nil
-                                        subRoute = "settings"
+                                        currentTab = "profile"
                                     },
                                     onChatClick: { driverName, driverPhone in
                                         _ = chatViewModel.openOrCreateChatByPhoneNumber(driverPhone)
@@ -495,10 +618,11 @@ public struct MainCoordinatorView: View {
                         }
                     }
                     
-                    // BOTTOM APP BAR (Shown only on top-level tabs)
-                    if subRoute == nil {
+                    // BOTTOM APP BAR (Shown on top-level tabs & primary Explore verticals)
+                    let showBottomBar = subRoute == nil || ["food_home", "grocery_home", "rides"].contains(subRoute ?? "")
+                    if showBottomBar {
                         EvrryBottomBar(
-                            currentRoute: currentTab,
+                            currentRoute: ["food_home", "grocery_home", "rides"].contains(subRoute ?? "") ? "explore" : currentTab,
                             chatsUnreadCount: chatViewModel.totalUnreadCount,
                             onNavigate: {
                                 subRoute = nil

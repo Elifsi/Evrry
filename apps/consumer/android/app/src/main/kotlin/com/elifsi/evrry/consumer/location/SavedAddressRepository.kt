@@ -67,4 +67,15 @@ class SavedAddressRepository @Inject constructor() {
             it.copy(isDefault = (it.id == id))
         }
     }
+
+    fun setHomeAddress(address: SavedAddress) {
+        val filtered = _addresses.value.filter { it.type != AddressType.HOME }
+        val updatedHome = address.copy(type = AddressType.HOME, isDefault = true)
+        _addresses.value = listOf(updatedHome) + filtered.map { it.copy(isDefault = false) }
+    }
+
+    companion object {
+        val shared = SavedAddressRepository()
+    }
 }
+

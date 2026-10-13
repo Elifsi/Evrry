@@ -1,5 +1,6 @@
 package com.elifsi.evrry.consumer.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,6 +35,13 @@ import com.elifsi.evrry.consumer.ui.grocery.GroceryHomeScreen
 import com.elifsi.evrry.consumer.ui.grocery.GroceryStoreDetailScreen
 import com.elifsi.evrry.consumer.ui.orders.OrderDetailsScreen
 import com.elifsi.evrry.consumer.ui.orders.OrderSuccessScreen
+import com.elifsi.evrry.consumer.ui.profile.ProfileScreen
+import com.elifsi.evrry.consumer.ui.profile.AddressBookScreen
+import com.elifsi.evrry.consumer.ui.profile.AccountDetailsScreen
+import com.elifsi.evrry.consumer.ui.profile.PaymentMethodsScreen
+import com.elifsi.evrry.consumer.ui.profile.VouchersReferralsScreen
+import com.elifsi.evrry.consumer.ui.profile.LoyaltyRewardsScreen
+import com.elifsi.evrry.consumer.ui.profile.PrivacySecurityScreen
 import com.elifsi.evrry.consumer.viewmodel.*
 
 /**
@@ -96,12 +104,28 @@ fun EvrryConsumerNavHost(
             )
         }
         is AuthScreenState.Authenticated, is AuthScreenState.Error -> {
+            val showBottomBar = inSubRoute == null || inSubRoute in listOf("food_home", "grocery_home", "rides")
+
+            // SYSTEM BACK BUTTON HANDLER: Pops sub-routes or returns to Home tab instead of closing the app
+            BackHandler(enabled = inSubRoute != null || currentTab != "home") {
+                if (inSubRoute != null) {
+                    if (previousSubRoute != null) {
+                        inSubRoute = previousSubRoute
+                        previousSubRoute = null
+                    } else {
+                        inSubRoute = null
+                    }
+                } else if (currentTab != "home") {
+                    currentTab = "home"
+                }
+            }
+
             // MAIN 5-TAB APP EXPERIENCE
             Scaffold(
                 bottomBar = {
-                    if (inSubRoute == null) {
+                    if (showBottomBar) {
                         EvrryBottomBar(
-                            currentRoute = currentTab,
+                            currentRoute = if (inSubRoute in listOf("food_home", "grocery_home", "rides")) "explore" else currentTab,
                             chatsUnreadCount = totalUnreadChats,
                             onNavigate = {
                                 inSubRoute = null
@@ -248,6 +272,86 @@ fun EvrryConsumerNavHost(
                                     previousSubRoute = null
                                     authViewModel.resetToPhoneInput()
                                 }
+                            )
+                        }
+                        "rides" -> {
+                            RideBookingScreen(
+                                viewModel = rideViewModel,
+                                onBack = { inSubRoute = null },
+                                onProfileClick = {
+                                    inSubRoute = null
+                                    currentTab = "profile"
+                                },
+                                onChatClick = { driverName, driverPhone ->
+                                    chatViewModel.startOrOpenDriverChat(driverName, driverPhone)
+                                    previousSubRoute = "rides"
+                                    inSubRoute = "chat_room"
+                                },
+                                onInAppCallClick = { driverName, driverPhone ->
+                                    val chat = chatViewModel.startOrOpenDriverChat(driverName, driverPhone)
+                                    callViewModel.startCall(
+                                        chatId = chat.id,
+                                        calleeName = driverName,
+                                        calleePhone = driverPhone,
+                                        callType = CallType.AUDIO
+                                    )
+                                    previousSubRoute = "rides"
+                                    inSubRoute = "voice_call"
+                                }
+                            )
+                        }
+                        "activity" -> {
+                            ActivityScreen(
+                                viewModel = activityViewModel,
+                                onBack = { inSubRoute = null },
+                                onOrderClick = { orderId ->
+                                    activeOrderId = orderId
+                                    previousSubRoute = "activity"
+                                    inSubRoute = "order_detail"
+                                },
+                                onReorderClick = { orderItem ->
+                                    exploreViewModel.reorderOrder(
+                                        orderItem.vendorName,
+                                        orderItem.title,
+                                        orderItem.amountRs,
+                                        orderItem.lineItems
+                                    )
+                                    inSubRoute = "cart"
+                                }
+                            )
+                        }
+                        "addresses" -> {
+                            AddressBookScreen(
+                                onBack = { inSubRoute = null }
+                            )
+                        }
+                        "account_details" -> {
+                            AccountDetailsScreen(
+                                authViewModel = authViewModel,
+                                onBack = { inSubRoute = null }
+                            )
+                        }
+                        "payment_methods" -> {
+                            PaymentMethodsScreen(
+                                onBack = { inSubRoute = null }
+                            )
+                        }
+                        "vouchers" -> {
+                            VouchersReferralsScreen(
+                                loyaltyViewModel = loyaltyViewModel,
+                                onBack = { inSubRoute = null }
+                            )
+                        }
+                        "rewards" -> {
+                            LoyaltyRewardsScreen(
+                                loyaltyViewModel = loyaltyViewModel,
+                                onBack = { inSubRoute = null }
+                            )
+                        }
+                        "privacy_security" -> {
+                            PrivacySecurityScreen(
+                                authViewModel = authViewModel,
+                                onBack = { inSubRoute = null }
                             )
                         }
                         "chat_room" -> {
@@ -400,15 +504,17 @@ fun EvrryConsumerNavHost(
                             when (currentTab) {
                                 "home" -> {
                                     val cartState by exploreViewModel.cart.collectAsState()
+                                    val userProf by authViewModel.userProfile.collectAsState()
                                     HomeAgentScreen(
                                         viewModel = homeViewModel,
+                                        displayName = userProf.fullName.ifEmpty { "Rahul" },
                                         cartItemCount = cartState.itemCount,
                                         onCartClick = {
                                             previousSubRoute = null
                                             inSubRoute = "cart"
                                         },
-                                        onMenuClick = { inSubRoute = "settings" },
-                                        onProfileClick = { inSubRoute = "settings" }
+                                        onMenuClick = { currentTab = "profile" },
+                                        onProfileClick = { currentTab = "profile" }
                                     )
                                 }
                                 "explore" -> {
@@ -426,7 +532,50 @@ fun EvrryConsumerNavHost(
                                             previousSubRoute = null
                                             inSubRoute = "grocery_home"
                                         },
-                                        onProfileClick = { inSubRoute = "settings" }
+                                        onNavigateToRides = {
+                                            previousSubRoute = null
+                                            inSubRoute = "rides"
+                                        },
+                                        onNavigateToHome = {
+                                            currentTab = "home"
+                                        },
+                                        onNavigateToCamera = {
+                                            previousSubRoute = null
+                                            inSubRoute = "camera"
+                                        },
+                                        onProfileClick = { currentTab = "profile" }
+                                    )
+                                }
+                                "camera" -> {
+                                    CameraScreen(
+                                        viewModel = cameraViewModel,
+                                        onBack = { currentTab = "home" },
+                                        onOpenMemories = {
+                                            previousSubRoute = "camera"
+                                            inSubRoute = "memories"
+                                        },
+                                        onCaptureComplete = { imgUrl, filter ->
+                                            capturedSnapUrl = imgUrl
+                                            capturedSnapFilter = filter
+                                            previousSubRoute = "camera"
+                                            inSubRoute = "snap_review"
+                                        },
+                                        onNavigateAction = { target ->
+                                            if (target.startsWith("/chat")) {
+                                                val contactHandle = target.removePrefix("/chat/")
+                                                val foundChat = chats.find { (it.subtitle?.contains(contactHandle) ?: false) || it.title.contains(contactHandle) }
+                                                if (foundChat != null) {
+                                                    chatViewModel.selectChat(foundChat)
+                                                    previousSubRoute = null
+                                                    inSubRoute = "chat_room"
+                                                } else {
+                                                    currentTab = "chats"
+                                                    inSubRoute = null
+                                                }
+                                            } else {
+                                                currentTab = "home"
+                                            }
+                                        }
                                     )
                                 }
                                 "chats" -> {
@@ -466,59 +615,53 @@ fun EvrryConsumerNavHost(
                                             previousSubRoute = null
                                             inSubRoute = "camera"
                                         },
-                                        onProfileClick = { inSubRoute = "settings" }
+                                        onProfileClick = { currentTab = "profile" }
                                     )
                                 }
-                                "rides" -> {
-                                    RideBookingScreen(
-                                        viewModel = rideViewModel,
-                                        onBack = { currentTab = "home" },
-                                        onProfileClick = { inSubRoute = "settings" },
-                                        onChatClick = { driverName, driverPhone ->
-                                            chatViewModel.startOrOpenDriverChat(driverName, driverPhone)
-                                            previousSubRoute = "rides"
-                                            inSubRoute = "chat_room"
-                                        },
-                                        onInAppCallClick = { driverName, driverPhone ->
-                                            val chat = chatViewModel.startOrOpenDriverChat(driverName, driverPhone)
-                                            callViewModel.startCall(
-                                                chatId = chat.id,
-                                                calleeName = driverName,
-                                                calleePhone = driverPhone,
-                                                callType = CallType.AUDIO
-                                            )
-                                            previousSubRoute = "rides"
-                                            inSubRoute = "voice_call"
-                                        }
-                                    )
-                                }
-                                "activity" -> {
-                                    ActivityScreen(
-                                        viewModel = activityViewModel,
-                                        onBack = { currentTab = "home" },
-                                        onOrderClick = { orderId ->
-                                            activeOrderId = orderId
-                                            inSubRoute = "order_detail"
-                                        },
-                                        onReorderClick = { orderItem ->
-                                            exploreViewModel.reorderOrder(
-                                                orderItem.vendorName,
-                                                orderItem.title,
-                                                orderItem.amountRs,
-                                                orderItem.lineItems
-                                            )
-                                            inSubRoute = "cart"
-                                        }
-                                    )
-                                }
-                                "settings" -> {
-                                    val activeModel by homeViewModel.activeModel.collectAsState()
-                                    SettingsScreen(
-                                        activeModel = activeModel,
+                                "profile" -> {
+                                    ProfileScreen(
                                         authViewModel = authViewModel,
                                         loyaltyViewModel = loyaltyViewModel,
-                                        onSelectModel = { homeViewModel.selectModel(it) },
-                                        onBack = { currentTab = "home" },
+                                        onNavigateToAccount = {
+                                            previousSubRoute = null
+                                            inSubRoute = "account_details"
+                                        },
+                                        onNavigateToPaymentMethods = {
+                                            previousSubRoute = null
+                                            inSubRoute = "payment_methods"
+                                        },
+                                        onNavigateToVouchers = {
+                                            previousSubRoute = null
+                                            inSubRoute = "vouchers"
+                                        },
+                                        onNavigateToRewards = {
+                                            previousSubRoute = null
+                                            inSubRoute = "rewards"
+                                        },
+                                        onNavigateToActivity = {
+                                            previousSubRoute = null
+                                            inSubRoute = "activity"
+                                        },
+                                        onNavigateToAddressBook = {
+                                            previousSubRoute = null
+                                            inSubRoute = "addresses"
+                                        },
+                                        onNavigateToMemories = {
+                                            previousSubRoute = null
+                                            inSubRoute = "memories"
+                                        },
+                                        onNavigateToAiSettings = {
+                                            previousSubRoute = null
+                                            inSubRoute = "settings"
+                                        },
+                                        onNavigateToAppSettings = {
+                                            previousSubRoute = null
+                                            inSubRoute = "settings"
+                                        },
+                                        onNavigateToPrivacySecurity = {
+                                            previousSubRoute = null
+                                            inSubRoute = "privacy_security"
+                                        },
                                         onLogout = {
                                             authViewModel.resetToPhoneInput()
                                         }

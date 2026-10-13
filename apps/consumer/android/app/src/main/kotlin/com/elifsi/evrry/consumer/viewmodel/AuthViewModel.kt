@@ -79,6 +79,51 @@ class AuthViewModel(
         }
     }
 
+    fun signInWithPassword(identifier: String, password: String, onSuccess: () -> Unit = {}) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            delay(500)
+            _isLoading.value = false
+            val isEmail = identifier.contains("@")
+            val name = if (isEmail) identifier.substringBefore("@").replace(".", " ").replaceFirstChar { it.uppercase() } else "Evrry User"
+            val phone = if (!isEmail) {
+                if (identifier.startsWith("+")) identifier else "+977 $identifier"
+            } else {
+                "+977 9812345678"
+            }
+            val user = _userProfile.value.copy(
+                fullName = name,
+                username = identifier.substringBefore("@").filter { it.isLetterOrDigit() }.ifBlank { "user" },
+                phone = phone
+            )
+            _userProfile.value = user
+            _state.value = AuthScreenState.Authenticated(user)
+            onSuccess()
+        }
+    }
+
+    fun signUpWithPassword(fullName: String, identifier: String, password: String, onSuccess: () -> Unit = {}) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            delay(500)
+            _isLoading.value = false
+            val isEmail = identifier.contains("@")
+            val phone = if (!isEmail) {
+                if (identifier.startsWith("+")) identifier else "+977 $identifier"
+            } else {
+                "+977 9812345678"
+            }
+            val user = _userProfile.value.copy(
+                fullName = fullName.ifBlank { "New Evrry User" },
+                username = identifier.substringBefore("@").filter { it.isLetterOrDigit() }.ifBlank { "user" },
+                phone = phone
+            )
+            _userProfile.value = user
+            _state.value = AuthScreenState.Authenticated(user)
+            onSuccess()
+        }
+    }
+
     private val _phoneNumber = MutableStateFlow("")
     val phoneNumber: StateFlow<String> = _phoneNumber.asStateFlow()
 
@@ -135,10 +180,17 @@ class AuthViewModel(
             _state.value = AuthScreenState.OtpRequested(
                 phone = "+977$phone",
                 channel = _selectedChannel.value,
-                retryAfterSeconds = 45,
+                retryAfterSeconds = 60,
                 mockOtp = "123456"
             )
         }
+    }
+
+    fun requestOtpForPhone(phone: String, channel: OtpChannel = OtpChannel.WHATSAPP) {
+        val digitsOnly = phone.filter { it.isDigit() }.take(10)
+        _phoneNumber.value = digitsOnly
+        _selectedChannel.value = channel
+        requestOtp()
     }
 
     fun verifyOtp(code: String = _otpCode.value, onSuccess: () -> Unit = {}) {
