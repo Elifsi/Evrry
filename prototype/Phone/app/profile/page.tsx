@@ -11,7 +11,8 @@ import CreatorSection from "@/components/profile/CreatorSection";
 import MemorySection from "@/components/profile/MemorySection";
 import SettingsSection from "@/components/profile/SettingsSection";
 import AuditSection from "@/components/profile/AuditSection";
-import { User, ListChecks, Wallet, QrCode } from "lucide-react";
+import AddressBookSection from "@/components/profile/AddressBookSection";
+import { User, ListChecks, Wallet, QrCode, Sparkles, Store } from "lucide-react";
 import VouchersSection from "@/components/profile/VouchersSection";
 import QrCodeModal from "@/components/profile/QrCodeModal";
 
@@ -88,7 +89,20 @@ export default function ProfilePage() {
         <RewardsSection open={openSection === "rewards"} onToggle={() => toggle("rewards")} />
 
         <NavRow href="/activity" icon={ListChecks} title="Activity" subtitle="Orders, bookings & rides" />
-        <NavRow href="/wallet" icon={Wallet} title="Payments" subtitle="Balance, cards & history" />
+
+        <AddressBookSection open={openSection === "addresses"} onToggle={() => toggle("addresses")} />
+        <NavRow
+          href="/settings"
+          icon={Sparkles}
+          title="AI & Voice Settings"
+          subtitle="4 AI Models (Ellie, Rony, Jenny, Suka) & Auto Multilingual"
+        />
+        <NavRow
+          href="/partner"
+          icon={Store}
+          title="Partner Mobile App Prototype"
+          subtitle="Rider, Kitchen, Grocery, Hotel & Landlord modes"
+        />
 
         <PreferencesSection open={openSection === "preferences"} onToggle={() => toggle("preferences")} />
         <CreatorSection open={openSection === "creator"} onToggle={() => toggle("creator")} />

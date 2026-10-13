@@ -4,6 +4,11 @@ import { AppState, PreferencesSlice } from "../types";
 
 export const createPreferencesSlice: StateCreator<AppState, [], [], PreferencesSlice> = (set) => ({
   preferences: [],
+  activeVoicePersona: "ellie",
+  selectedLanguage: "ne",
+
+  setActiveVoicePersona: (persona) => set({ activeVoicePersona: persona }),
+  setSelectedLanguage: (lang) => set({ selectedLanguage: lang }),
 
   setPreference: (key, value) =>
     set((s) => {

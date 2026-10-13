@@ -9,8 +9,8 @@
 import Foundation
 import Supabase
 
-public enum VoicePersona: String, Codable {
-    case eli = "eli"
+public enum VoicePersona: String, Codable, CaseIterable {
+    case ellie = "ellie"
     case rony = "rony"
     case jenny = "jenny"
     case suka = "suka"
@@ -76,7 +76,7 @@ public final class EvrryAiService {
     
     public func chatWithConcierge(
         prompt: String,
-        persona: VoicePersona = .eli,
+        persona: VoicePersona = .ellie,
         userId: String? = nil
     ) async throws -> VoiceChatResult {
         let body = VoiceChatBody(
@@ -91,7 +91,7 @@ public final class EvrryAiService {
     }
 
     public func createVoiceRoom(
-        persona: VoicePersona = .eli,
+        persona: VoicePersona = .ellie,
         userId: String? = nil
     ) async throws -> VoiceRoomResult {
         let body = VoiceRoomBody(

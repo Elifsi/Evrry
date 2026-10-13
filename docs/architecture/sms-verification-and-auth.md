@@ -115,3 +115,67 @@ All client platforms connect to the same centralized authentication engine:
 | **iOS Consumer (Swift)** | [`apps/consumer/ios/.../EvrryAuthService.swift`](file:///home/rahul/codes/Evrry/apps/consumer/ios/EvrryConsumer/Services/EvrryAuthService.swift) | `signInWithPhone()`, `verifyPhoneOtp()` |
 | **iOS Partner (Swift)** | [`apps/partner/ios/.../EvrryAuthService.swift`](file:///home/rahul/codes/Evrry/apps/partner/ios/EvrryPartner/Services/EvrryAuthService.swift) | `signInWithPhone()`, `verifyPhoneOtp()` |
 | **Web (Next.js)** | [`apps/web/common/auth.ts`](file:///home/rahul/codes/Evrry/apps/web/common/auth.ts) | `signInWithPhone()`, `verifyPhoneOtp()` |
+
+---
+
+## 7. 1-Tap Social Sign-In (Google, Apple, Email) & Phone Binding
+
+To lower initial registration friction while maintaining operational dispatch compliance in Nepal:
+1. **Google Sign-In**:
+   - 1-tap OAuth sign-in (`signInWithGoogle()`).
+   - Retrieves user full name, verified email, and profile avatar.
+2. **Apple Sign-In**:
+   - Sign in with Apple (`signInWithApple()`) supporting relay email masking.
+3. **Email Sign-In**:
+   - Magic link or OTP email authentication (`signInWithEmail(email)`).
+4. **Mandatory Nepal Mobile Binding Invariant**:
+   - Social accounts are permitted for initial onboarding and browsing.
+   - However, placing a food/grocery order or hailing a taxi requires a registered 10-digit Nepal mobile number (`+977 98XXXXXXXX`).
+   - The user profile triggers a non-blocking prompt to bind and verify their domestic phone number for rider/driver phone contact.
+
+---
+
+## 8. Client Authentication Lifecycle State Machine
+
+The client apps (Android Jetpack Compose & iOS SwiftUI) enforce a strict, unified state machine:
+
+```
+                  ┌──────────────────────┐
+                  │ AuthScreenState.     │
+                  │        Splash        │ (1.5-second brand animation)
+                  └──────────┬───────────┘
+                             │
+            ┌────────────────┴────────────────┐
+            ▼                                 ▼
+   [ First-time install ]            [ Returning session ]
+            │                                 │
+            ▼                                 ▼
+┌───────────────────────┐            ┌─────────────────┐
+│   AuthScreenState.    │            │ AuthScreenState.│
+│      Onboarding       │            │  Authenticated  │
+└───────────┬───────────┘            └─────────────────┘
+            │
+            │ (User taps "Skip" or completes 5-vertical tour)
+            ▼
+┌───────────────────────────────────────────────┐
+│             AuthScreenState.Idle              │
+│  - Phone input field (🇳🇵 +977)                │
+│  - Channel selector (WhatsApp vs Domestic SMS)│
+│  - Continue with Google / Apple / Email       │
+└───────────────────────┬───────────────────────┘
+                        │
+                        ▼ (User requests code)
+┌───────────────────────────────────────────────┐
+│          AuthScreenState.OtpRequested         │
+│  - 6-box discrete PIN input                   │
+│  - 45-second animated cooldown resend         │
+└───────────────────────┬───────────────────────┘
+                        │
+                        ▼ (OTP verified)
+┌───────────────────────────────────────────────┐
+│        AuthScreenState.Authenticated          │
+│  - Loads 5-tab main app (Home, Explore,       │
+│    Chats, Rides, Activity/Orders)             │
+└───────────────────────────────────────────────┘
+```
+

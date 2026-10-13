@@ -16,7 +16,7 @@ Welcome to the **evrry** Super App platform documentation, developed by **Elifsi
 - [Unified Mobile UI & iOS Navigation Rules](./architecture/unified-mobile-ui-and-ios-navigation.md) — 1:1 UI parity between Android and iOS, with mandatory iOS in-app back buttons.
 - [WhatsApp Cloud API OTP Verification](./architecture/whatsapp-otp-verification.md) — Meta Graph API primary OTP with automatic domestic SMS fallback.
 - [Superadmin Control Center & Dynamic Rules](./architecture/superadmin-panel-control-center.md) — Administrative console for platform fee (Rs 10), radius multipliers, and vouchers without writing SQL.
-- [AI Voice Personas & WebRTC Pipeline](./architecture/ai-voice-personas-and-webrtc.md) — 4 Voice Personas (Eli, Rony, Jenny, Suka) with LiveKit WebRTC, Whisper, and Piper-TTS.
+- [AI Voice Personas & WebRTC Pipeline](./architecture/ai-voice-personas-and-webrtc.md) — 4 Voice Personas (Ellie, Rony, Jenny, Suka) with LiveKit WebRTC, Whisper, and Piper-TTS.
 - [Consumer Architecture](./architecture/consumer.md) — Consumer clients, subsystems, and security boundaries.
 - [Partner Architecture](./architecture/partner.md) — Partner clients, merchant workflows, and tenant isolation.
 - [Payment Gateways & Domestic Integration](./architecture/payment-gateways-nepal.md) — eSewa, Khalti, ConnectIPS, and Fonepay gateway architecture.

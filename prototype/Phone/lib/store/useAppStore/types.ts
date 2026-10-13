@@ -138,6 +138,10 @@ export interface MemorySlice {
 
 export interface PreferencesSlice {
   preferences: Preference[];
+  activeVoicePersona: import("@/lib/ai/personas").VoicePersonaId;
+  selectedLanguage: import("@/lib/ai/personas").SupportedLanguage;
+  setActiveVoicePersona: (persona: import("@/lib/ai/personas").VoicePersonaId) => void;
+  setSelectedLanguage: (lang: import("@/lib/ai/personas").SupportedLanguage) => void;
   setPreference: (key: string, value: string) => void;
   deletePreference: (key: string) => void;
 }
@@ -161,4 +165,5 @@ export type AppState = AuditSlice &
   RideSlice &
   MemorySlice &
   PreferencesSlice &
-  UiSlice;
+  UiSlice &
+  import("./slices/addressBookSlice").AddressBookSlice;

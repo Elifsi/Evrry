@@ -28,31 +28,38 @@ Companion to [`UI_DESIGN_SYSTEM.md`](UI_DESIGN_SYSTEM.md) · [`UI_COMPONENT_CATA
 
 ---
 
-## Screen 1 — Splash
+## Screen 1 — Brand Splash Screen (1.5-Second Animated)
 | | |
 |---|---|
-| **Purpose** | Brand moment while app boots/auth restores |
-| **Layout** 👁 | White bg; centred blue **symbol tile**; below it the **EVRRY wordmark**; below that tagline *Everything. One Place.*; abstract **blue gradient waves** lower area |
-| **Components** | SymbolTile (≈ 96 px, radius ≈ 22 %), Wordmark (≈ 160–200 px wide), Tagline (`caption` wide-tracked, `text.secondary`), WaveArtwork (full-bleed bottom ≈ 40 % height, `accentLight`→`brand.secondary`) |
-| **Tokens** | `background.main`, `gradient.brandIcon`, `gradient.waves`, `text.secondary` |
-| **Spacing** 🧭 | Symbol→wordmark 24; wordmark→tagline 12; block vertically centred slightly above centre (~45 %) |
-| **Interactive** | None |
-| **States/edge** | Min display 600 ms, max 1.2 s (`motion.splash`) or until session check done; if offline → continue (cached session) ; failure → onboarding/sign-in |
-| **A11y** | Decorative waves `aria-hidden`; announce "EVRRY" once; honour reduced-motion (no wave animation) |
-| **Impl notes** | Android: SplashScreen API (icon = symbol, bg white); iOS: LaunchScreen with static symbol; Web: skip or ≤ 300 ms. Transition → onboarding (first run), else Home. |
+| **Purpose** | Brand entrance moment while verifying saved session or routing to onboarding |
+| **Duration** | Exactly 1.5 s (1500 ms): 450 ms entrance curve, 700 ms brand hold, 350 ms exit crossfade |
+| **Layout** | Vertical centered stack on soft gradient (`#FFFFFF` → `#F0F6FF`); centered blue rounded squircle tile (`92×92 dp/pt`, radius `26 dp/pt`) with bold white `e`; below it the `evrry` wordmark with `🇳🇵` Nepal flag; tagline *Nepal's Everything Super App*; bottom 3-dot micro-pulse indicator |
+| **Components** | `SplashScreen` (Android) / `SplashView` (iOS), `Animatable` / `withAnimation`, `EvrryPrimaryBlue` surface badge |
+| **Thermal & Battery Optimization** | Uses native hardware-accelerated Compose `Animatable` and SwiftUI `.animation` primitives with zero CPU polling loops or heavy video files to prevent device overheating and battery drain |
+| **Auto-Routing State Machine** | 1. If active user session exists in local storage / keychain → Route directly to Home (`AuthScreenState.Authenticated`)<br>2. If first install / onboarding not completed → Route to Onboarding Carousel (`AuthScreenState.Onboarding`)<br>3. If onboarding previously seen but unauthenticated → Route to Phone Login (`AuthScreenState.Idle`) |
+| **A11y** | Announce "Evrry, Nepal's Everything Super App" once; honor system reduced-motion (skip scale bounce) |
 
-## Screen 2 — Onboarding
+---
+
+## Screen 2 — Dynamic DoorDash-Grade Onboarding Walkthrough (5 Core Verticals)
 | | |
 |---|---|
-| **Purpose** | Explain value & route to sign-in/sign-up |
-| **Layout** 👁 | White bg; top: headline *One app / for everything / you do.* (middle line blue); description *Chat, Pay, Shop, Travel, Services and more.*; centre: abstract blue wave art + 3 page dots; bottom: full-width **Get Started** and *Already have an account? **Sign In*** |
-| **Components** | Headline (`display`), Body (`body`, `text.secondary`), Art, PageDots (8 px, active `brand.primary`), PrimaryButton, TextLink |
-| **Tokens** | `text.primary`, `brand.primary`, `text.secondary`, `gradient.waves`, `action.primary` |
-| **Spacing** 🧭 | 20 side; headline top at safe-area + 48; CTA bottom = safe-area + 24; link 16 below CTA |
-| **Interactive** | Get Started → phone-number + OTP sign-up (evrry auth); Sign In → sign-in; swipe between pages; **Skip** top-right 🧭 |
-| **States** | OTP/network errors surface in next screen; button loading while checking session |
-| **A11y** | Headline is a heading; pages reachable by buttons not only swipe; dots exposed as "Page 1 of 3"; CTA 52 px |
-| **Notes** | Replace "Pay" in copy with evrry features before launch (copy decision); ⚠ reference copy lists *Pay*. |
+| **Purpose** | Educate first-time users on Nepal's 5 core super app verticals with interactive, smooth transitions |
+| **Layout** | Full-screen dynamic container with background color smoothly crossfading (`animateColorAsState` / `.animation`) to match each active vertical. Top bar: Brand wordmark (`e evrry`) + top-right "Skip" button. Center: Interactive artwork card (`240×240 dp/pt`) with drop shadow, category badge, central hero vector icon, floating live metric pill (`previewMetric`), bold headline, descriptive subtitle, and 2 highlight feature chips with checkmarks. Bottom: DoorDash-style expanding pill indicator + "Continue" / "Get Started with Evrry" CTA. |
+| **Extensible Data Model** | `OnboardingPage(id, badge, title, subtitle, accentColor, backgroundColor, icon/systemImage, highlights, previewMetric, previewMetricLabel)` |
+| **5 Core Slides** | 1. **Food Delivery & Dining** (`#EF4444` Coral Red): *"Hot & Fresh Meals, Delivered Fast"* · 28 min avg delivery · 450+ restaurants · Live GPS rider tracking<br>2. **Grocery Quick Mart** (`#10B981` Emerald Green): *"Groceries & Daily Essentials in 15 Mins"* · 15 min express dispatch · Farm-fresh produce · First 3 orders free delivery<br>3. **Mobility & Rides** (`#2563EB` Royal Blue): *"Fast & Safe Rides Across Nepal"* · 3 min pickup ETA · Upfront transparent fares · 24/7 In-ride SOS security<br>4. **End-to-End Encrypted Chat** (`#8B5CF6` Purple): *"Private Chat, HD Calls & Money Sharing"* · 100% Signal-grade Double Ratchet E2EE · Crystal HD calls · Split bills<br>5. **Hospitality & Rentals** (`#F59E0B` Warm Amber): *"Boutique Stays & Vehicle Rentals"* · 4.9★ rating · Verified host guarantee · Instant digital check-in |
+| **Interactive Controls** | Swipeable `HorizontalPager` / `TabView(PageTabViewStyle)`, tapping expanding dots jumps to page, "Skip" routes immediately to Login, last slide CTA transforms to *"Get Started with Evrry"* with forward arrow |
+| **A11y** | Content accessible via both swipe gestures and directional tap buttons; indicators announce "Page X of 5"; CTA touch target minimum 54 dp/pt |
+
+---
+
+## Screen 2.1 — Mobile Authentication & 1-Tap Social Sign-In
+| | |
+|---|---|
+| **Purpose** | Low-friction Nepal mobile number verification (+977) and 1-tap social login |
+| **Layout** | Scrollable container (`verticalScroll` / `ScrollView`). Top: Brand header + welcome message. Center: Phone input field with 🇳🇵 `+977` prefix, OTP channel selector pills (WhatsApp "Instant · Free" vs Domestic SMS "Backup"), and "Get Verification Code" button. Middle: `─── OR CONTINUE WITH ───` subtle divider. Bottom: Social login button group (Google, Apple, Email) and terms disclaimer. |
+| **Social Sign-In Group** | 1. **Continue with Google**: White surface, official Google `G` emblem, calls `signInWithGoogle()`<br>2. **Continue with Apple**: Dark `#0F172A` surface, official `` Apple glyph, calls `signInWithApple()`<br>3. **Continue with Email**: White surface with envelope icon, triggers inline email entry dialog/sheet, calls `signInWithEmail(email)` |
+| **Nepal Mobile Linking Invariant** | Users authenticating via Google, Apple, or Email receive a subsequent prompt to attach their 10-digit Nepal mobile number (+977) so food delivery riders and taxi drivers can contact them during active dispatches |
 
 ## Screen 3 — Home
 | | |
@@ -70,15 +77,43 @@ Companion to [`UI_DESIGN_SYSTEM.md`](UI_DESIGN_SYSTEM.md) · [`UI_COMPONENT_CATA
 ## Screen 4 — Chat
 | | |
 |---|---|
-| **Purpose** | 1:1 messaging, order/ride coordination |
-| **Layout** 👁 | Top: back, avatar, name + "Online", call icon (right); body: received bubble(s), sent bubble, **location preview card**, timestamps; bottom: composer *Type a message…*, attachment, blue circular send |
-| **Components** | TopBar(chat), MessageBubble, TimestampLabel, LocationCard, Composer |
-| **Tokens** | see Chat bubbles in catalog (⚠ sent-bubble colour), `status.success` (online dot) |
-| **Spacing** 🧭 | Bubble gap 4 (same sender) / 12 (change); side inset 16; bubble padding 12×14 |
-| **Interactive** | Call → in-app VoIP; long-press: reply/copy/delete; attach: camera, gallery, location, file; send; scroll-to-bottom FAB when scrolled up |
-| **States** | Sending (clock icon) · sent ✓ · delivered ✓✓ · read ✓✓ blue; failed → red `!` + retry; typing indicator; E2EE banner "Messages are end-to-end encrypted" (🧭 product rule) |
-| **A11y** | Each bubble labelled "You said … 10:42" / "Aarav said …"; status as text not colour only; composer min 48; live region for new messages |
-| **Notes** | Partner (rider/merchant) threads show verified badge; request-gate screen for strangers uses Banner pattern. Call button also offers SIM-call fallback (product rule). |
+| **Purpose** | 1:1 encrypted social messaging, order/ride coordination, voice notes, stickers, and media |
+| **Layout** 👁 | Top bar: in-app back `<`, avatar, name + "Online", wallpaper button (`Palette` / `photo.artframe`), call button (right); dynamic wallpaper container with photo/gradient and 18–20% dark scrim; message list: received bubbles, sent bubbles, location preview cards, borderless floating stickers/animated emojis; bottom composer: emoji sheet toggle (`Mood`), pill input *Type a message…*, attachment button (`+`), circular send button, and adjacent voice note mic button |
+| **Components** | `ChatRoomScreen` / `ChatRoomView`, `TopBar(chat)`, `MessageBubble`, `StickerBubble`, `VoiceNotePlayer`, `LocationCard`, `Composer`, `WallpaperContainer` |
+| **Tokens** | `status.success` (online dot), `surface.default` (received bubble), `action.secondaryPressed` / `brand.primary` (sent bubble), `overlay.scrim` (20% wallpaper dark scrim) |
+| **Spacing** 🧭 | Bubble gap 4 (same sender) / 12 (change); side inset 16; bubble padding 12×14; sticker max-size 150×150 |
+| **Interactive** | Call → `CallScreen` (WebRTC); wallpaper button → `WallpaperPickerSheet`; emoji button → `EmojiStickerSheet`; mic button (hold/lock) → record voice note; attach: camera, gallery, location, file; sticker tap → send; long-press: reply/copy/delete |
+| **States** | Sending (clock icon) · sent ✓ · delivered ✓✓ · read ✓✓ blue; typing indicator; E2EE banner "Messages are end-to-end encrypted"; wallpaper loading & cached |
+| **A11y** | Each bubble labelled "You said … 10:42" / "Aarav said …"; sticker bubbles announce alt description; composer min 48; live region for incoming messages |
+| **Notes** | Partner (rider/merchant) threads show verified badge; stickers render without rectangular border; custom wallpapers apply 18–20% scrim for bubble legibility. |
+
+## Screen 4.1 — WebRTC 1:1 Voice & Video Call
+| | |
+|---|---|
+| **Purpose** | Real-time encrypted VoIP voice and video calls between customers and contacts or drivers |
+| **Layout** | Full-screen immersive call view; top: in-app back / minimize button, encryption indicator 🔒, call duration timer (`02:45`); center: peer avatar with pulsating animated ripple rings (Voice) or full-screen remote camera feed with floating draggable PIP of local camera (Video); bottom: floating horizontal glassmorphic action bar with mic mute, speaker toggle, video/camera flip, and 56 px red circular End Call CTA |
+| **Components** | `CallScreen` / `CallView`, `AvatarRippleVisualizer`, `DraggablePipVideo`, `CallControlBar`, `DurationTimer` |
+| **Interactive** | Mic toggle (mute/unmute), speaker toggle (earpiece/speakerphone), video toggle (enable/disable local camera), camera flip (front/back), end call (terminates WebRTC session & logs to `call_logs`) |
+| **States** | `Initiating` → `Ringing` → `Connected` → `Ended` / `Declined` / `Missed`; reconnecting overlay on network drop |
+| **A11y** | Call controls labeled "Mute microphone", "Toggle speakerphone", "End call"; duration announced at periodic intervals |
+
+## Screen 4.2 — Emoji & Sticker Sheet
+| | |
+|---|---|
+| **Purpose** | WhatsApp-grade expressive picker for categorized Unicode emojis, Google Noto animated emojis, and Twemoji stickers |
+| **Layout** | 3-tab bottom sheet modal (50–55% height); top drag handle and search/tab bar: `Emojis`, `Animated`, `Stickers`; tab 1 displays 5 category chips (`Smileys`, `People`, `Food`, `Activities`, `Objects`) with 7-col grid; tab 2 displays Google Noto animated GIFs in 4-col grid; tab 3 displays Twemoji SVG stickers in 4-col grid |
+| **Components** | `EmojiStickerSheet` / `EmojiStickerSheetView`, `CategoryChipRow`, `EmojiGrid`, `AsyncImageGrid` |
+| **Interactive** | Tab switch with indicator slide; category chip filter; tap emoji/sticker to send immediately into active conversation |
+| **Assets** | Zero paid SDKs: Google Noto Animated Emojis (Apache 2.0 license), Twitter Twemoji (CC-BY 4.0 license), Unicode 15.0 |
+
+## Screen 4.3 — Chat Wallpaper Customizer
+| | |
+|---|---|
+| **Purpose** | Per-conversation chat background personalization with preset palettes and custom gallery photos |
+| **Layout** | Modal bottom sheet; title "Chat Wallpaper" with reset option; "My Photos" gallery launcher card (camera/photo icon + "Choose from Gallery"); 12 preset tiles in a 3-col grid (WhatsApp Warm Emerald, Classic Doodle, Navy, Midnight Violet, Sunset Amber, Rose Quartz, Slate Glass, etc.); selected tile features white checkmark badge |
+| **Components** | `WallpaperPickerSheet` / `WallpaperPickerView`, `PresetTileGrid`, `GalleryPhotoPickerTile` |
+| **Interactive** | Tap preset → instant wallpaper update; tap "My Photos" → launches native device photo picker (`GetContent` / `PhotosPicker`); persist via `set_chat_wallpaper()` RPC |
+| **Legibility Scrim** | Mandatory 18–20% dark tint scrim applied automatically over custom photos so white text and bubbles remain easily readable |
 
 ## Screen 5 — Payments (EXCLUDED)
 The reference shows balance card, Send/Receive/Scan/Add Money, transactions. **Not implemented** (no in-app wallet, see payments architecture). Replacement 🧭: the **Orders/Activity** tab = a filterable ListRow list (Orders · Bookings · Rides) with status chips and a receipt detail page. Receipts show line items, fees, voucher discount, and *payment method used* (Fonepay/eSewa/Khalti/Card/COD) as plain text. Amount formatting & status-with-icon rules from the typography/catalog docs still apply.
@@ -128,6 +163,51 @@ The reference shows balance card, Send/Receive/Scan/Add Money, transactions. **N
 | **States** | Unverified badge, logged-out → Sign-in CTA, update-available badge on About |
 | **A11y** | Each row a `button` with label; toggles announce state; sign-out confirm dialog with destructive text `errorText` |
 
+## Screen 10 — Home AI Voice Concierge (Flagship Home Agent)
+| | |
+|---|---|
+| **Purpose** | Voice-first multimodal concierge for instant everyday ordering, ride bidding, and queries |
+| **Layout** | Top bar with ChatGPT-style minimal switcher `[ Ellie ▾ ]` and profile icon; central pulsating **Voice Waveform Orb** (size 140–160 px); transcript subtitle bubble; bottom quick chips ("🥟 Momo Order", "🛵 Fast Bike", "🛒 Milk & Bread", "🏨 Hotel Room"); bottom navigation |
+| **Minimal Switcher** | Centered pill `[ Ellie ▾ ]` opening a sleek bottom sheet displaying the 4 models: **Ellie** (Everyday guide), **Rony** (Executive concierge), **Jenny** (Hospitable companion), **Suka** (Calm night assistant) |
+| **Zero Language Pills** | Deliberately omits manual language pills. The AI engine automatically mirrors the user's spoken or typed language (**Nepali, Hindi, Maithili, English**) |
+| **Voice Orb States** | `idle` (gentle breathing scale 1.0), `listening` (pulsating audio wave reactive), `thinking` (spinning aura glow), `speaking` (harmonious multi-ring wave) |
+| **Components** | `HomeAgentScreen` / `HomeAgentView`, `VoiceOrb`, `ModelSwitcherSheet`, `QuickChipsRow` |
+| **A11y** | Voice button `accessibilityLabel="Microphone input"`; live transcription region for deaf/hard-of-hearing users |
+
+## Screen 11 — Nepal Phone Auth & WhatsApp OTP
+| | |
+|---|---|
+| **Purpose** | Fast, frictionless Nepal mobile sign-in with instant WhatsApp delivery & SMS fallback |
+| **Layout** | Step 1: `+977` prefix, 10-digit input field, WhatsApp/SMS toggle, "Send Verification Code" CTA.<br>Step 2: Top bar with in-app back `<`; title "Verify Code"; masked phone number; 6 individual discrete digit boxes; 45s cooldown countdown; "Resend Code" link |
+| **In-App Back `<`** | Mandatory top-left back button inside `EvrryTopBar` ($\ge 44 \times 44\text{ pt}$) preventing iOS navigation traps |
+| **Auto-Verification** | Enters 6th digit $\rightarrow$ triggers auto-verify immediately without requiring a confirm button tap |
+| **Components** | `PhoneInputScreen` / `PhoneInputView`, `OtpVerifyScreen` / `OtpVerifyView`, `EvrryTopBar` |
+
+## Screen 12 — Snapchat-Style Camera, Lenses & Real-Time QR Scanner
+| | |
+|---|---|
+| **Purpose** | High-performance mobile camera viewfinder with real-time QR code decoding and AR lenses (100% trademark-compliant) |
+| **Layout** | Fullscreen camera viewfinder surface; right-side vertical tool dock (Flip, Flash, Night, Grid, Lenses, QR toggle); top controls (close, active lens badge, demo QR trigger); center QR reticle with corner brackets; floating `QrScanCard`; bottom circular shutter button, horizontal lens carousel, and bottom-left Memories thumbnail shortcut |
+| **Legal Protection** | Zero trademarked phrases ("Snapchat", "Snapcode", "Bitmoji", "My Eyes Only"). Cleanly designated as **Evrry Camera**, **Lenses**, and **Stories** |
+| **Live QR Decoding** | Seamlessly decodes: 1) Fonepay & Nepal EMVCo QRs $\rightarrow$ "Pay with Fonepay" action; 2) Evrry Friend Contact QRs $\rightarrow$ "Open Chat" action; 3) Restaurant Dining Table QRs $\rightarrow$ "View Digital Menu"; 4) Web links $\rightarrow$ "Open Link" |
+| **Components** | `CameraScreen` / `CameraView`, `QrScanCard`, `LensCarousel`, `CircularShutter` |
+
+## Screen 13 — Memories Hub & My Locker (Private Vault)
+| | |
+|---|---|
+| **Purpose** | 3-tab media repository for preserved camera snaps, device camera roll imports, and PIN-secured private vault |
+| **Layout** | Top bar with back button and title "Memories"; 3-tab segment bar (`Snaps`, `Camera Roll`, `My Locker`); multi-column photo grid; fullscreen snap detail modal with location/filter tags, delete, and friend/story distribution buttons |
+| **My Locker Security** | Discrete 4-digit passcode keypad (`LockerPinKeypad`) with 4-dot indicators; shake error animation on invalid entry (default PIN: `1234`); unlocked session header banner with instant "Lock Now" button; "Unhide / Restore" action |
+| **Components** | `MemoriesScreen` / `MemoriesView`, `LockerPinKeypad`, `SnapDetailModal` |
+
+## Screen 14 — Snap Review & Direct Friend Sharing
+| | |
+|---|---|
+| **Purpose** | Immediate post-capture inspection, text caption overlay, story posting, and WhatsApp-grade encrypted chat sharing |
+| **Layout** | High-resolution image preview; top bar with dismiss `X`, text caption button, and direct amber "Save to My Locker" button; interactive caption overlay; bottom action bar with "Save" (Memories), "Story" (24-hr status), and "Send To" (opens friend bottom sheet) |
+| **Chat Integration** | 1-tap friend selection sheet immediately transmits captured photo snap with caption through WhatsApp-grade E2EE chat |
+| **Components** | `SnapReviewScreen` / `SnapReviewView`, `SendToFriendSheet` |
+
 ---
 
 ## Cross-screen requirements
@@ -136,3 +216,4 @@ The reference shows balance card, Send/Receive/Scan/Add Money, transactions. **N
 - Status never by colour alone; errors are specific and actionable.
 - Focus order = reading order; custom focus ring `border.focus`.
 - Mock data in the reference is illustrative; NPR + Nepal-specific names/places replace INR/India examples.
+- **Mandatory iOS In-App Back Button (`<`)**: Every pushed or modal screen must feature an in-app back navigation button to accommodate iOS hardware which has no physical or system back button.

@@ -3,14 +3,14 @@
  * Elifsi Technologies Private Limited
  *
  * Connects Web portals to server-side AI Gateway for:
- * - 4 Persona AI Voice Agents: Eli (Energetic Female), Rony (Executive Male), Jenny (Hospitable Female), Suka (Calm Male)
+ * - 4 Persona AI Voice Agents: Ellie (Energetic Female), Rony (Executive Male), Jenny (Hospitable Female), Suka (Calm Male)
  * - WebRTC LiveKit room creation for low-latency voice streaming
  * - Menu Vision OCR & Catalog onboarding
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-export type VoicePersonaId = 'eli' | 'rony' | 'jenny' | 'suka';
+export type VoicePersonaId = 'ellie' | 'eli' | 'rony' | 'jenny' | 'suka';
 
 export interface VoicePersonaMetadata {
   id: VoicePersonaId;
@@ -50,7 +50,7 @@ export class EvrryWebAiClient {
   }
 
   /**
-   * Fetch catalog of the 4 Voice Personas (Eli, Rony, Jenny, Sol).
+   * Fetch catalog of the 4 Voice Personas (Ellie, Rony, Jenny, Suka).
    */
   async getPersonas(): Promise<{ success: boolean; personas?: VoicePersonaMetadata[]; error?: string }> {
     try {
@@ -67,7 +67,7 @@ export class EvrryWebAiClient {
   /**
    * Chat with AI Concierge in specified persona voice.
    */
-  async chatWithConcierge(prompt: string, persona: VoicePersonaId = 'eli', userId?: string) {
+  async chatWithConcierge(prompt: string, persona: VoicePersonaId = 'ellie', userId?: string) {
     try {
       const { data, error } = await this.supabase.functions.invoke('ai-gateway', {
         body: {
@@ -88,7 +88,7 @@ export class EvrryWebAiClient {
   /**
    * Create a low-latency WebRTC LiveKit audio room for voice conversation.
    */
-  async createVoiceRoom(persona: VoicePersonaId = 'eli', userId?: string, roomName?: string): Promise<VoiceRoomSession> {
+  async createVoiceRoom(persona: VoicePersonaId = 'ellie', userId?: string, roomName?: string): Promise<VoiceRoomSession> {
     try {
       const { data, error } = await this.supabase.functions.invoke('ai-gateway', {
         body: {

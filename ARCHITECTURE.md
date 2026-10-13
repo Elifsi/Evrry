@@ -56,10 +56,16 @@ This document describes the comprehensive system architecture of the **evrry** S
 - **Purpose**: Implements the multi-vertical mock catalog, conversational voice AI concierge, E2EE chat, WebRTC calling, and order simulations. Form-factor is specifically designed and styled for **mobile smartphone viewports**, acting as the **Smartphone UI & UX Golden Master** for native iOS and Android apps. It is **NOT** a desktop web app or the consumer web portal.
 
 ### B. Consumer Applications — `apps/consumer/`
-- **Android**: `apps/consumer/android/` (Kotlin + Jetpack Compose + Google Maps SDK with 3D isometric vehicles)
-- **iOS**: `apps/consumer/ios/` (Swift + SwiftUI + Google Maps SDK with 44pt in-app back buttons)
-- **Web**: `apps/web/consumer/` (Next.js + React + MapLibre GL / OpenStreetMap for zero-cost web mapping)
-- **Purpose**: Dedicated to customer discovery, voice ordering, cart management, payments, and real-time order/ride tracking.
+- **Android**: `apps/consumer/android/` (Kotlin 2.0 + Jetpack Compose + Material 3, in-app `<` back navigation) — ✅ **Fully Implemented**
+- **iOS**: `apps/consumer/ios/` (Swift 5.10 / 6 + SwiftUI + Clean MVVM, in-app `<` back navigation) — ✅ **Fully Implemented**
+- **Web**: `apps/web/consumer/` (Next.js + React + MapLibre GL / OpenStreetMap for zero-cost web mapping) — 🔮 Planned
+- **Implementation Highlights**:
+  - 1:1 domain models (`AuthState`, `VoiceModel`, `CatalogItem`, `FoodModels`, `CartState`, `RideBooking`), ViewModels, and services.
+  - Dedicated Nepal phone auth with WhatsApp template OTP delivery, Sparrow SMS fallback, 45s resend cooldown, and 6-digit auto-verify PIN entry.
+  - AI Voice Concierge featuring ChatGPT-style minimal switcher `[ Ellie Mini ▾ ]` (Ellie Mini & Ellie Pro), voice waveform orb, zero manual language pills, and automatic multilingual mirroring (Nepali, Hindi, Maithili, English).
+  - Full Food Delivery Vertical architecture ported directly from reference repositories [`reference/kaaneneskpc_Deliverr`](reference/kaaneneskpc_Deliverr) and [`reference/enatega_food-delivery-multivendor`](reference/enatega_food-delivery-multivendor): Dedicated Food Home (`FoodHomeScreen` / `FoodHomeView`), Cuisines carousel, quick filters, restaurant cards, Restaurant Menu Detail (`RestaurantDetailScreen` / `RestaurantDetailView`), Enatega multi-restaurant cart replacement alert, `FoodItemCustomizationSheet` (radio variations, checkbox add-ons, notes, steppers), delivery address picker (`DefaultAddresses`), `OrderSuccessScreen` / `OrderSuccessView`, and `OrderDetailsScreen` / `OrderDetailsView` (5-stage live status stepper, route & dispatch map, driver HUD with Call action, itemized receipt breakdown).
+  - Mandatory in-app back buttons (`<`) on every sub-screen in `EvrryTopBar` ($\ge 44\times 44\text{ pt/dp}$) to guarantee seamless navigation on iOS devices which lack a hardware back button.
+  - Complete elimination of stored in-app wallet (`walletBalanceNpr` purged across all models) in compliance with Nepal Rastra Bank (NRB) regulations, utilizing direct domestic payments (eSewa, Khalti, Fonepay QR, COD).
 
 ### C. Partner & Operations Applications — `apps/partner/` & `apps/web/`
 - **Android**: `apps/partner/android/` (Kotlin + Jetpack Compose for KDS, POS, and Rider mode)

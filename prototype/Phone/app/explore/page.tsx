@@ -1,10 +1,11 @@
+// Rides-only release: Hotels & Room Rentals are hidden from this page.
+// The underlying pages, data files, and store slices are preserved for future
+// development; only the user-facing navigation entry points are removed here.
 import Link from "next/link";
 import {
   UtensilsCrossed,
   ShoppingCart,
   Car,
-  Hotel,
-  Home,
   Laptop,
   Shirt,
   Wrench,
@@ -13,12 +14,24 @@ import {
   ChevronRight,
   Sparkles,
   Zap,
-  ShieldCheck,
-  Star,
 } from "lucide-react";
 
 export default function ExplorePage() {
+  // Hotels & Rentals removed for current release. Rides is the active mobility vertical.
   const CORE_VERTICALS = [
+    {
+      id: "rides",
+      label: "City Rides",
+      tagline: "Pathao & Uber style · Bike, Auto & Cab",
+      eta: "3-5 min pickup",
+      badge: "EV & Moto",
+      color: "from-blue-600 to-indigo-700",
+      lightBg: "bg-blue-50",
+      textColor: "text-blue-700",
+      borderColor: "border-blue-200",
+      icon: Car,
+      href: "/explore/rides",
+    },
     {
       id: "food",
       label: "Food Delivery",
@@ -45,45 +58,6 @@ export default function ExplorePage() {
       icon: ShoppingCart,
       href: "/explore/grocery",
     },
-    {
-      id: "rides",
-      label: "City Rides",
-      tagline: "Pathao & Uber style",
-      eta: "3-5 min pickup",
-      badge: "EV & Moto",
-      color: "from-blue-600 to-indigo-700",
-      lightBg: "bg-blue-50",
-      textColor: "text-blue-700",
-      borderColor: "border-blue-200",
-      icon: Car,
-      href: "/explore/rides",
-    },
-    {
-      id: "hotels",
-      label: "Hotels & Stays",
-      tagline: "Booking.com reservations",
-      eta: "Instant confirmation",
-      badge: "Verified",
-      color: "from-amber-500 to-yellow-600",
-      lightBg: "bg-amber-50",
-      textColor: "text-amber-800",
-      borderColor: "border-amber-200",
-      icon: Hotel,
-      href: "/explore/hotels",
-    },
-    {
-      id: "rentals",
-      label: "Room & Flat Rentals",
-      tagline: "Airbnb & Hamrobazar stays",
-      eta: "Verified Landlords",
-      badge: "1BHK / 2BHK",
-      color: "from-rose-600 to-pink-700",
-      lightBg: "bg-rose-50",
-      textColor: "text-rose-700",
-      borderColor: "border-rose-200",
-      icon: Home,
-      href: "/explore/rentals",
-    },
   ];
 
   const SECONDARY_VERTICALS = [
@@ -98,7 +72,7 @@ export default function ExplorePage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs text-ink/70">
           <MapPin size={14} className="text-brand shrink-0" />
-          <span className="font-semibold text-ink">Jhamsikhel, Lalitpur</span>
+          <span className="font-semibold text-ink">Kathmandu Valley</span>
           <span className="text-[10px] text-ink/40">(Doorstep Delivery)</span>
         </div>
         <Link
@@ -110,9 +84,9 @@ export default function ExplorePage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-ink">Explore Verticals</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Explore Services</h1>
         <p className="mt-0.5 text-xs text-ink/50">
-          Manual marketplace with dedicated vertical experiences across Nepal.
+          Rides · Food · Groceries — and more coming soon across Nepal.
         </p>
       </div>
 
@@ -121,19 +95,19 @@ export default function ExplorePage() {
         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/35" />
         <input
           type="text"
-          placeholder="Search food, groceries, rides, hotels, flats..."
+          placeholder="Search food, groceries, rides..."
           className="w-full pl-10 pr-4 py-2.5 bg-white border border-black/10 rounded-2xl text-xs text-ink placeholder:text-ink/35 shadow-2xs focus:outline-none focus:border-brand"
         />
       </div>
 
-      {/* 5 Core Verticals Feature Cards */}
+      {/* Active Verticals */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-black uppercase tracking-wider text-ink/60">
-            Core 5 Super App Verticals
+            Available Now
           </h2>
           <span className="text-[10px] font-bold text-brand bg-brandSoft px-2 py-0.5 rounded-full">
-            Full Manual UI
+            Live
           </span>
         </div>
 
@@ -187,12 +161,12 @@ export default function ExplorePage() {
         <h3 className="text-xs font-bold text-ink/70">Popular in Kathmandu Valley</h3>
         <div className="flex flex-wrap gap-1.5">
           {[
+            { label: "🛵 EVRRY Moto Ride", href: "/explore/rides" },
+            { label: "🚗 AC Cab to Airport", href: "/explore/rides" },
             { label: "🥟 Momo & Chowmein", href: "/explore/food" },
             { label: "🍲 Jimbu Thakali", href: "/explore/food" },
             { label: "🥛 DDC Cow Milk", href: "/explore/grocery" },
-            { label: "🛵 EVRRY Moto Ride", href: "/explore/rides" },
-            { label: "🏨 Pokhara Lakeside", href: "/explore/hotels" },
-            { label: "🏠 1BHK Jhamsikhel", href: "/explore/rentals" },
+            { label: "⚡ EV Auto Ride", href: "/explore/rides" },
           ].map((chip) => (
             <Link
               key={chip.label}

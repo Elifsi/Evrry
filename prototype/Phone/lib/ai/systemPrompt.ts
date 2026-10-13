@@ -1,5 +1,6 @@
 import { CartItem } from "@/lib/types";
 import { findById } from "@/lib/data/catalog";
+import { getVoicePersona, SUPPORTED_LANGUAGES } from "@/lib/ai/personas";
 
 export interface RequestContext {
   walletBalance: number;
@@ -8,6 +9,8 @@ export interface RequestContext {
   /** Today's date (YYYY-MM-DD) from the client's own clock/timezone — never computed server-side,
    *  since a server's local date can legitimately differ from the user's (see lib/dates.ts). */
   today?: string;
+  persona?: string;
+  language?: string;
 }
 
 const BASE_SYSTEM_PROMPT = `You are the AI concierge that IS this app's home screen — a voice-first agent, not a
@@ -49,7 +52,15 @@ Conversation shape:
 - Keep replies tight: 1-4 sentences, spoken-voice style. Plain prose only — no markdown bullet/numbered lists
   or headings (the client renders **bold** but nothing else literally).
 - If the user attaches an image, actually look at it and respond to what's in it — describe it, answer
-  questions about it, or use it to help find/compare a real catalog item if that's what they're asking for.`;
+  questions about it, or use it to help find/compare a real catalog item if that's what they're asking for.
+- CRITICAL AUTOMATIC LANGUAGE MIRRORING:
+  Automatically detect the language in which the user speaks or writes (Nepali नेपाली, Hindi हिन्दी, Maithili मैथिली, Bhojpuri, English, Nepglish, Hinglish, etc.).
+  ALWAYS speak and reply in that EXACT SAME LANGUAGE and script.
+  NEVER prompt or ask the user to select, switch, or configure a language. Seamlessly adapt and converse natively in whatever language they use.
+  If the user addresses you in Nepali (or Romanized Nepali like "k cha khabar?"), reply in fluent, natural Nepali.
+  If the user addresses you in Hindi, reply in fluent, natural Hindi.
+  If the user addresses you in Maithili, reply in fluent, natural Maithili.
+  If the user addresses you in English, reply in English.`;
 
 export function buildSystemPrompt(context: RequestContext) {
   const cartLines = context.cart
@@ -60,11 +71,15 @@ export function buildSystemPrompt(context: RequestContext) {
     .filter(Boolean)
     .join("\n");
 
+  const personaConfig = context.persona ? getVoicePersona(context.persona) : getVoicePersona('ellie');
+
+  const personaSection = `\n- Active AI Agent Model: ${personaConfig.name} (${personaConfig.tagline})\n- Persona instructions: ${personaConfig.systemInstruction}`;
+
   return `${BASE_SYSTEM_PROMPT}
 
 Live account state (authoritative — trust this over anything said earlier in the conversation):
 - Today's date: ${context.today || "unknown — ask the user to confirm a date if they use a relative one like \"tomorrow\""}
 - User's name: ${context.displayName || "the user"}
 - Wallet balance: Rs ${context.walletBalance.toLocaleString("en-IN")}
-- Current cart: ${context.cart.length === 0 ? "empty" : `\n${cartLines}`}`;
+- Current cart: ${context.cart.length === 0 ? "empty" : `\n${cartLines}`}${personaSection}`;
 }

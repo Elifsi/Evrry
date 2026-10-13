@@ -133,4 +133,25 @@ public final class EvrryMapRoutingService {
         }
         return coords
     }
+    
+    /**
+     * Calculates the heading/bearing angle in degrees (0..360) between two coordinates,
+     * used to rotate 3D isometric vehicle markers smoothly along the road.
+     */
+    public static func calculateBearing(
+        from origin: CLLocationCoordinate2D,
+        to destination: CLLocationCoordinate2D
+    ) -> Double {
+        let lat1 = origin.latitude * .pi / 180.0
+        let lon1 = origin.longitude * .pi / 180.0
+        let lat2 = destination.latitude * .pi / 180.0
+        let lon2 = destination.longitude * .pi / 180.0
+        
+        let dLon = lon2 - lon1
+        let y = sin(dLon) * cos(lat2)
+        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+        let radiansBearing = atan2(y, x)
+        let degrees = radiansBearing * 180.0 / .pi
+        return (degrees + 360.0).truncatingRemainder(dividingBy: 360.0)
+    }
 }

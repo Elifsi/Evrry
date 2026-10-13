@@ -6,18 +6,24 @@ import { appendMessage, attemptDeliver, updateMessage, uid } from "../internal";
 export const createMessagingSlice: StateCreator<ChatState, [], [], MessagingSlice> = (set, get) => ({
   messagesByContact: {},
   unreadByContact: {},
+  wallpaperByContact: {},
 
-  sendMessage: async (contactId, text, imageDataUrl, audio) => {
+  sendMessage: async (contactId, text, imageDataUrl, audio, meta) => {
     const trimmed = text.trim();
-    if (!trimmed && !imageDataUrl && !audio) return;
+    // Allow sticker messages that have no text/image/audio
+    if (!trimmed && !imageDataUrl && !audio && !meta) return;
     const msgId = uid("msg");
     appendMessage(set, contactId, {
       id: msgId,
       direction: "out",
       text: trimmed,
+      type: meta?.type,
+      stickerUrl: meta?.stickerUrl,
       imageDataUrl,
       audioDataUrl: audio?.dataUrl,
       audioDurationMs: audio?.durationMs,
+      locationMeta: meta?.locationMeta,
+      envelopeMeta: meta?.envelopeMeta,
       at: Date.now(),
       status: "sending",
     });
@@ -37,5 +43,9 @@ export const createMessagingSlice: StateCreator<ChatState, [], [], MessagingSlic
     if (hadUnread && transport.socket && transport.socket.readyState === WebSocket.OPEN) {
       transport.socket.send(JSON.stringify({ type: "read", to: contactId, at: Date.now() }));
     }
+  },
+
+  setWallpaper: (contactId, url) => {
+    set((s) => ({ wallpaperByContact: { ...s.wallpaperByContact, [contactId]: url } }));
   },
 });

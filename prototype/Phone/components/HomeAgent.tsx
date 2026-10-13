@@ -15,9 +15,24 @@ import {
   X,
   Share2,
   SlidersHorizontal,
+  Settings,
+  Store,
+  Globe,
+  Check,
+  Volume2,
+  ChevronDown,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAppStore } from "@/lib/store/useAppStore";
+import {
+  getAllVoicePersonas,
+  SUPPORTED_LANGUAGES,
+  SupportedLanguage,
+  VoicePersonaId,
+  getPersonaGreeting,
+  getVoicePersona,
+} from "@/lib/ai/personas";
+import { playNaturalIndicSpeech, stopNaturalIndicSpeech } from "@/lib/ai/ttsAudio";
 import { AiChatSSEEvent, ChatMessage } from "@/lib/types";
 import { findById } from "@/lib/data/catalog";
 import { todayIso } from "@/lib/dates";
@@ -71,6 +86,10 @@ export default function HomeAgent() {
   const bookHotel = useAppStore((s) => s.bookHotel);
   const personalizationEnabled = useAppStore((s) => s.personalizationEnabled);
   const memory = useAppStore((s) => s.memory);
+  const activeVoicePersona = useAppStore((s) => s.activeVoicePersona);
+  const setActiveVoicePersona = useAppStore((s) => s.setActiveVoicePersona);
+  const selectedLanguage = useAppStore((s) => s.selectedLanguage);
+  const setSelectedLanguage = useAppStore((s) => s.setSelectedLanguage);
 
   const [started, setStarted] = useState(chatMessages.length > 0);
   const [aiMode, setAiMode] = useState<"chat" | "assistant">("chat");
@@ -88,6 +107,7 @@ export default function HomeAgent() {
   const [speakEnergyToken, setSpeakEnergyToken] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
   const [showVoicePicker, setShowVoicePicker] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(null);
@@ -163,14 +183,14 @@ export default function HomeAgent() {
     if (voice) utter.voice = voice;
   }
 
-  /** A standalone preview, deliberately outside the conversation's speak()/queue machinery — just a quick sample, not a real turn. */
-  function previewVoice(voice: SpeechSynthesisVoice) {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance("Hi, this is how I sound.");
-    utter.voice = voice;
-    utter.rate = 1.02;
-    window.speechSynthesis.speak(utter);
+  /** A standalone preview of persona greeting, speaking: "Hi, my name is [Name]. [Localized Greeting]" */
+  function previewVoice(voiceOrPersona?: SpeechSynthesisVoice | VoicePersonaId, maybePersonaId?: VoicePersonaId) {
+    if (typeof window === "undefined") return;
+    const pid = (typeof voiceOrPersona === "string" ? voiceOrPersona : (maybePersonaId || activeVoicePersona || "ellie")) as VoicePersonaId;
+    const persona = getVoicePersona(pid);
+    const greetingText = `Hi, my name is ${persona.name}. ${persona.sampleGreetings.ne || persona.sampleGreeting}`;
+
+    playNaturalIndicSpeech(greetingText, "auto");
   }
 
   async function handleShareTranscript() {
@@ -283,7 +303,8 @@ export default function HomeAgent() {
     const rec = new Ctor();
     rec.continuous = true;
     rec.interimResults = true;
-    rec.lang = "en-US";
+    const currentLangMeta = SUPPORTED_LANGUAGES.find((l) => l.code === selectedLanguage);
+    rec.lang = currentLangMeta?.speechLocale || "ne-NP";
 
     // Local to this call — a stale timer/callback from an old session can
     // never act on the wrong recognizer, by construction, since a fresh
@@ -365,12 +386,17 @@ export default function HomeAgent() {
     setCaption(text);
     setSpeakEnergyToken((t) => t + 1);
 
+    if (selectedLanguage !== "en" || /[\u0900-\u097F]/.test(text)) {
+      playNaturalIndicSpeech(text, "auto", () => {
+        setErrorFlavor(false);
+        resumeAfterSpeaking();
+      });
+      return;
+    }
+
     const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
     if (!canSpeak) {
       if (opts?.errorFlavor) {
-        // No TTS AND the thing we wanted to say was an apology — genuinely
-        // stuck, not just "briefly speaking an error," so this really is
-        // the terminal error phase rather than a same-frame tint.
         transitionPhase("error");
         return;
       }
@@ -606,6 +632,8 @@ export default function HomeAgent() {
             cart: useAppStore.getState().cart,
             displayName,
             today: todayIso(),
+            persona: activeVoicePersona,
+            language: selectedLanguage,
           },
           image: image ? { dataUrl: image.dataUrl, mimeType: image.mimeType } : undefined,
         }),
@@ -747,8 +775,9 @@ export default function HomeAgent() {
         {/* Hidden file input for media/image attachment */}
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelected} />
 
-        {/* Top Bar matching chat.png and Assistant.png */}
+        {/* Top Bar matching chat.png and Assistant.png with ChatGPT-Style Model Switcher */}
         <div className="relative z-10 flex items-center justify-between px-5 pt-4 pb-2">
+          {/* Left: Menu button */}
           <button
             type="button"
             onClick={() => setShowDrawer(true)}
@@ -761,6 +790,70 @@ export default function HomeAgent() {
             </div>
           </button>
 
+          {/* Center: ChatGPT-Style Minimal Model Switcher [ Ellie ▾ ] */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowModelPicker((prev) => !prev)}
+              className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold text-[#0B172A] hover:bg-black/5 active:scale-95 transition border border-slate-200/80 bg-white/80 backdrop-blur-sm shadow-2xs cursor-pointer"
+            >
+              <span>{getVoicePersona(activeVoicePersona).name}</span>
+              <ChevronDown
+                size={14}
+                className={clsx("text-slate-400 transition-transform duration-200", showModelPicker && "rotate-180")}
+              />
+            </button>
+
+            {/* Dropdown Menu (ChatGPT style) */}
+            {showModelPicker && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowModelPicker(false)}
+                />
+                <div className="absolute left-1/2 -translate-x-1/2 top-11 z-50 w-64 overflow-hidden rounded-2xl bg-white p-1.5 shadow-xl border border-slate-100 divide-y divide-slate-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                    Model
+                  </div>
+                  <div className="py-1 space-y-0.5">
+                    {getAllVoicePersonas().map((p) => {
+                      const isSelected = activeVoicePersona === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveVoicePersona(p.id);
+                            setShowModelPicker(false);
+                            previewVoice(p.id);
+                          }}
+                          className={clsx(
+                            "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition",
+                            isSelected
+                              ? "bg-slate-100 font-semibold text-[#0B172A]"
+                              : "text-slate-700 hover:bg-slate-50 font-normal"
+                          )}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-base">{p.avatarEmoji}</span>
+                            <div>
+                              <p className="leading-tight text-xs font-semibold">{p.name}</p>
+                              <p className="text-[10px] text-slate-400 font-normal line-clamp-1">
+                                {p.tagline.split("—")[0]}
+                              </p>
+                            </div>
+                          </div>
+                          {isSelected && <Check size={14} className="text-[#005EFF] shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Right: Profile Avatar */}
           <Link
             href="/profile"
             className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 shadow-sm active:scale-95 transition"
@@ -976,8 +1069,13 @@ export default function HomeAgent() {
           >
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <p className="text-base font-semibold text-[#0B172A]">evrry Assistant</p>
-                <p className="text-xs text-slate-400">Everything. One Place.</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-base font-semibold text-[#0B172A]">evrry Assistant</p>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-[#005EFF] border border-blue-100">
+                    {getVoicePersona(activeVoicePersona).avatarEmoji} {getVoicePersona(activeVoicePersona).name}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">Everything. One Place. Powered by Gemini.</p>
               </div>
               <button
                 onClick={() => setShowDrawer(false)}
@@ -987,7 +1085,75 @@ export default function HomeAgent() {
               </button>
             </div>
 
+            {/* AI Model Switcher (Clean & Minimal) */}
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  AI Model
+                </span>
+                <span className="text-[11px] text-[#005EFF]">Auto-detects user language</span>
+              </div>
+              <div className="space-y-1.5">
+                {getAllVoicePersonas().map((p) => {
+                  const isSelected = activeVoicePersona === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setActiveVoicePersona(p.id);
+                        previewVoice(p.id);
+                      }}
+                      className={clsx(
+                        "flex w-full items-center justify-between rounded-2xl px-3.5 py-2.5 text-left transition border",
+                        isSelected
+                          ? "bg-blue-50/80 border-[#005EFF] shadow-sm ring-1 ring-[#005EFF]/30"
+                          : "bg-slate-50/70 border-slate-100 hover:bg-slate-100/70"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{p.avatarEmoji}</span>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900 leading-tight">{p.name}</p>
+                          <p className="text-[11px] text-slate-500 line-clamp-1">{p.tagline.split("—")[0]}</p>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#005EFF] text-white">
+                          <Check size={12} strokeWidth={3} />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Action Rows & Navigation */}
             <div className="mt-4 space-y-2">
+              <Link
+                href="/settings"
+                onClick={() => setShowDrawer(false)}
+                className="flex w-full items-center justify-between rounded-2xl bg-blue-50/50 px-4 py-3 text-sm font-medium text-slate-800 hover:bg-blue-50 border border-blue-100/60 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <Settings size={16} className="text-[#005EFF]" />
+                  <span>AI & App Settings</span>
+                </div>
+                <span className="text-xs text-[#005EFF] font-semibold">Fine-tune &rarr;</span>
+              </Link>
+
+              <Link
+                href="/partner"
+                onClick={() => setShowDrawer(false)}
+                className="flex w-full items-center justify-between rounded-2xl bg-emerald-50/50 px-4 py-3 text-sm font-medium text-slate-800 hover:bg-emerald-50 border border-emerald-100/60 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <Store size={16} className="text-emerald-600" />
+                  <span>Partner Mobile Prototype</span>
+                </div>
+                <span className="text-xs text-emerald-600 font-semibold">5 Roles &rarr;</span>
+              </Link>
+
               <button
                 onClick={() => {
                   resetConversation();
@@ -1007,7 +1173,7 @@ export default function HomeAgent() {
                 className="flex w-full items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
               >
                 <SlidersHorizontal size={16} className="text-[#005EFF]" />
-                <span>Change voice</span>
+                <span>Change system voice</span>
               </button>
 
               <button
@@ -1022,10 +1188,14 @@ export default function HomeAgent() {
               </button>
             </div>
 
-            <div className="mt-5 rounded-2xl bg-blue-50/60 p-4 text-xs text-slate-600 border border-blue-100/50">
-              <p className="font-semibold text-slate-800 mb-1">Session status</p>
-              <p>Personalization: {personalizationEnabled ? "On" : "Off"}</p>
-              <p>Remembered facts: {memory.length}</p>
+            <div className="mt-4 rounded-2xl bg-blue-50/60 p-3.5 text-xs text-slate-600 border border-blue-100/50">
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-semibold text-slate-800">Session Status</p>
+                <span className="text-[10px] bg-white px-2 py-0.5 rounded-full font-medium text-slate-600 border border-blue-100">
+                  Gemini 2.5 Flash
+                </span>
+              </div>
+              <p>Personalization: {personalizationEnabled ? "On" : "Off"} · Memories: {memory.length}</p>
               <p>Messages this session: {chatMessages.length}</p>
               {!supported && (
                 <p className="mt-1 text-amber-600">Voice input isn&apos;t supported in this browser.</p>

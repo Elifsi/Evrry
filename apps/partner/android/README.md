@@ -37,22 +37,24 @@ implementation("androidx.lifecycle:lifecycle-service:2.7.0")
 
 ---
 
-## 2. Multi-Flavor Architecture (`kaaneneskpc/Deliverr`)
+## 2. Multi-Flavor / Dynamic Role Architecture (`kaaneneskpc/Deliverr`)
 
-The partner application uses single-codebase multi-variant Gradle build flavors:
-- **`flavorDimensions += "partnerType"`**
-  - `rider`: Optimized for delivery riders and mobility drivers. Foreground GPS tracking loop, order pickup OTPs, and turn-by-turn routing.
-  - `restaurant`: Optimized for tablets. Kitchen Display System (KDS), preparation timers, 86ing items, and thermal printer integration.
-  - `store`: Optimized for grocery pick & pack with barcode scanning.
+The partner application uses a single-codebase adaptive architecture:
+- **`flavorDimensions += "partnerType"`** or runtime adaptive role view:
+  - `driver`: Mobility passenger rides (Bike, Taxi, Cab, Comfort EV). Turn-by-turn OSRM map routing, InDrive-style fare bidding, 4-digit start OTP, driver location broadcast, In-Trip Chat & Dual Calling (VoIP + SIM).
+  - `restaurant`: Dining kitchen operations. Tablet-optimized Kitchen Display System (KDS), preparation timers, 86ing items, ESC/POS thermal ticket printing, courier/consumer chat.
+  - `grocery`: **Supermarket Mode ONLY** (Dark Store deferred). Order pick-and-pack checklist, barcode scanner, inventory adjustments, and substitution alerts.
+  - `rider`: Food & grocery delivery courier. Foreground GPS tracking service, order claiming, 2-stage multi-stop routing (Store Pickup → Customer Drop), handoff OTP verification, COD cash collection, multi-party chat.
 
 ---
 
 ## 3. Official Architectural Reference Alignments
 
-- **Kitchen KDS & Order Lifecycles**: Follows [`enatega/food-delivery-multivendor`](https://github.com/enatega/food-delivery-multivendor) for finite-state order transitions (`pending_vendor` $\rightarrow$ `accepted` $\rightarrow$ `preparing` $\rightarrow$ `ready_for_pickup`).
-- **Driver Bidding Counter-Offers**: Follows [`WaqasSiddiqi/inDrive-Clone`](https://github.com/WaqasSiddiqi/inDrive-Clone) for real-time ride counter-bids before trip assignment.
-- **Vehicle Rental Agency Portal**: Follows [`arman-dogru/car-rental-android-app`](https://github.com/arman-dogru/car-rental-android-app) for vehicle listing, inspection checklist, and security deposit management.
-- **Driver GPS Broadcast**: Follows [`anandwana001/uber-clone`](https://github.com/anandwana001/uber-clone) with vehicle bearing/heading calculation.
+- **Driver Mobility & GPS Broadcast**: Follows [`amitshekhariitbhu/ridesharing-uber-lyft-app`](https://github.com/amitshekhariitbhu/ridesharing-uber-lyft-app) and [`anandwana001/uber-clone`](https://github.com/anandwana001/uber-clone) with vehicle bearing/heading calculation, polyline decode, and active HUD.
+- **Kitchen KDS & Order Lifecycles**: Follows [`enatega/food-delivery-multivendor`](https://github.com/enatega/food-delivery-multivendor) (`enatega-multivendor-store`) for finite-state order transitions (`acknowledged` $\rightarrow$ `preparing` $\rightarrow$ `ready_for_pickup`), audio alarm chimes, and ESC/POS thermal printing.
+- **Grocery Supermarket Fulfillment**: Follows [`Aakash901/BlinkitClone`](https://github.com/Aakash901/BlinkitClone) for item catalog models, pick-and-pack checklist, and out-of-stock substitutions.
+- **Delivery Courier Operations**: Follows [`kaaneneskpc/Deliverr`](https://github.com/kaaneneskpc/Deliverr) and [`enatega/food-delivery-multivendor`](https://github.com/enatega/food-delivery-multivendor) (`enatega-multivendor-rider`) for foreground GPS service, order claiming, two-stop navigation, and delivery OTP handoff.
+- **Chat & Calling**: Follows [`GetStream/whatsApp-clone-compose`](https://github.com/GetStream/whatsApp-clone-compose) and [`Gmarvis/whatsapp-clone`](https://github.com/Gmarvis/whatsapp-clone) for real-time messaging and dual calling (VoIP + SIM dialer).
 
 ---
 

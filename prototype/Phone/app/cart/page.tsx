@@ -142,12 +142,8 @@ export default function CartPage() {
           ))}
         </div>
         {!source && (
-          <p className="mt-1.5 text-xs text-red-600">
-            No balance or card on file —{" "}
-            <Link href="/wallet" className="underline">
-              add money or a card
-            </Link>{" "}
-            first.
+          <p className="mt-1.5 text-xs text-ink/60">
+            Pay directly via eSewa, Khalti, Fonepay QR, or Cash on Delivery.
           </p>
         )}
       </div>

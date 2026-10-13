@@ -22,6 +22,7 @@ import { createRideSlice } from "./slices/rideSlice";
 import { createMemorySlice } from "./slices/memorySlice";
 import { createPreferencesSlice } from "./slices/preferencesSlice";
 import { createUiSlice } from "./slices/uiSlice";
+import { createAddressBookSlice } from "./slices/addressBookSlice";
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -38,6 +39,7 @@ export const useAppStore = create<AppState>()(
       ...createMemorySlice(...a),
       ...createPreferencesSlice(...a),
       ...createUiSlice(...a),
+      ...createAddressBookSlice(...a),
     }),
     // Unchanged from before the slice split: no partialize, so every field
     // above persists to localStorage as-is. Bump `version` (with a

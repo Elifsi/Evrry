@@ -85,4 +85,31 @@ describe("useChatStore incoming message integration", () => {
 
     expect(useChatStore.getState().messagesByContact["unknown-contact-id"]).toBeUndefined();
   });
+
+  it("appends and sends sticker messages with type and stickerUrl", async () => {
+    const mockContact = { id: "contact-mock", username: "mockuser", publicKeyJwk: {} as JsonWebKey, addedAt: Date.now(), isMock: true };
+    useChatStore.setState({ contacts: [mockContact] });
+
+    const stickerUrl = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f600.svg";
+    await useChatStore.getState().sendMessage("contact-mock", "", undefined, undefined, {
+      type: "sticker",
+      stickerUrl,
+    });
+
+    const messages = useChatStore.getState().messagesByContact["contact-mock"];
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      type: "sticker",
+      stickerUrl,
+      direction: "out",
+    });
+  });
+
+  it("persists chat wallpaper per-contact", () => {
+    useChatStore.getState().setWallpaper("contact-1", "dusk");
+    useChatStore.getState().setWallpaper("contact-2", "ocean");
+
+    expect(useChatStore.getState().wallpaperByContact["contact-1"]).toBe("dusk");
+    expect(useChatStore.getState().wallpaperByContact["contact-2"]).toBe("ocean");
+  });
 });

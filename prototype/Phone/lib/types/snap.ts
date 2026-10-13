@@ -28,4 +28,22 @@ export interface Snap {
   dataUrl: string;
   filterName: string;
   createdAt: number;
+  location?: string;
+  caption?: string;
+  isLocked?: boolean;
 }
+
+export type QrActionType = "fonepay" | "contact" | "restaurant" | "url" | "text";
+
+export interface QrScanResult {
+  raw: string;
+  type: QrActionType;
+  title: string;
+  subtitle: string;
+  actionLabel: string;
+  target?: string;
+  amount?: number;
+}
+
+export type MemoryTab = "snaps" | "roll" | "locker";
+

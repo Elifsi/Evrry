@@ -70,7 +70,7 @@ The self-hosted architecture consists of 5 modular container stacks managed via 
 | **Deno Edge Functions** | Deno Runtime | Executes the 11 serverless functions (`payment-verify`, `send-otp`, `ai-gateway`, `payout-execute`, etc.). |
 | **Kong API Gateway** | OpenResty / Nginx | Central ingress reverse proxy routing traffic to `/rest/v1`, `/auth/v1`, `/storage/v1`, `/functions/v1`. |
 | **Supabase Studio** | Next.js / TypeScript | Web admin dashboard for Elifsi engineers to inspect tables, view logs, and monitor database health. |
-| **Python Voice Gateway** | FastAPI + LiveKit WebRTC | Low-latency voice broker for the 4 AI personas (Eli, Rony, Jenny, Suka) with Whisper and Piper-TTS. |
+| **Python Voice Gateway** | FastAPI + LiveKit WebRTC | Low-latency voice broker for the 4 AI personas (Ellie, Rony, Jenny, Suka) with Whisper and Piper-TTS. |
 | **OSRM Engine** | C++ (Open Source Routing Machine) | Calculates turn-by-turn routes, travel time, and distances across all roads in Nepal with zero per-query fees. |
 | **Redis** | Redis 7 | In-memory key-value cache for driver geospatial coordinates (`GEOADD`), rate limiters, and session states. |
 | **Next.js Web Suite** | Node.js / Next.js 16 | The 3 web portals: Superadmin (`apps/web/admin`), Partner KDS (`apps/web/partner`), and Consumer Web (`apps/web/consumer`). |

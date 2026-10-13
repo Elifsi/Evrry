@@ -36,7 +36,17 @@ export default function VoicePickerSheet({
               {!selectedVoiceURI && <Check size={15} className="text-brand" />}
             </button>
             {voices
-              .filter((v) => v.lang.startsWith("en"))
+              .filter((v) => {
+                const l = v.lang.toLowerCase();
+                return l.startsWith("en") || l.startsWith("ne") || l.startsWith("hi") || l.startsWith("mai") || l.startsWith("in");
+              })
+              .concat(
+                voices.filter((v) => {
+                  const l = v.lang.toLowerCase();
+                  return !l.startsWith("en") && !l.startsWith("ne") && !l.startsWith("hi") && !l.startsWith("mai") && !l.startsWith("in");
+                })
+              )
+              .slice(0, 40)
               .map((v) => (
                 <button
                   key={v.voiceURI}

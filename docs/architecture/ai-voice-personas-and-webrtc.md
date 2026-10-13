@@ -9,16 +9,21 @@
 The **evrry AI Voice Concierge** delivers an ultra-low latency (< 300ms round trip), voice-first ordering and conversational experience across all 5 core platform verticals (Food, Grocery, InDrive Cab/Bike Bidding, Stays/Hotels, and Rentals).
 
 Rather than relying on a single generic synthetic voice, the platform provides **4 Persona Voice Agents**:
-1. **Eli** — Youthful, energetic, and quick-witted female concierge (flagship everyday guide).
+1. **Ellie** — Youthful, energetic, and quick-witted female concierge (flagship everyday guide).
 2. **Rony** — Deep baritone, authoritative, and formal (executive concierge).
 3. **Jenny** — Sweet, warm, cheerful, and hospitable (grocery & travel companion).
 4. **Suka** — Mellow, soothing, calm, and thoughtful male concierge (evening & wellness assistant).
+
+### ChatGPT-Style Minimal Model Switcher & Zero Language Pills
+- **Minimal Switcher**: Inspired by modern conversational interfaces (such as ChatGPT's model pill), the Home screen features a single, clean top pill `[ Ellie ▾ ]` that opens a streamlined selection sheet allowing the user to select Ellie, Rony, Jenny, or Suka.
+- **Automatic Multilingual Mirroring**: No manual language toggle pills (e.g. "EN / NE / HI / MAI") cluttering the interface. The AI pipeline automatically mirrors the user's spoken or typed language — seamlessly speaking back in **Nepali**, **Hindi**, **Maithili**, or **English** in the exact dialect used by the user.
 
 ```mermaid
 flowchart TD
     subgraph Mobile / Web Client
         A["Native Microphone (16kHz 16-bit PCM)"]
         B["LiveKit WebRTC Client / WebSocket Audio Track"]
+        SW["Minimal Switcher Pill [ Ellie ▾ ]"]
     end
 
     subgraph LiveKit WebRTC SFU Server
@@ -29,7 +34,7 @@ flowchart TD
         D["Voice Activity Detection (VAD) & Barge-In Handler"]
         E["Faster-Whisper (ASR) + IndicConformer"]
         F["AI4Bharat IndicXlit (Romanized to Devanagari)"]
-        G["LLM Dialog Orchestrator (vLLM / OpenRouter)"]
+        G["LLM Dialog Orchestrator (Auto-Language Mirroring)"]
         H["Tool Calling: search_catalog, add_to_cart, ride_fare"]
         I["Neural TTS (Piper-TTS / Indic-Parler-TTS)"]
         J["Persona Vocal Modulation (Pitch & Speed)"]
@@ -40,6 +45,7 @@ flowchart TD
         L["User Context & Consent-Gated Memory (get_ai_context)"]
     end
 
+    SW -.->|Select Persona| G
     A --> B
     B <--> C
     C <--> D
@@ -62,7 +68,7 @@ Each persona has distinct acoustic characteristics, pitch offsets, cadence speed
 
 | Persona | Gender | Timbre & Cadence | Pitch | Speed | Domain Specialties | Personality & Sample Greeting |
 |---|---|---|---|---|---|---|
-| **Eli** | Female | Bright Alto / Soprano, crisp, punchy | `+0.08` | `1.05x` | Food delivery, fast momo orders, quick motorbike rides, daily chores | *Youthful female Kathmandu guide.* Speaks colloquial Nepali and English ("Hajur", "Dai", "Mitho chha", "Ekdam fast").<br>`"Namaste! Eli here. Momo, grocery, ya bike ride — k chaiyo tapailai? Ekdam fast ready gardinchu!"` |
+| **Ellie** | Female | Bright Alto / Soprano, crisp, punchy | `+0.08` | `1.05x` | Food delivery, fast momo orders, quick motorbike rides, daily chores | *Youthful female Kathmandu guide.* Speaks colloquial Nepali and English ("Hajur", "Dai", "Mitho chha", "Ekdam fast").<br>`"Namaste! Ellie here. Momo, grocery, ya bike ride — k chaiyo tapailai? Ekdam fast ready gardinchu!"` |
 | **Rony** | Male | Deep Baritone, composed, formal | `-0.08` | `0.95x` | InDrive cab fare bidding, hotel room reservations, long-term rentals, corporate orders | *Executive concierge.* Authoritative, respectful, and decisive. Refined formal Nepali ("Namaskar", "Tapailai swaagat chha").<br>`"Namaskar. I am Rony, your executive concierge. Whether you need corporate transport, hotel suites, or ride fare coordination, I am at your service."` |
 | **Jenny** | Female | Soprano / Bright Alto, melodic, warm | `+0.06` | `1.00x` | Supermarket groceries, fresh produce, family homestays, customer care | *Hospitable & cheerful companion.* Attentive and polite ("Namaste! Kasto chha tapailai?"). Highlights freshness and discount vouchers.<br>`"Namaste! I am Jenny! Kasto chha tapailai? Fresh fruits, kitchen groceries, ki family hotel khojdai hunuhunchha? Let me help you find the best options!"` |
 | **Suka** | Male | Warm Baritone, soft, soothing, serene | `-0.05` | `0.92x` | Late-night comfort food, relaxing night rides home, step-by-step guidance, support | *Calm & thoughtful male assistant.* Soft-spoken, patient, unhurried, reassuring.<br>`"Namaste... I am Suka. Take a breath and relax. Tell me how you are feeling or what you need tonight, and we will take care of it together."` |
@@ -117,10 +123,10 @@ To make voice conversations feel completely natural:
 ## 6. Database Schema & User Preference Persistence
 
 Implemented in Migration `20261005000017_ai_voice_personas.sql`:
-- **ENUM `public.ai_voice_persona_enum`**: `'eli'`, `'rony'`, `'jenny'`, `'suka'`.
+- **ENUM `public.ai_voice_persona_enum`**: `'ellie'`, `'rony'`, `'jenny'`, `'suka'`.
 - **Table `public.ai_voice_personas`**: Catalog of active personas, system prompts, pitch/speed parameters, and TTS voice codes.
 - **User Preference in `public.user_ai_profile`**:
-  - `preferred_voice_persona`: Defaults to `'eli'`.
+  - `preferred_voice_persona`: Defaults to `'ellie'`.
   - `voice_speed`: User-customizable speaking rate (`0.75x` to `1.50x`).
 - **RPC `public.set_preferred_voice_persona(p_persona, p_speed)`**: Allows users to switch voices seamlessly in mobile/web settings.
 - **Context Integration in `public.get_ai_context(p_user)`**: Returns the user's active persona and prompt instructions during session initialization.

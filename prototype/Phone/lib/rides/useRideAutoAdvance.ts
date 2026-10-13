@@ -10,7 +10,7 @@ import { useAppStore } from "@/lib/store/useAppStore";
 import { ActiveRide } from "@/lib/types";
 
 function useTick(active: boolean) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!active) return;
     const id = setInterval(() => setNow(Date.now()), 1000);

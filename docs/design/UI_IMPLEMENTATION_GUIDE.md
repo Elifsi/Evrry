@@ -59,7 +59,7 @@ borderRadius: { lg: "16px", xl: "20px", xl2: "24px" },
 ```
 Fonts: `next/font/google` → `Inter({ subsets:["latin"], variable:"--font-inter", weight:["300","400","500","600","700"] })` (self-hosted at build, no runtime request).
 
-**Migration map (applied)**: see above; remaining items: dark-mode screens (voice/call overlays use provisional navy), wallet UI still present in prototype (scheduled for removal).
+**Migration map (applied)**: see above; remaining items: dark-mode screens (voice/call overlays use provisional navy); wallet UI has been completely purged and replaced with the Activity & Orders tab across prototype and native clients.
 
 ## 4. Android (Compose)
 - Define `object EvrryColors` + map to Material 3 `lightColorScheme(primary=…, onPrimary=White, secondary=…, surface=…, outline=…, error=…)`.

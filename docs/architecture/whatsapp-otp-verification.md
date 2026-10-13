@@ -130,6 +130,21 @@ await auth.verifyPhoneOtp('+9779812345678', '849201');
 
 ---
 
+## 6. Mobile UI Implementation Across Android & iOS
+
+The WhatsApp OTP flow is implemented with 1:1 behavioral and visual parity across all platforms:
+- **Android**: [`PhoneInputScreen.kt`](file:///home/rahul/codes/Evrry/apps/consumer/android/src/main/kotlin/com/elifsi/evrry/consumer/ui/auth/PhoneInputScreen.kt) and [`OtpVerifyScreen.kt`](file:///home/rahul/codes/Evrry/apps/consumer/android/src/main/kotlin/com/elifsi/evrry/consumer/ui/auth/OtpVerifyScreen.kt).
+- **iOS**: [`PhoneInputView.swift`](file:///home/rahul/codes/Evrry/apps/consumer/ios/EvrryConsumer/Views/Auth/PhoneInputView.swift) and [`OtpVerifyView.swift`](file:///home/rahul/codes/Evrry/apps/consumer/ios/EvrryConsumer/Views/Auth/OtpVerifyView.swift).
+- **Prototype Reference**: [`prototype/Phone/app/auth/page.tsx`](file:///home/rahul/codes/Evrry/prototype/Phone/app/auth/page.tsx).
+
+### Key Mobile UX Invariants:
+1. **In-App Back Button (`<`)**: The OTP verification screen renders an explicit top-left in-app back button inside `EvrryTopBar` (tap target $\ge 44 \times 44\text{ pt}$) allowing users to return to edit their mobile number without navigation traps.
+2. **6-Digit Box Auto-Focus & Auto-Submit**: The 6 digits are rendered in discrete bordered rounded boxes. Entering the 6th digit triggers automatic submission without requiring a separate "Confirm" tap.
+3. **45-Second Cooldown Visualizer**: Resend link is disabled for 45 seconds with a ticking countdown, preventing accidental spam.
+4. **Channel Switcher**: If a user does not receive the WhatsApp OTP, the resend prompt allows switching seamlessly to SMS fallback.
+
+---
+
 ## 6. How to Test Right Now (Zero Cost)
 
 1. Make a POST request or run the client app:

@@ -18,10 +18,17 @@ export interface ChatContact {
 
 export type ChatMessageStatus = "sending" | "delivered" | "queued_remote" | "queued_local" | "received" | "read";
 
+/** Discriminant for special message types so the renderer can branch correctly. */
+export type ChatMessageType = "text" | "sticker";
+
 export interface ChatMessageE2E {
   id: string;
   direction: "in" | "out";
   text: string;
+  /** Discriminant — defaults to "text" when absent for backwards compatibility. */
+  type?: ChatMessageType;
+  /** Set when type === "sticker"; the absolute or relative URL of the sticker asset. */
+  stickerUrl?: string;
   /** An image attached to this message (e.g. a Snap sent to a contact). */
   imageDataUrl?: string;
   /** A held-to-record voice note, as a base64 audio data URL. */
@@ -29,6 +36,17 @@ export interface ChatMessageE2E {
   audioDurationMs?: number;
   at: number;
   status: ChatMessageStatus;
+  locationMeta?: {
+    address: string;
+    expiresAtTimeText: string;
+    isSharingActive: boolean;
+  };
+  envelopeMeta?: {
+    amountNpr: number;
+    senderNote: string;
+    isClaimed: boolean;
+    claimedByText?: string;
+  };
 }
 
 export interface ChatIdentity {
@@ -107,8 +125,11 @@ export interface ContactsSlice {
 export interface MessagingSlice {
   messagesByContact: Record<string, ChatMessageE2E[]>;
   unreadByContact: Record<string, number>;
-  sendMessage: (contactId: string, text: string, imageDataUrl?: string, audio?: { dataUrl: string; durationMs: number }) => Promise<void>;
+  /** Per-chat wallpaper URL (CSS background string or asset path). */
+  wallpaperByContact: Record<string, string>;
+  sendMessage: (contactId: string, text: string, imageDataUrl?: string, audio?: { dataUrl: string; durationMs: number }, meta?: { locationMeta?: ChatMessageE2E["locationMeta"]; envelopeMeta?: ChatMessageE2E["envelopeMeta"]; type?: ChatMessageType; stickerUrl?: string }) => Promise<void>;
   markRead: (contactId: string) => void;
+  setWallpaper: (contactId: string, url: string) => void;
 }
 
 export interface ConnectionSlice {

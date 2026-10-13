@@ -44,9 +44,11 @@ const navSections: NavSection[] = [
         badgeVariant: "brand",
       },
       {
-        name: "Grocery Picking",
+        name: "Grocery Operations",
         href: "/grocery",
         icon: ShoppingBag,
+        badge: "Dual-Mode",
+        badgeVariant: "brand",
       },
       {
         name: "Hotel Front Desk",

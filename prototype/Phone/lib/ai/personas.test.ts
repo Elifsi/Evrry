@@ -6,22 +6,22 @@ import {
   VoicePersonaId,
 } from './personas';
 
-describe('AI Voice Personas (Eli, Rony, Jenny, Suka)', () => {
+describe('AI Voice Personas (Ellie, Rony, Jenny, Suka)', () => {
   it('registers exactly four distinct voice personas', () => {
     const personas = getAllVoicePersonas();
     expect(personas).toHaveLength(4);
     const ids = personas.map((p) => p.id);
-    expect(ids).toEqual(['eli', 'rony', 'jenny', 'suka']);
+    expect(ids).toEqual(['ellie', 'rony', 'jenny', 'suka']);
   });
 
-  it('correctly configures Eli as the flagship energetic female concierge', () => {
-    const eli = getVoicePersona('eli');
-    expect(eli.name).toBe('Eli');
-    expect(eli.gender).toBe('female');
-    expect(eli.pitch).toBeGreaterThan(0);
-    expect(eli.speed).toBeGreaterThan(1.0);
-    expect(eli.sampleGreeting).toContain('Eli here');
-    expect(eli.systemInstruction).toContain('energetic');
+  it('correctly configures Ellie as the flagship energetic female concierge', () => {
+    const ellie = getVoicePersona('ellie');
+    expect(ellie.name).toBe('Ellie');
+    expect(ellie.gender).toBe('female');
+    expect(ellie.pitch).toBeGreaterThan(0);
+    expect(ellie.speed).toBeGreaterThan(1.0);
+    expect(ellie.sampleGreeting).toContain('Ellie here');
+    expect(ellie.systemInstruction).toContain('energetic');
   });
 
   it('correctly configures Rony as the deep authoritative male concierge', () => {
@@ -55,10 +55,11 @@ describe('AI Voice Personas (Eli, Rony, Jenny, Suka)', () => {
     expect(suka.systemInstruction).toContain('calm');
   });
 
-  it('gracefully falls back to Eli when persona is invalid or missing', () => {
-    expect(getVoicePersona(null).id).toBe('eli');
-    expect(getVoicePersona(undefined).id).toBe('eli');
-    expect(getVoicePersona('unknown_voice').id).toBe('eli');
+  it('gracefully falls back to Ellie when persona is invalid or missing', () => {
+    expect(getVoicePersona(null).id).toBe('ellie');
+    expect(getVoicePersona(undefined).id).toBe('ellie');
+    expect(getVoicePersona('unknown_voice').id).toBe('ellie');
+    expect(getVoicePersona('eli').id).toBe('ellie');
     expect(getVoicePersona('  SUKA  ').id).toBe('suka');
   });
 

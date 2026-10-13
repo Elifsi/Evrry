@@ -18,7 +18,14 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   const { messages, context, image } = (await req.json()) as {
     messages: ChatMessage[];
-    context?: { walletBalance?: number; cart?: CartItem[]; displayName?: string; today?: string };
+    context?: {
+      walletBalance?: number;
+      cart?: CartItem[];
+      displayName?: string;
+      today?: string;
+      persona?: string;
+      language?: string;
+    };
     image?: PendingImageInput;
   };
 
@@ -27,6 +34,8 @@ export async function POST(req: NextRequest) {
     cart: context?.cart ?? [],
     displayName: context?.displayName,
     today: context?.today,
+    persona: context?.persona,
+    language: context?.language,
   };
 
   const geminiKey = process.env.GEMINI_API_KEY;

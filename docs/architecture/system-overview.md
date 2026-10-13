@@ -42,7 +42,7 @@
 │    ├── Faster-Whisper & IndicConformer  │  │  • eSewa HMAC-SHA256 Token     │
 │    ├── AI4Bharat IndicXlit & Parler-TTS │  │  • connectIPS / Khalti Payouts │
 │    └── Local vLLM Qwen 2.5 Inference    │  │  • Push Worker (FCM & APNs)    │
-│  • Redis (GEOADD Driver GPS, Sockets)   │  │  • Evrry In-App Wallet Engine  │
+│  • Redis (GEOADD Driver GPS, Sockets)   │  │  • Direct Checkout & QR Engine │
 │  • OSRM Backend (Zero Google Fees)      │  │                                │
 └─────────────────────────────────────────┘  └────────────────────────────────┘
 ```

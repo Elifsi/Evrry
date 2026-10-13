@@ -4,6 +4,7 @@ import {
   KdsOrderTicket,
   OrderTicketStatus,
   PartnerMenuItem,
+  SupermarketShelfItem,
   HotelRoomBooking,
   LandlordRentalListing,
   TenantEnquiry,
@@ -26,17 +27,56 @@ export const INITIAL_STORES: PartnerStore[] = [
     activeOrdersCount: 4,
   },
   {
-    id: "str-02",
+    id: "hub-01",
     partnerId: "prt-02",
-    name: "Bhatbhateni Supermarket (Tangal)",
+    name: "Evrry Dark Store (Jhamsikhel Express Hub)",
     vertical: "grocery",
-    address: "Tangal, Kathmandu",
-    phone: "+977 1-4411122",
+    address: "Jhamsikhel Ward-3, Lalitpur",
+    phone: "+977 1-5521000",
     isAcceptingOrders: true,
     taxPan: "300182746",
+    rating: 4.9,
+    openHours: "06:00 AM - 11:30 PM",
+    activeOrdersCount: 6,
+  },
+  {
+    id: "store_bb_pulchowk",
+    partnerId: "prt-02",
+    name: "Bhatbhateni Supermarket (Pulchowk)",
+    vertical: "grocery",
+    address: "Pulchowk, Lalitpur",
+    phone: "+977 1-5522334",
+    isAcceptingOrders: true,
+    taxPan: "300182746",
+    rating: 4.7,
+    openHours: "07:30 AM - 09:30 PM",
+    activeOrdersCount: 8,
+  },
+  {
+    id: "store_bigmart_jham",
+    partnerId: "prt-05",
+    name: "Big Mart Express (Jhamsikhel)",
+    vertical: "grocery",
+    address: "Jhamsikhel Road, Lalitpur",
+    phone: "+977 1-5538921",
+    isAcceptingOrders: true,
+    taxPan: "602819234",
+    rating: 4.5,
+    openHours: "07:00 AM - 09:00 PM",
+    activeOrdersCount: 5,
+  },
+  {
+    id: "store_mitho_kirana",
+    partnerId: "prt-06",
+    name: "Mitho Kirana & Daily Needs",
+    vertical: "grocery",
+    address: "Bakhundole Height, Lalitpur",
+    phone: "+977 9841223399",
+    isAcceptingOrders: true,
+    taxPan: "102938475",
     rating: 4.6,
-    openHours: "08:00 AM - 09:00 PM",
-    activeOrdersCount: 7,
+    openHours: "06:30 AM - 10:00 PM",
+    activeOrdersCount: 3,
   },
   {
     id: "str-03",
@@ -162,28 +202,144 @@ let cachedOrders: KdsOrderTicket[] = [
     createdAt: "45 mins ago",
     deliveryAddress: "Takeaway Counter Pickup",
   },
+  // ⚡ Model 1: Dark Store Express Picking Orders (10m SLA)
   {
-    id: "ord-201",
-    displayNumber: "#EVR-GRC-901",
+    id: "ord-ds-8821",
+    displayNumber: "#EVR-DS-8821",
+    customerName: "Samyak Shakya",
+    customerPhone: "+977 9841998811",
+    orderType: "DELIVERY",
+    vertical: "grocery",
+    fulfillmentType: "DARK_STORE_EXPRESS",
+    storeId: "hub-01",
+    storeName: "Evrry Dark Store (Jhamsikhel Express Hub)",
+    status: "PREPARING",
+    items: [
+      { id: "ds-itm-1", name: "DDC Standard Milk (500ml pouch)", quantity: 2, priceNpr: 50, isVeg: true, isPacked: true, binRackLocation: "Rack A1 • Shelf 1 • Bin 02", barcode: "890103088211" },
+      { id: "ds-itm-2", name: "Valley Poultry Fresh Eggs (Pack of 6)", quantity: 1, priceNpr: 130, isVeg: false, isPacked: true, binRackLocation: "Rack A2 • Shelf 3 • Bin 14", barcode: "890103088212" },
+      { id: "ds-itm-3", name: "Current 2X Spicy Hot Noodles 100g", quantity: 3, priceNpr: 60, isVeg: true, isPacked: false, binRackLocation: "Rack C4 • Shelf 2 • Bin 09", barcode: "890103088213" },
+      { id: "ds-itm-4", name: "Palungo Saag Fresh (Organic Bundle)", quantity: 1, priceNpr: 45, isVeg: true, isPacked: false, binRackLocation: "Chiller 02 • Bin 01", barcode: "890103088214" },
+    ],
+    subtotalNpr: 405,
+    deliveryFeeNpr: 0,
+    totalNpr: 405,
+    paymentMethod: "ONLINE_PAID",
+    estimatedPrepMinutes: 3,
+    createdAt: "1 min ago",
+    deliveryAddress: "Sanepa Heights, Lalitpur (House 42)",
+    assignedRider: {
+      name: "Raju Shrestha (Express 10m)",
+      phone: "+977 9860112233",
+      vehiclePlate: "Ba 99 Pa 1102 (Super Soco CPx EV)",
+    },
+  },
+  {
+    id: "ord-ds-8822",
+    displayNumber: "#EVR-DS-8822",
+    customerName: "Pooja Manandhar",
+    customerPhone: "+977 9801992244",
+    orderType: "DELIVERY",
+    vertical: "grocery",
+    fulfillmentType: "DARK_STORE_EXPRESS",
+    storeId: "hub-01",
+    storeName: "Evrry Dark Store (Jhamsikhel Express Hub)",
+    status: "PENDING",
+    items: [
+      { id: "ds-itm-5", name: "Wai Wai Quick Chicken 75g", quantity: 5, priceNpr: 30, isVeg: false, isPacked: false, binRackLocation: "Rack C4 • Shelf 1 • Bin 03", barcode: "890103088215" },
+      { id: "ds-itm-6", name: "Tokla Tea Gold CTC 500g", quantity: 1, priceNpr: 320, isVeg: true, isPacked: false, binRackLocation: "Rack B1 • Shelf 4 • Bin 11", barcode: "890103088216" },
+      { id: "ds-itm-7", name: "Aashirvaad Shudh Chakki Atta 5kg", quantity: 1, priceNpr: 540, isVeg: true, isPacked: false, binRackLocation: "Rack D1 • Pallet 02", barcode: "890103088217" },
+    ],
+    subtotalNpr: 1010,
+    deliveryFeeNpr: 0,
+    totalNpr: 1010,
+    paymentMethod: "ONLINE_PAID",
+    estimatedPrepMinutes: 3,
+    createdAt: "Just now",
+    deliveryAddress: "Jhamsikhel Ward-3 (Opposite British School)",
+  },
+
+  // 🏪 Model 2: Supermarket & Kirana Retail Orders (Bhatbhateni, Big Mart, Mitho Kirana)
+  {
+    id: "ord-sm-501",
+    displayNumber: "#EVR-BB-501",
     customerName: "Anjali KC",
     customerPhone: "+977 9813445566",
     orderType: "DELIVERY",
     vertical: "grocery",
+    fulfillmentType: "SUPERMARKET_RETAIL",
+    storeId: "store_bb_pulchowk",
+    storeName: "Bhatbhateni Supermarket (Pulchowk)",
+    substitutionPreference: "callCustomer",
     status: "PREPARING",
     items: [
-      { id: "gitm-1", name: "Himalayan Fresh Organic Milk (1 L)", quantity: 2, priceNpr: 110, isVeg: true, isPacked: true },
-      { id: "gitm-2", name: "Brown Eggs Large Pack (Carton of 12)", quantity: 1, priceNpr: 320, isVeg: false, isPacked: true },
-      { id: "gitm-3", name: "Whole Wheat Bread 400g", quantity: 1, priceNpr: 95, isVeg: true, isPacked: false },
-      { id: "gitm-4", name: "Basmati Premium Rice (5 kg Bag)", quantity: 1, priceNpr: 890, isVeg: true, isPacked: false },
-      { id: "gitm-5", name: "DDC Cow Butter 200g", quantity: 2, priceNpr: 240, isVeg: true, isPacked: false },
+      { id: "sm-itm-1", name: "Himalayan Fresh Organic Milk (1 L)", quantity: 2, priceNpr: 110, isVeg: true, isPacked: true, barcode: "890103001" },
+      { id: "sm-itm-2", name: "Brown Eggs Large Pack (Carton of 12)", quantity: 1, priceNpr: 320, isVeg: false, isPacked: false, barcode: "890103002" },
+      { id: "sm-itm-3", name: "Whole Wheat Bread 400g", quantity: 1, priceNpr: 95, isVeg: true, isPacked: false, barcode: "890103003" },
+      { id: "sm-itm-4", name: "Basmati Premium Rice (5 kg Bag)", quantity: 1, priceNpr: 890, isVeg: true, isPacked: false, barcode: "890103004" },
+      { id: "sm-itm-5", name: "DDC Cow Butter 200g", quantity: 2, priceNpr: 240, isVeg: true, isPacked: false, barcode: "890103005" },
     ],
     subtotalNpr: 1895,
-    deliveryFeeNpr: 70,
-    totalNpr: 1965,
+    deliveryFeeNpr: 65,
+    totalNpr: 1960,
     paymentMethod: "ONLINE_PAID",
-    estimatedPrepMinutes: 15,
-    createdAt: "8 mins ago",
+    estimatedPrepMinutes: 25,
+    createdAt: "6 mins ago",
     deliveryAddress: "Baluwatar-4, Kathmandu (Opposite Russian Embassy)",
+    assignedRider: {
+      name: "Bikash Tamang",
+      phone: "+977 9860112233",
+      vehiclePlate: "Ba 85 Pa 4412 (Honda Dio)",
+    },
+  },
+  {
+    id: "ord-sm-502",
+    displayNumber: "#EVR-BM-502",
+    customerName: "Nabin Adhikari",
+    customerPhone: "+977 9851088771",
+    orderType: "DELIVERY",
+    vertical: "grocery",
+    fulfillmentType: "SUPERMARKET_RETAIL",
+    storeId: "store_bigmart_jham",
+    storeName: "Big Mart Express (Jhamsikhel)",
+    substitutionPreference: "allowStoreSubstitution",
+    status: "PENDING",
+    items: [
+      { id: "bm-itm-1", name: "DDC Standard Milk (500ml pouch)", quantity: 4, priceNpr: 50, isVeg: true, isPacked: false, barcode: "890103006" },
+      { id: "bm-itm-2", name: "Mude Red Potatoes (2 kg net)", quantity: 1, priceNpr: 160, isVeg: true, isPacked: false, barcode: "890103007" },
+      { id: "bm-itm-3", name: "Real Mixed Fruit Juice 1L", quantity: 2, priceNpr: 260, isVeg: true, isPacked: false, barcode: "890103008" },
+    ],
+    subtotalNpr: 880,
+    deliveryFeeNpr: 50,
+    totalNpr: 930,
+    paymentMethod: "ONLINE_PAID",
+    estimatedPrepMinutes: 20,
+    createdAt: "3 mins ago",
+    deliveryAddress: "Bakhundole Height, Lalitpur",
+  },
+  {
+    id: "ord-sm-503",
+    displayNumber: "#EVR-MK-503",
+    customerName: "Sunil Shrestha",
+    customerPhone: "+977 9841220033",
+    orderType: "DELIVERY",
+    vertical: "grocery",
+    fulfillmentType: "SUPERMARKET_RETAIL",
+    storeId: "store_mitho_kirana",
+    storeName: "Mitho Kirana & Daily Needs",
+    substitutionPreference: "refundItem",
+    status: "PENDING",
+    items: [
+      { id: "mk-itm-1", name: "Wai Wai Quick Masala Delight 75g", quantity: 10, priceNpr: 30, isVeg: true, isPacked: false, barcode: "890103009" },
+      { id: "mk-itm-2", name: "Himalayan Pink Salt 1kg", quantity: 1, priceNpr: 85, isVeg: true, isPacked: false, barcode: "890103010" },
+      { id: "mk-itm-3", name: "Century Turmeric Powder 200g", quantity: 1, priceNpr: 120, isVeg: true, isPacked: false, barcode: "890103011" },
+    ],
+    subtotalNpr: 505,
+    deliveryFeeNpr: 45,
+    totalNpr: 550,
+    paymentMethod: "CASH_ON_DELIVERY",
+    estimatedPrepMinutes: 15,
+    createdAt: "5 mins ago",
+    deliveryAddress: "Pulchowk Damkal, Lalitpur",
   },
 ];
 
@@ -601,4 +757,201 @@ export async function fetchPartnerFinancials(storeId: string): Promise<PartnerFi
       isVerified: true,
     },
   };
+}
+
+let cachedShelfInventory: SupermarketShelfItem[] = [
+  {
+    id: "shelf-01",
+    storeId: "store_bb_pulchowk",
+    name: "DDC Standard Blue Milk (500ml pouch)",
+    category: "Dairy & Bakery",
+    packSize: "500ml",
+    priceNpr: 50,
+    mrpNpr: 50,
+    inStock: true,
+    stockCount: 42,
+    barcode: "8901030001",
+    imageUrl: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "shelf-02",
+    storeId: "store_bb_pulchowk",
+    name: "Valley Poultry Fresh Brown Eggs (Pack of 6)",
+    category: "Dairy & Bakery",
+    packSize: "6 pcs",
+    priceNpr: 130,
+    mrpNpr: 140,
+    inStock: true,
+    stockCount: 18,
+    barcode: "8901030002",
+    imageUrl: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "shelf-03",
+    storeId: "store_bb_pulchowk",
+    name: "Mude Red Organic Potatoes (1 kg net)",
+    category: "Fresh Produce",
+    packSize: "1 kg",
+    priceNpr: 80,
+    mrpNpr: 90,
+    inStock: true,
+    stockCount: 65,
+    barcode: "8901030003",
+    imageUrl: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "shelf-04",
+    storeId: "store_bb_pulchowk",
+    name: "Current 2X Spicy Hot Ramen 100g",
+    category: "Instant & Noodles",
+    packSize: "100g",
+    priceNpr: 60,
+    mrpNpr: 60,
+    inStock: false, // 86'd out of stock
+    stockCount: 0,
+    barcode: "8901030004",
+    imageUrl: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "shelf-05",
+    storeId: "store_bb_pulchowk",
+    name: "Hetauda Cold-Pressed Mustard Oil 1L",
+    category: "Staples & Oils",
+    packSize: "1L Bottle",
+    priceNpr: 340,
+    mrpNpr: 360,
+    inStock: true,
+    stockCount: 12,
+    barcode: "8901030005",
+    imageUrl: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "shelf-06",
+    storeId: "store_bb_pulchowk",
+    name: "Jumla Royal Red Organic Apples (1 kg)",
+    category: "Fresh Produce",
+    packSize: "1 kg",
+    priceNpr: 280,
+    mrpNpr: 320,
+    inStock: true,
+    stockCount: 24,
+    barcode: "8901030006",
+    imageUrl: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "shelf-07",
+    storeId: "store_bigmart_jham",
+    name: "Wai Wai Quick Chicken 75g",
+    category: "Instant & Noodles",
+    packSize: "75g",
+    priceNpr: 30,
+    mrpNpr: 30,
+    inStock: true,
+    stockCount: 80,
+    barcode: "8901030007",
+    imageUrl: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "shelf-08",
+    storeId: "store_mitho_kirana",
+    name: "Century Pure Turmeric Powder 200g",
+    category: "Staples & Spices",
+    packSize: "200g",
+    priceNpr: 120,
+    mrpNpr: 130,
+    inStock: true,
+    stockCount: 30,
+    barcode: "8901030008",
+    imageUrl: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80",
+  },
+];
+
+export async function fetchSupermarketShelfItems(storeId?: string): Promise<SupermarketShelfItem[]> {
+  if (storeId) {
+    const matched = cachedShelfInventory.filter((i) => i.storeId === storeId);
+    if (matched.length > 0) return matched;
+  }
+  return [...cachedShelfInventory];
+}
+
+export async function toggleSupermarketShelfItemInStock(
+  itemId: string,
+  inStock: boolean
+): Promise<{ success: boolean; inStock: boolean }> {
+  cachedShelfInventory = cachedShelfInventory.map((i) =>
+    i.id === itemId ? { ...i, inStock, stockCount: inStock ? (i.stockCount || 10) : 0 } : i
+  );
+  return { success: true, inStock };
+}
+
+export async function updateSupermarketShelfItemStock(
+  itemId: string,
+  stockCount: number
+): Promise<{ success: boolean; stockCount: number }> {
+  cachedShelfInventory = cachedShelfInventory.map((i) =>
+    i.id === itemId ? { ...i, stockCount, inStock: stockCount > 0 } : i
+  );
+  return { success: true, stockCount };
+}
+
+export async function resolveItemSubstitution(
+  orderId: string,
+  itemId: string,
+  action: "replace" | "refund",
+  replacementName?: string
+): Promise<{ success: boolean; newTotal: number }> {
+  let newTotal = 0;
+  cachedOrders = cachedOrders.map((o) => {
+    if (o.id === orderId) {
+      let deductedAmount = 0;
+      const updatedItems = o.items.map((i) => {
+        if (i.id === itemId) {
+          if (action === "replace") {
+            return {
+              ...i,
+              isSubstituted: true,
+              substitutedWithName: replacementName || "Store Selected Equivalent",
+              isPacked: true,
+            };
+          } else {
+            deductedAmount += i.priceNpr * i.quantity;
+            return {
+              ...i,
+              isRefunded: true,
+              isPacked: false,
+            };
+          }
+        }
+        return i;
+      });
+      const adjustedSubtotal = Math.max(0, o.subtotalNpr - deductedAmount);
+      const adjustedTotal = adjustedSubtotal + o.deliveryFeeNpr;
+      newTotal = adjustedTotal;
+      return {
+        ...o,
+        items: updatedItems,
+        subtotalNpr: adjustedSubtotal,
+        totalNpr: adjustedTotal,
+      };
+    }
+    return o;
+  });
+  return { success: true, newTotal };
+}
+
+export async function sealDarkStoreBag(
+  orderId: string,
+  sealCode: string
+): Promise<{ success: boolean; sealCode: string }> {
+  cachedOrders = cachedOrders.map((o) => {
+    if (o.id === orderId) {
+      return {
+        ...o,
+        status: "READY_FOR_PICKUP",
+        bagSealCode: sealCode,
+      };
+    }
+    return o;
+  });
+  return { success: true, sealCode };
 }

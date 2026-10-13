@@ -37,10 +37,14 @@ prototype/Phone/coverage/
 # ── Android build output (Consumer & Partner) ─────────────────────────────────
 apps/consumer/android/.gradle/
 apps/consumer/android/build/
+apps/consumer/android/**/build/
+apps/consumer/android/**/.cxx/
 apps/consumer/android/local.properties
 apps/consumer/android/*.keystore
 apps/partner/android/.gradle/
 apps/partner/android/build/
+apps/partner/android/**/build/
+apps/partner/android/**/.cxx/
 apps/partner/android/local.properties
 apps/partner/android/*.keystore
 

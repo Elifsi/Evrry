@@ -278,12 +278,13 @@ CREATE TABLE public.ride_bids (
 );
 ```
 
-### F. Realtime Messaging & Ephemeral Snaps (`Debanshu777` & `GetStream`)
+### F. Realtime Messaging, Ephemeral Snaps & WebRTC Calling (`Debanshu777` & `GetStream`)
 ```sql
 CREATE TABLE public.chats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type TEXT NOT NULL CHECK (type IN ('DIRECT', 'ORDER_SUPPORT', 'RIDE_COORDINATION')),
   reference_id TEXT,
+  wallpaper_url TEXT, -- Per-chat preset or custom gallery wallpaper URL
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -292,8 +293,27 @@ CREATE TABLE public.messages (
   chat_id UUID NOT NULL REFERENCES public.chats(id) ON DELETE CASCADE,
   sender_id UUID NOT NULL REFERENCES auth.users(id),
   encrypted_payload TEXT NOT NULL,
-  message_type TEXT NOT NULL DEFAULT 'TEXT' CHECK (message_type IN ('TEXT', 'IMAGE', 'VOICE_NOTE', 'LIVE_RIDE_SHARE')),
+  message_type TEXT NOT NULL DEFAULT 'TEXT' CHECK (message_type IN (
+    'TEXT', 'IMAGE', 'VOICE_NOTE', 'LIVE_RIDE_SHARE', 'STICKER', 'ANIMATED_EMOJI'
+  )),
+  sticker_url TEXT,   -- Open-source royalty-free Twemoji SVG or Noto GIF URL
   status TEXT NOT NULL DEFAULT 'sent' CHECK (status IN ('sent', 'delivered', 'read')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE public.call_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  call_id TEXT NOT NULL,
+  caller_id UUID NOT NULL REFERENCES auth.users(id),
+  callee_id UUID NOT NULL REFERENCES auth.users(id),
+  call_type TEXT NOT NULL CHECK (call_type IN ('VOICE', 'VIDEO')),
+  status TEXT NOT NULL DEFAULT 'initiated' CHECK (status IN (
+    'initiated', 'ringing', 'connected', 'ended', 'missed', 'declined'
+  )),
+  duration_seconds INTEGER DEFAULT 0,
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  ended_at TIMESTAMPTZ,
+  signaling_meta JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -322,6 +342,28 @@ BEGIN
   RETURN FOUND;
 END;
 $$;
+
+-- Secure Chat Wallpaper Setter RPC
+CREATE OR REPLACE FUNCTION public.set_chat_wallpaper(p_chat_id UUID, p_wallpaper_url TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM public.chat_participants
+    WHERE chat_id = p_chat_id AND user_id = auth.uid()
+  ) THEN
+    RAISE EXCEPTION 'Not a participant of this chat';
+  END IF;
+
+  UPDATE public.chats
+  SET wallpaper_url = p_wallpaper_url
+  WHERE id = p_chat_id;
+
+  RETURN TRUE;
+END;
+$$;
 ```
 
 ---
@@ -339,6 +381,7 @@ ALTER TABLE public.room_listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ride_bids ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.call_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.snaps ENABLE ROW LEVEL SECURITY;
 ```
 
@@ -348,4 +391,5 @@ ALTER TABLE public.snaps ENABLE ROW LEVEL SECURITY;
 - **Platform Ledger**: Read-only access for authenticated partners where `account_id = auth.uid()`; mutations restricted strictly to backend service roles.
 - **Room Listings**: Public `SELECT` where `is_available = true`; `INSERT/UPDATE/DELETE` restricted to `landlord_id = auth.uid()`.
 - **Messages**: `SELECT` where `sender_id = auth.uid() OR recipient_id = auth.uid()`.
+- **Call Logs**: `SELECT` where `caller_id = auth.uid() OR callee_id = auth.uid()`; `INSERT` where `caller_id = auth.uid()`; `UPDATE` where `caller_id = auth.uid() OR callee_id = auth.uid()`.
 - **Snaps**: `SELECT` where `(sender_id = auth.uid() OR recipient_id = auth.uid()) AND is_burned = false`.

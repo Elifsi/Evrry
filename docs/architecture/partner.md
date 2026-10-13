@@ -24,36 +24,41 @@ The system operates across **two distinct role dimensions**:
 The Partner UI dynamically reconfigures its core views based on the partner's registered vertical:
 
 ```
-┌───────────────────────────────────────────────────────────────────────────────┐
-│                      PARTNER VERTICAL ROLE MAPPING                            │
-├───────────────────┬───────────────────────────────────────────────────────────┤
-│ Consumer Feature  │ Corresponding Partner Role & Operational Interface        │
-├───────────────────┼───────────────────────────────────────────────────────────┤
-│ 🚗 Rides / Cabs   │ RIDER / DRIVER ROLE:                                      │
-│                   │ • Full-screen interactive map & turn-by-turn routing      │
-│                   │ • Live trip requests, accept/decline HUD                  │
-│                   │ • Passenger pickup & dropoff OTP verification             │
-│                   │ • Live GPS broadcasting to Supabase Realtime              │
-├───────────────────┼───────────────────────────────────────────────────────────┤
-│ 🍔 Food & Dining  │ RESTAURANT / KITCHEN ROLE:                                │
-│                   │ • Kitchen Display System (KDS) order queue & prep timers  │
-│                   │ • Accept with estimated prep time (15m, 30m) or reject    │
-│                   │ • Instant menu item 86'ing (marking out of stock)         │
-│                   │ • ESC/POS thermal receipt & Kitchen Order Ticket (KOT)    │
-├───────────────────┼───────────────────────────────────────────────────────────┤
-│ 🛒 Grocery & Mart │ GROCERY / STORE CLERK ROLE:                               │
-│                   │ • Order pick-and-pack checklist                           │
-│                   │ • Barcode scanner / SKU lookup                            │
-│                   │ • Real-time stock counts and customer substitution alerts │
-├───────────────────┼───────────────────────────────────────────────────────────┤
-│ 🏨 Hotels         │ HOSPITALITY FRONT-DESK ROLE:                              │
-│                   │ • Room reservation calendar & check-in / check-out desk   │
-│                   │ • Room availability, bed configurations, rate management  │
-├───────────────────┼───────────────────────────────────────────────────────────┤
-│ 🔧 Services       │ FIELD TECHNICIAN / SERVICE PROVIDER ROLE:                 │
-│                   │ • Daily appointment calendar & customer location dispatch │
-│                   │ • Job proof photo upload & customer signature sign-off    │
-└───────────────────┴───────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                          PARTNER VERTICAL ROLE MAPPING                                  │
+├───────────────────┬─────────────────────────────────────────────────────────────────────┤
+│ Partner Type      │ Corresponding Partner Role & Operational Interface                  │
+├───────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ 🚗 Driver         │ MOBILITY RIDE DRIVER ROLE (`partner_type = 'driver'`):              │
+│ (Passenger Rides) │ • Full-screen interactive map & turn-by-turn routing (OSRM)         │
+│                   │ • InDrive-style real-time fare negotiation & counter-bidding        │
+│                   │ • Live trip requests HUD (Accept, Counter-Bid, Decline)             │
+│                   │ • Passenger 4-digit start OTP verification (`start_otp`)            │
+│                   │ • Live GPS broadcasting to Supabase Realtime `driver_locations`     │
+│                   │ • In-Trip Passenger Chat & Dual Calling (In-App VoIP + Direct SIM)  │
+├───────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ 🍔 Restaurant     │ RESTAURANT / KITCHEN ROLE (`partner_type = 'restaurant'`):          │
+│ (Food & Dining)   │ • Kitchen Display System (KDS) order queue & prep timers            │
+│                   │ • High-decibel audio incoming order chimes                          │
+│                   │ • Accept with estimated prep time (15m, 25m, 40m) or structured rej.│
+│                   │ • Instant menu item 86'ing (marking out-of-stock in real-time)      │
+│                   │ • ESC/POS thermal receipt & Kitchen Order Ticket (KOT) printing     │
+│                   │ • In-app communication with assigned Delivery Courier & Customer    │
+├───────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ 🛒 Grocery        │ GROCERY / SUPERMARKET ROLE (`partner_type = 'grocery'`):            │
+│ (Retail Mart)     │ • ⚠️ SUPERMARKET MODE ONLY (Dark Store micro-fulfillment deferred)   │
+│                   │ • Order pick-and-pack fulfillment checklist (item-by-item checkoff) │
+│                   │ • Barcode scanner / SKU lookup for price checks & stock depletion   │
+│                   │ • Real-time inventory count and customer substitution alert dispatch│
+│                   │ • In-app communication with assigned Delivery Courier & Customer    │
+├───────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ 🛵 Rider          │ FOOD & GROCERY DELIVERY COURIER ROLE (`partner_type = 'rider'`):     │
+│ (Delivery Courier)│ • Claims ready orders from restaurants & supermarkets               │
+│                   │ • Two-stage multi-stop turn-by-turn navigation (Pickup → Drop-off)   │
+│                   │ • Secure customer handoff 4-digit delivery OTP verification         │
+│                   │ • Cash-on-Delivery (COD) cash collection ledger & reconciliation    │
+│                   │ • Multi-party chat (Courier ↔ Restaurant/Supermarket & Consumer)    │
+└───────────────────┴─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Dimension 2: Staff Permission Roles (Who is using the app?)
@@ -61,8 +66,9 @@ Within any partner entity, staff accounts are restricted via PostgreSQL Row Leve
 
 * **`owner`**: Complete authority. Bank account setup, payout requests, revenue reports, tax/VAT documents, and staff member management.
 * **`manager`**: Operational control. Menu/catalog pricing, operating hours, active order dispatch, and customer dispute resolution.
-* **`kitchen_staff` / `counter_cashier`**: Order fulfillment only. View incoming order tickets, mark food as "ready for pickup", and print receipts. **Strictly blocked from viewing bank accounts, gross revenues, or payout triggers.**
-* **`driver` / `rider`**: Mobility execution only. View assigned trip details, passenger phone proxy, and GPS navigation.
+* **`kitchen_staff` / `counter_cashier`**: Order fulfillment only. View incoming order tickets, mark items as "ready for pickup", and print receipts. **Strictly blocked from viewing bank accounts, gross revenues, or payout triggers.**
+* **`driver`**: Mobility execution only. View assigned trip details, passenger phone proxy/direct dialer, and GPS navigation.
+* **`rider`**: Delivery courier execution only. View assigned order pickup & delivery points, customer OTP, and COD cash collection ledger.
 
 ---
 
@@ -161,14 +167,16 @@ A core platform principle is **"AI-Assisted, Human-Controlled"**:
 ## 6. Single Adaptive Partner App vs. Fragmented Apps & Onboarding Lifecycle
 
 ### A. Why a Single Adaptive App is Strictly Superior
-Instead of maintaining 5 separate apps ("EVRRY Driver", "EVRRY Restaurant", "EVRRY Hotel", "EVRRY Grocery", "EVRRY Landlord"), **evrry uses ONE unified Partner Application** (`apps/partner` on mobile, `apps/web/partner` on desktop/web):
+Instead of maintaining fragmented apps ("EVRRY Driver", "EVRRY Restaurant", "EVRRY Grocery", "EVRRY Courier"), **evrry uses ONE unified Adaptive Partner Application** (`apps/partner/android` and `apps/partner/ios` on mobile, `apps/web/partner` on desktop/web):
 
-1. **Zero Clutter via Dynamic HUD**: A bike rider never sees restaurant kitchen buttons; a hotel manager never sees bike-taxi maps. The app detects the partner's verified `partner_profiles.type` and renders **only** the relevant operational interface.
-2. **Single Codebase & Shared Infra**: One app to test, publish, and maintain. Authentication (SMS OTP), KYC uploaders, Bank Account management, and Ledger Payouts are 100% shared.
-3. **Multi-Role Switching for Nepali Business Owners**: Many individuals in Nepal operate multiple ventures (e.g. a restaurant owner who also rents out a flat upstairs on EVRRY Stays). A profile switcher in the app bar allows instant 1-tap switching without logging in and out.
-4. **Desktop/Web vs. Mobile Optimization**:
-   - **Riders & Drivers**: Onboard and operate 100% on **Mobile** (`apps/partner/android`).
-   - **Restaurants, Supermarkets & Hotels**: Onboard and operate primarily on **Desktop Web** (`apps/web/partner`) for large KDS screens, physical barcode scanners, and thermal receipt printing.
+1. **Zero Clutter via Dynamic HUD**: A bike driver never sees restaurant kitchen buttons; a supermarket clerk never sees bike-taxi maps. The app detects the partner's verified active role (`driver`, `restaurant`, `grocery`, `rider`) and renders **only** the relevant operational interface.
+2. **Single Codebase & Shared Infra**: One app to test, publish, and maintain. Authentication (SMS OTP), KYC uploaders, Bank Account management, and Ledger Payouts are 100% shared across all four partner types.
+3. **Multi-Role Switching for Nepali Business Owners**: Many individuals in Nepal operate multiple ventures (e.g. a grocery store owner who also drives a taxi in the evening, or a restaurant owner who runs local food delivery). A profile switcher in the top app bar allows instant 1-tap switching without logging in and out.
+4. **The 4 Primary Mobile Operational Modes**:
+   - **Mobility Ride Driver (`driver`)**: Full-screen OSRM Map HUD, InDrive bidding cards, live GPS broadcasting, passenger start OTP, in-trip Chat & Dual Calling (VoIP + SIM).
+   - **Restaurant Kitchen (`restaurant`)**: KDS order board, audio arrival chimes, prep countdown timers, instant 86'ing out-of-stock items, ESC/POS receipt printing.
+   - **Grocery Supermarket (`grocery`)**: **Supermarket mode only** (Dark Store deferred). Order picking checklist, camera barcode scanner, real-time inventory adjustments, customer substitution dispatch.
+   - **Food & Grocery Courier (`rider`)**: Foreground location tracking, order claiming, two-stop routing (Store Pickup → Customer Drop), handoff OTP verification, COD cash ledger.
 
 ### B. End-to-End Partner Onboarding Workflow
 

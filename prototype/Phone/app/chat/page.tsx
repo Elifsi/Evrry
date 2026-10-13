@@ -38,8 +38,9 @@ export default function ChatIndexPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const storyActive = Boolean(myStory && Date.now() - myStory.createdAt < STORY_TTL_MS);
-  const noteActive = Boolean(myNote && Date.now() - myNote.createdAt < NOTE_TTL_MS);
+  const [mountedTime] = useState(() => Date.now());
+  const storyActive = Boolean(myStory && mountedTime - myStory.createdAt < STORY_TTL_MS);
+  const noteActive = Boolean(myNote && mountedTime - myNote.createdAt < NOTE_TTL_MS);
 
   async function handleGalleryStory(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = await readImageFile(e);

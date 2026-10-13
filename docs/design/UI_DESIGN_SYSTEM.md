@@ -151,7 +151,7 @@ See [`UI_SCREEN_SPECIFICATIONS.md`](UI_SCREEN_SPECIFICATIONS.md#navigation). Pri
 
 ## 7. Source-reference conflicts to resolve with the designer
 
-1. Reference bottom nav = Home/Chat/**Pay**/Shop/More; evrry has no wallet → proposed replacement **Orders/Activity** (needs sign-off).
+1. Reference bottom nav = Home/Chat/**Pay**/Shop/More; evrry has no wallet → replaced by **Orders/Activity** tab (Signed off & implemented).
 2. Reference shows Flights/Trains/Bus travel; evrry scope is **Hotels/Stays + Rides** (+ Rooms, Vehicle rentals).
 3. Reference shows INR (₹) sample data; evrry uses **NPR (रू / NPR)**.
 4. Reference shows Wallet, Bills, Recharge, DTH, Electricity, Gas, Water, Insurance, Education — **not in evrry's roadmap**; documented as visual pattern only.

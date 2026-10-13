@@ -12,7 +12,7 @@ function useCallMediaTick() {
 }
 
 function useElapsed(startedAt: number | null) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!startedAt) return;
     const id = setInterval(() => setNow(Date.now()), 1000);

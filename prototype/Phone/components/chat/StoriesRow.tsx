@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { NOTE_TTL_MS, STORY_TTL_MS, noteColor, StoryItem, useChatStore } from "@/lib/store/useChatStore";
 import { Plus } from "lucide-react";
@@ -25,10 +26,9 @@ export default function StoriesRow({
   const myStory = useChatStore((s) => s.myStory);
   const myNote = useChatStore((s) => s.myNote);
 
-  // Story/note are only local right now (see the plan's scoping note) — a
-  // page-load check is enough for expiry, no live timer needed.
-  const storyActive = Boolean(myStory && Date.now() - myStory.createdAt < STORY_TTL_MS);
-  const noteActive = Boolean(myNote && Date.now() - myNote.createdAt < NOTE_TTL_MS);
+  const [mountedTime] = useState(() => Date.now());
+  const storyActive = Boolean(myStory && mountedTime - myStory.createdAt < STORY_TTL_MS);
+  const noteActive = Boolean(myNote && mountedTime - myNote.createdAt < NOTE_TTL_MS);
 
   return (
     <div className="mt-5 flex gap-4 overflow-x-auto pb-1">
@@ -82,9 +82,9 @@ export default function StoriesRow({
 
       {contacts.map((c) => {
         const contactStory = storiesByContact[c.id];
-        const contactStoryActive = Boolean(contactStory && Date.now() - contactStory.createdAt < STORY_TTL_MS);
+        const contactStoryActive = Boolean(contactStory && mountedTime - contactStory.createdAt < STORY_TTL_MS);
         const contactNote = notesByContact[c.id];
-        const contactNoteActive = Boolean(contactNote && Date.now() - contactNote.createdAt < NOTE_TTL_MS);
+        const contactNoteActive = Boolean(contactNote && mountedTime - contactNote.createdAt < NOTE_TTL_MS);
         return (
           <div key={c.id} className="flex shrink-0 flex-col items-center gap-1.5">
             {contactNoteActive && contactNote && (

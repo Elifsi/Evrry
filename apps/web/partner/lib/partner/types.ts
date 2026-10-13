@@ -44,7 +44,15 @@ export interface OrderTicketItem {
   isVeg?: boolean;
   options?: string[];
   isPacked?: boolean; // For grocery pick-and-pack
+  binRackLocation?: string; // e.g. "Rack A1 • Shelf 2 • Bin 04"
+  barcode?: string;
+  isSubstituted?: boolean;
+  substitutedWithName?: string;
+  isRefunded?: boolean;
 }
+
+export type GroceryFulfillmentType = "DARK_STORE_EXPRESS" | "SUPERMARKET_RETAIL";
+export type SubstitutionPreference = "callCustomer" | "allowStoreSubstitution" | "refundItem";
 
 export interface KdsOrderTicket {
   id: string;
@@ -53,6 +61,10 @@ export interface KdsOrderTicket {
   customerPhone: string;
   orderType: "DELIVERY" | "DINE_IN" | "TAKEAWAY";
   vertical: "food" | "grocery";
+  fulfillmentType?: GroceryFulfillmentType;
+  storeId?: string;
+  storeName?: string;
+  substitutionPreference?: SubstitutionPreference;
   status: OrderTicketStatus;
   items: OrderTicketItem[];
   subtotalNpr: number;
@@ -62,11 +74,26 @@ export interface KdsOrderTicket {
   estimatedPrepMinutes: number;
   createdAt: string;
   deliveryAddress: string;
+  bagSealCode?: string;
   assignedRider?: {
     name: string;
     phone: string;
     vehiclePlate: string;
   };
+}
+
+export interface SupermarketShelfItem {
+  id: string;
+  storeId: string;
+  name: string;
+  category: string;
+  packSize: string;
+  priceNpr: number;
+  mrpNpr: number;
+  inStock: boolean;
+  stockCount: number;
+  barcode: string;
+  imageUrl?: string;
 }
 
 export interface PartnerMenuItem {

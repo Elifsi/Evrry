@@ -15,10 +15,10 @@
 | Directory | Purpose | Status |
 |---|---|---|
 | `prototype/Phone/` | **Mobile Phone Experience Prototype** (Smartphone UI, UX & Interaction Master) | ✅ **Current & Working** |
-| `apps/consumer/` | Native Android & iOS consumer applications (Google Maps SDK + 3D isometric vehicles) | 🔮 Planned |
+| `apps/consumer/` | Native Android & iOS consumer applications (Google Maps SDK + 3D isometric vehicles) | ✅ **Fully Implemented** |
 | `apps/partner/` | Native Android & iOS partner/merchant applications (KDS, POS, Rider modes) | 🔮 Planned |
 | `apps/web/` | Production web applications (`consumer/`, `partner/`, `admin/`, shared `common/`) | 🔮 Planned |
-| `supabase/` | Centralized shared backend (20 Migrations, 11 Edge Functions, PostGIS, Storage, pg_cron) | ✅ **100% Implemented** |
+| `supabase/` | Centralized shared backend (22 Migrations, 11 Edge Functions, PostGIS, Storage, pg_cron) | ✅ **100% Implemented** |
 
 
 ---
@@ -35,11 +35,14 @@
    - Shared catalog across Electronics, Food, Grocery, Fashion, Hotels, Rides, and Services.
    - Dual interface: voice/chat conversational search and manual **Explore** marketplace.
 
-3. **End-to-End Encrypted Direct Messaging & WebRTC Calling**:
+3. **End-to-End Encrypted Direct Messaging, WebRTC Calling, Stickers & Wallpapers**:
    - Browser-to-browser E2EE chat using Web Cryptography API (ECDH P-256 key agreement + AES-GCM-256).
    - In-memory WebSocket relay server (`server/chat-relay.mjs`) for ciphertext routing.
    - TOFU (Trust On First Use) ECDSA identity signature challenge on socket connect.
    - Peer-to-peer 1:1 WebRTC voice and video calls (`lib/chat/webrtc.ts`) with custom CallOverlay UI.
+   - **Royalty-Free Stickers & Animated Emojis (`StickerSheet.tsx`)**: Google Noto Animated Emojis (Apache 2.0 GIFs) and Twitter Twemoji Stickers (CC-BY 4.0 SVGs).
+   - **Borderless Floating Sticker Bubbles**: Rendered without speech bubble backgrounds, with floating translucent timestamps.
+   - **Per-Chat Wallpaper Customizer (`WallpaperPicker.tsx`)**: 12 curated color/gradient presets + "My Photos" local file reader converting photos to persistent data URLs, overlaid with an **18% dark tint scrim** (`linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18))`) to guarantee text readability.
 
 4. **Ride Booking & Simulation**:
    - Fare estimation, pickup/destination selection, vehicle tier picking.
@@ -101,7 +104,7 @@ This starts both the Next.js frontend (port 3000) and the WebSocket relay (port 
 cd prototype/Phone
 npm run lint         # ESLint check
 npx tsc --noEmit     # TypeScript typecheck
-npm run test         # Vitest unit + integration tests (97 tests, 15 suites passing)
+npm run test         # Vitest unit + integration tests (99 tests, 15 suites passing)
 npm run test:e2e     # Playwright browser end-to-end tests
 npm run build        # Production Next.js build (41 routes compiled)
 ```
