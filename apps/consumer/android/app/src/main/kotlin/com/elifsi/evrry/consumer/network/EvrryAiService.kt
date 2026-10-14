@@ -88,7 +88,7 @@ data class SetPersonaRpcParams(
 
 @Singleton
 class EvrryAiService @Inject constructor(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient = io.github.jan.supabase.DefaultSupabaseClient()
 ) {
     /**
      * Send transcribed voice text to the AI Concierge with chosen persona.

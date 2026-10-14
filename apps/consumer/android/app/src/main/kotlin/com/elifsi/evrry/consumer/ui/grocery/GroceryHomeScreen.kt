@@ -31,8 +31,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.elifsi.evrry.consumer.model.*
 import com.elifsi.evrry.consumer.ui.theme.*
 import com.elifsi.evrry.consumer.viewmodel.ExploreViewModel
@@ -553,342 +555,407 @@ fun GroceryHomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // 4. MAIN PRODUCT GRID (2-column Quick Mart grid with headers)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = if (cart.itemCount > 0) 90.dp else 24.dp)
-            ) {
-                // PROMOTIONAL BANNER
-                item(span = { GridItemSpan(2) }) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color.Transparent,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFF059669), Color(0xFF0D9488))
-                                    )
-                                )
-                                .padding(14.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Surface(
-                                        color = Color.White.copy(alpha = 0.2f),
-                                        shape = RoundedCornerShape(20.dp)
-                                    ) {
-                                        Text(
-                                            text = "🥛 MORNING ESSENTIALS",
-                                            fontSize = 9.sp,
-                                            fontWeight = FontWeight.Black,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "Fresh DDC Milk & Bakery",
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                    Text(
-                                        text = "Free delivery on orders above Rs. 1,000",
-                                        fontSize = 11.sp,
-                                        color = Color.White.copy(alpha = 0.85f)
-                                    )
-                                }
-                                Text("🥬", fontSize = 36.sp)
-                            }
-                        }
-                    }
-                }
-
-                // AISLES HORIZONTAL SCROLLER
-                item(span = { GridItemSpan(2) }) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "EXPLORE AISLES",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = EvrryMutedText,
-                            letterSpacing = 0.5.sp
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            GroceryCatalogData.categories.forEach { cat ->
-                                val isSelected = selectedCategory == cat.id
-                                Surface(
-                                    color = if (isSelected) Color(0xFF047857) else Color.White,
-                                    shape = RoundedCornerShape(12.dp),
-                                    border = androidx.compose.foundation.BorderStroke(
-                                        1.dp,
-                                        if (isSelected) Color(0xFF047857) else EvrrySubtleBorder
-                                    ),
-                                    modifier = Modifier
-                                        .clickable { groceryViewModel.selectCategory(cat.id) }
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Text(cat.emoji, fontSize = 14.sp)
-                                        Text(
-                                            text = cat.name,
-                                            fontSize = 12.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                            color = if (isSelected) Color.White else EvrryDarkCharcoal
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // SUBCATEGORY PILLS
-                if (currentCategoryObj.subcategories.isNotEmpty()) {
-                    item(span = { GridItemSpan(2) }) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            currentCategoryObj.subcategories.forEach { subCat ->
-                                val isSubSelected = selectedSubCategory == subCat
-                                Surface(
-                                    color = if (isSubSelected) Color(0xFFECFDF5) else Color.White,
-                                    shape = RoundedCornerShape(20.dp),
-                                    border = androidx.compose.foundation.BorderStroke(
-                                        1.dp,
-                                        if (isSubSelected) Color(0xFF10B981) else EvrrySubtleBorder
-                                    ),
-                                    modifier = Modifier
-                                        .clickable { groceryViewModel.selectSubCategory(subCat) }
-                                ) {
-                                    Text(
-                                        text = subCat,
-                                        fontSize = 11.sp,
-                                        fontWeight = if (isSubSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSubSelected) Color(0xFF047857) else EvrryDarkCharcoal,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // PRODUCTS COUNT HEADER
-                item(span = { GridItemSpan(2) }) {
+            if (searchQuery.isNotEmpty()) {
+                // SEARCH RESULTS MODE (Full-width 2-column grid across entire catalog)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${currentCategoryObj.name} (${filteredProducts.size})",
-                            fontSize = 12.sp,
+                            text = "Search results for \"$searchQuery\"",
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = EvrryDarkCharcoal
                         )
                         Text(
-                            text = "⚡ 12m dispatch",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF047857)
+                            text = "${filteredProducts.size} items",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = EvrryMutedText
                         )
                     }
-                }
 
-                // NO PRODUCTS STATE
-                if (filteredProducts.isEmpty()) {
-                    item(span = { GridItemSpan(2) }) {
-                        Surface(
-                            color = Color.White,
-                            shape = RoundedCornerShape(16.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, EvrrySubtleBorder),
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+                    if (filteredProducts.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(vertical = 40.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text("🔍", fontSize = 32.sp)
-                                Spacer(modifier = Modifier.height(8.dp))
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("🔍", fontSize = 42.sp)
+                                Spacer(modifier = Modifier.height(10.dp))
                                 Text(
-                                    text = "No products found",
+                                    text = "No products found matching \"$searchQuery\"",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = EvrryDarkCharcoal
                                 )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Try searching for milk, eggs, or wai wai",
+                                    text = "Try searching for milk, eggs, wai wai, atta, or fruits",
                                     fontSize = 12.sp,
                                     color = EvrryMutedText
                                 )
                             }
                         }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            contentPadding = PaddingValues(bottom = if (cart.itemCount > 0) 90.dp else 24.dp)
+                        ) {
+                            items(filteredProducts, key = { it.id }) { product ->
+                                GroceryProductCard(
+                                    product = product,
+                                    activeHub = activeHub,
+                                    exploreViewModel = exploreViewModel,
+                                    groceryViewModel = groceryViewModel
+                                )
+                            }
+                        }
                     }
                 }
-
-                // 2-COLUMN PRODUCT CARDS
-                items(filteredProducts, key = { it.id }) { product ->
-                    GroceryProductCard(
-                        product = product,
-                        activeHub = activeHub,
-                        exploreViewModel = exploreViewModel,
-                        groceryViewModel = groceryViewModel
-                    )
-                }
-
-                // 4B. DID YOU FORGET ANYTHING? (Quick Mart Pre-Checkout Impulse Additions)
-                if (impulseItems.isNotEmpty()) {
-                    item(span = { GridItemSpan(2) }) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp)
-                            ) {
+            } else {
+                // BLINKIT SIGNATURE DUAL-PANE PLP ARCHITECTURE
+                // Left Pane: Vertical Category Sidebar / Rail (82dp)
+                // Right Pane: Sticky Subcategory Chips + 2-Column Product Grid
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    // 1. LEFT CATEGORY SIDEBAR RAIL
+                    Surface(
+                        color = Color(0xFFF8FAFC),
+                        modifier = Modifier
+                            .width(82.dp)
+                            .fillMaxHeight(),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, EvrrySubtleBorder)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                top = 2.dp,
+                                bottom = if (cart.itemCount > 0) 90.dp else 24.dp
+                            )
+                        ) {
+                            items(GroceryCatalogData.categories, key = { it.id }) { cat ->
+                                val isSelected = selectedCategory == cat.id
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                        .clickable { groceryViewModel.selectCategory(cat.id) }
+                                        .background(if (isSelected) Color.White else Color.Transparent)
+                                        .padding(vertical = 8.dp, horizontal = 2.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    // Blinkit Left Active Green Indicator Strip
+                                    Box(
+                                        modifier = Modifier
+                                            .width(3.5.dp)
+                                            .height(34.dp)
+                                            .clip(RoundedCornerShape(topEnd = 3.dp, bottomEnd = 3.dp))
+                                            .background(if (isSelected) Color(0xFF047857) else Color.Transparent)
+                                    )
+
+                                    Spacer(modifier = Modifier.width(3.dp))
+
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = if (isSelected) Color(0xFFECFDF5) else Color.White,
+                                            border = androidx.compose.foundation.BorderStroke(
+                                                1.dp,
+                                                if (isSelected) Color(0xFFA7F3D0) else EvrrySubtleBorder
+                                            ),
+                                            modifier = Modifier.size(42.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Text(cat.emoji, fontSize = 20.sp)
+                                            }
+                                        }
+
+                                        Text(
+                                            text = cat.name,
+                                            fontSize = 9.5.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) Color(0xFF047857) else EvrryDarkCharcoal,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                            lineHeight = 11.sp
+                                        )
+                                    }
+                                }
+
+                                HorizontalDivider(
+                                    color = EvrrySubtleBorder.copy(alpha = 0.4f),
+                                    thickness = 0.5.dp
+                                )
+                            }
+                        }
+                    }
+
+                    // 2. RIGHT PRODUCT LISTING PANE
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(horizontal = 8.dp)
+                    ) {
+                        // Sticky Subcategory Chips
+                        if (currentCategoryObj.subcategories.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                currentCategoryObj.subcategories.forEach { subCat ->
+                                    val isSubSelected = selectedSubCategory == subCat
+                                    Surface(
+                                        color = if (isSubSelected) Color(0xFFECFDF5) else Color.White,
+                                        shape = RoundedCornerShape(16.dp),
+                                        border = androidx.compose.foundation.BorderStroke(
+                                            1.dp,
+                                            if (isSubSelected) Color(0xFF10B981) else EvrrySubtleBorder
+                                        ),
+                                        modifier = Modifier.clickable { groceryViewModel.selectSubCategory(subCat) }
+                                    ) {
+                                        Text(
+                                            text = subCat,
+                                            fontSize = 11.sp,
+                                            fontWeight = if (isSubSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSubSelected) Color(0xFF047857) else EvrryDarkCharcoal,
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Aisle Header & ETA
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${currentCategoryObj.name} (${filteredProducts.size})",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EvrryDarkCharcoal
+                            )
+                            Text(
+                                text = "⚡ 10-12m dispatch",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF047857)
+                            )
+                        }
+
+                        if (filteredProducts.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(vertical = 40.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("🛍️", fontSize = 36.sp)
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "DID YOU FORGET ANYTHING? ⚡",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = EvrryMutedText,
-                                        letterSpacing = 0.5.sp
+                                        text = "No products in this subcategory",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = EvrryDarkCharcoal
                                     )
                                     Text(
-                                        text = "Quick Add",
+                                        text = "Select 'All' or browse another aisle",
                                         fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF047857)
+                                        color = EvrryMutedText
+                                    )
+                                }
+                            }
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(
+                                    top = 2.dp,
+                                    bottom = if (cart.itemCount > 0) 90.dp else 24.dp
+                                )
+                            ) {
+                                items(filteredProducts, key = { it.id }) { product ->
+                                    GroceryProductCard(
+                                        product = product,
+                                        activeHub = activeHub,
+                                        exploreViewModel = exploreViewModel,
+                                        groceryViewModel = groceryViewModel
                                     )
                                 }
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    impulseItems.forEach { item ->
-                                        val impulseCatalogItem = CatalogItem(
-                                            id = item.id,
-                                            vertical = "grocery",
-                                            title = item.title,
-                                            subtitle = "${item.packSize} • ${item.brand}",
-                                            priceNpr = item.priceNpr,
-                                            originalPriceNpr = item.mrpNpr,
-                                            vendorName = activeHub.name,
-                                            vendorId = activeHub.id,
-                                            rating = 4.9,
-                                            etaMinutes = activeHub.etaMinutes,
-                                            tags = item.tags
-                                        )
-                                        Surface(
-                                            color = Color.White,
-                                            shape = RoundedCornerShape(14.dp),
+                                // 4B. DID YOU FORGET ANYTHING? (Pre-checkout impulse additions)
+                                if (impulseItems.isNotEmpty()) {
+                                    item(span = { GridItemSpan(2) }) {
+                                        Column(
                                             modifier = Modifier
-                                                .width(145.dp)
-                                                .border(1.dp, EvrrySubtleBorder, RoundedCornerShape(14.dp))
+                                                .fillMaxWidth()
+                                                .padding(top = 10.dp, bottom = 4.dp)
                                         ) {
-                                            Column(
-                                                modifier = Modifier.padding(10.dp),
-                                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(bottom = 6.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(60.dp)
-                                                        .clip(RoundedCornerShape(8.dp))
-                                                        .background(Color(0xFFF1F5F9)),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    Text(
-                                                        text = when (item.categoryId) {
-                                                            "dairy" -> "🥛"
-                                                            "produce" -> "🥦"
-                                                            "instant" -> "🍜"
-                                                            "personal" -> "🧴"
-                                                            "bakery" -> "🍞"
-                                                            else -> "🛍️"
-                                                        },
-                                                        fontSize = 28.sp
-                                                    )
-                                                }
                                                 Text(
-                                                    text = item.packSize,
-                                                    fontSize = 9.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = EvrryMutedText
+                                                    text = "DID YOU FORGET ANYTHING? ⚡",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = EvrryMutedText,
+                                                    letterSpacing = 0.5.sp
                                                 )
                                                 Text(
-                                                    text = item.title,
-                                                    fontSize = 11.sp,
+                                                    text = "Quick Add",
+                                                    fontSize = 10.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = EvrryDarkCharcoal,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
+                                                    color = Color(0xFF047857)
                                                 )
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        text = "Rs ${item.priceNpr.toInt()}",
-                                                        fontSize = 12.sp,
-                                                        fontWeight = FontWeight.Black,
-                                                        color = EvrryDarkCharcoal
+                                            }
+
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .horizontalScroll(rememberScrollState()),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                impulseItems.forEach { item ->
+                                                    val impulseCatalogItem = CatalogItem(
+                                                        id = item.id,
+                                                        vertical = "grocery",
+                                                        title = item.title,
+                                                        subtitle = "${item.packSize} • ${item.brand}",
+                                                        priceNpr = item.priceNpr,
+                                                        originalPriceNpr = item.mrpNpr,
+                                                        vendorName = activeHub.name,
+                                                        vendorId = activeHub.id,
+                                                        rating = 4.9,
+                                                        etaMinutes = activeHub.etaMinutes,
+                                                        tags = item.tags
                                                     )
                                                     Surface(
                                                         color = Color.White,
-                                                        shape = RoundedCornerShape(6.dp),
+                                                        shape = RoundedCornerShape(12.dp),
                                                         modifier = Modifier
-                                                            .clickable {
-                                                                if (exploreViewModel.hasConflict(activeHub.id, "grocery")) {
-                                                                    exploreViewModel.clearAndAdd(impulseCatalogItem)
+                                                            .width(130.dp)
+                                                            .border(1.dp, EvrrySubtleBorder, RoundedCornerShape(12.dp))
+                                                    ) {
+                                                        Column(
+                                                            modifier = Modifier.padding(8.dp),
+                                                            verticalArrangement = Arrangement.spacedBy(3.dp)
+                                                        ) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .height(54.dp)
+                                                                    .clip(RoundedCornerShape(8.dp))
+                                                                    .background(Color(0xFFF1F5F9)),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                if (!item.imageUrl.isNullOrBlank()) {
+                                                                    AsyncImage(
+                                                                        model = if (item.imageUrl.startsWith("http")) item.imageUrl else "https://vsdkaijsiuzommgqibse.supabase.co/storage/v1/object/public/catalog/${item.imageUrl}",
+                                                                        contentDescription = item.title,
+                                                                        modifier = Modifier.fillMaxSize().padding(2.dp),
+                                                                        contentScale = ContentScale.Fit
+                                                                    )
                                                                 } else {
-                                                                    exploreViewModel.addToCart(impulseCatalogItem)
+                                                                    Text(
+                                                                        text = when (item.categoryId) {
+                                                                            "dairy" -> "🥛"
+                                                                            "produce" -> "🥦"
+                                                                            "instant" -> "🍜"
+                                                                            "personal" -> "🧴"
+                                                                            "bakery" -> "🍞"
+                                                                            else -> "🛍️"
+                                                                        },
+                                                                        fontSize = 24.sp
+                                                                    )
                                                                 }
                                                             }
-                                                            .border(1.dp, Color(0xFF047857), RoundedCornerShape(6.dp))
-                                                    ) {
-                                                        Text(
-                                                            text = "+ ADD",
-                                                            fontSize = 10.sp,
-                                                            fontWeight = FontWeight.Black,
-                                                            color = Color(0xFF047857),
-                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
-                                                        )
+                                                            Text(
+                                                                text = item.packSize,
+                                                                fontSize = 9.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = EvrryMutedText
+                                                            )
+                                                            Text(
+                                                                text = item.title,
+                                                                fontSize = 11.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = EvrryDarkCharcoal,
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis
+                                                            )
+                                                            Row(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                Text(
+                                                                    text = "Rs ${item.priceNpr.toInt()}",
+                                                                    fontSize = 11.sp,
+                                                                    fontWeight = FontWeight.Black,
+                                                                    color = EvrryDarkCharcoal
+                                                                )
+                                                                Surface(
+                                                                    color = Color.White,
+                                                                    shape = RoundedCornerShape(6.dp),
+                                                                    modifier = Modifier
+                                                                        .clickable {
+                                                                            if (exploreViewModel.hasConflict(activeHub.id, "grocery")) {
+                                                                                exploreViewModel.clearAndAdd(impulseCatalogItem)
+                                                                            } else {
+                                                                                exploreViewModel.addToCart(impulseCatalogItem)
+                                                                            }
+                                                                        }
+                                                                        .border(1.dp, Color(0xFF047857), RoundedCornerShape(6.dp))
+                                                                ) {
+                                                                    Text(
+                                                                        text = "+ ADD",
+                                                                        fontSize = 9.sp,
+                                                                        fontWeight = FontWeight.Black,
+                                                                        color = Color(0xFF047857),
+                                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -901,9 +968,10 @@ fun GroceryHomeScreen(
                 }
             }
         }
+    }
 
-        // 5. PERSISTENT FLOATING BASKET & FREE DELIVERY NUDGE (Express Commerce Standard)
-        if (cart.itemCount > 0) {
+    // 5. PERSISTENT FLOATING BASKET & FREE DELIVERY NUDGE (Express Commerce Standard)
+    if (cart.itemCount > 0) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -1112,19 +1180,46 @@ fun GroceryProductCard(
                     .background(Color(0xFFF1F5F9)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = when (product.categoryId) {
-                        "dairy" -> "🥛"
-                        "produce" -> "🥦"
-                        "instant" -> "🍜"
-                        "staples" -> "🍚"
-                        "beverages" -> "🧃"
-                        "bakery" -> "🍞"
-                        "cleaning" -> "🧼"
-                        else -> "🛍️"
-                    },
-                    fontSize = 38.sp
-                )
+                if (!product.imageUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = if (product.imageUrl.startsWith("http")) product.imageUrl else "https://vsdkaijsiuzommgqibse.supabase.co/storage/v1/object/public/catalog/${product.imageUrl}",
+                        contentDescription = product.title,
+                        modifier = Modifier.fillMaxSize().padding(4.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Text(
+                        text = when (product.categoryId) {
+                            "dairy" -> "🥛"
+                            "produce" -> "🥦"
+                            "instant" -> "🍜"
+                            "staples" -> "🍚"
+                            "beverages" -> "🧃"
+                            "bakery" -> "🍞"
+                            "cleaning" -> "🧼"
+                            else -> "🛍️"
+                        },
+                        fontSize = 34.sp
+                    )
+                }
+
+                // Blinkit 10m Delivery ETA Tag
+                Surface(
+                    color = Color.White.copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(4.dp),
+                    border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFFA7F3D0)),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                ) {
+                    Text(
+                        text = "⚡ 10m",
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF047857),
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                    )
+                }
 
                 if (currentDiscount > 0) {
                     Surface(
@@ -1132,11 +1227,11 @@ fun GroceryProductCard(
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .padding(6.dp)
+                            .padding(4.dp)
                     ) {
                         Text(
                             text = "$currentDiscount% OFF",
-                            fontSize = 9.sp,
+                            fontSize = 8.5.sp,
                             fontWeight = FontWeight.Black,
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -1151,20 +1246,20 @@ fun GroceryProductCard(
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(6.dp)
+                            .padding(4.dp)
                     ) {
                         Text(
                             text = "Only $currentStock left",
-                            fontSize = 9.sp,
+                            fontSize = 8.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFB45309),
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // Pack Size Badge or Variant Selector Pills (Express Quick Mart Single-Card Variant Switcher)
             if (product.variants.size > 1) {
@@ -1202,7 +1297,7 @@ fun GroceryProductCard(
                 ) {
                     Text(
                         text = currentPackSize,
-                        fontSize = 10.sp,
+                        fontSize = 9.5.sp,
                         fontWeight = FontWeight.Bold,
                         color = EvrryMutedText,
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -1210,23 +1305,24 @@ fun GroceryProductCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
-            // Title & Brand
+            // Title & Brand (Blinkit 2-line uniform height)
             Text(
                 text = product.title,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = EvrryDarkCharcoal,
                 maxLines = 2,
+                minLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                lineHeight = 16.sp
+                lineHeight = 15.sp
             )
 
             if (product.titleNe != null) {
                 Text(
                     text = product.titleNe,
-                    fontSize = 10.sp,
+                    fontSize = 9.5.sp,
                     color = EvrryMutedText,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

@@ -152,7 +152,7 @@ object GroceryCatalogData {
             id = "beverages",
             name = "Cold Drinks & Juices",
             nameNe = "पेय पदार्थ",
-            emoji = "ice",
+            emoji = "🧃",
             subcategories = listOf("All", "Soft Drinks", "Real Juices", "Tea & Coffee", "Energy Drinks")
         ),
         GroceryCategory(

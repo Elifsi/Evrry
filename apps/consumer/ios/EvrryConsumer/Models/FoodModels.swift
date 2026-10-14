@@ -27,6 +27,7 @@ public struct Restaurant: Identifiable, Hashable {
     public let operatingHours: String
     public let pickupEtaMinutes: Int
     public let hygieneCert: String
+    public let imageUrl: String?
     
     public init(
         id: String,
@@ -45,7 +46,8 @@ public struct Restaurant: Identifiable, Hashable {
         phone: String = "+977-1-5542199",
         operatingHours: String = "10:00 AM – 10:30 PM (Sun–Sat)",
         pickupEtaMinutes: Int = 15,
-        hygieneCert: String = "DFTQC Nepal Grade A · Certified Clean Kitchen"
+        hygieneCert: String = "DFTQC Nepal Grade A · Certified Clean Kitchen",
+        imageUrl: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -64,6 +66,7 @@ public struct Restaurant: Identifiable, Hashable {
         self.operatingHours = operatingHours
         self.pickupEtaMinutes = pickupEtaMinutes
         self.hygieneCert = hygieneCert
+        self.imageUrl = imageUrl
     }
 }
 

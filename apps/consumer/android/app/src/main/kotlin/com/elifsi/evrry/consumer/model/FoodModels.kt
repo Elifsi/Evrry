@@ -26,7 +26,8 @@ data class Restaurant(
     val phone: String = "+977-1-5542199",
     val operatingHours: String = "10:00 AM – 10:30 PM (Sun–Sat)",
     val pickupEtaMinutes: Int = 15,
-    val hygieneCert: String = "Certified Clean Kitchen · DFTQC Nepal Grade A"
+    val hygieneCert: String = "Certified Clean Kitchen · DFTQC Nepal Grade A",
+    val imageUrl: String? = null
 )
 
 @Serializable

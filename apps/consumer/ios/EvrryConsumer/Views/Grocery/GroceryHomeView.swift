@@ -326,222 +326,279 @@ public struct GroceryHomeView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 6)
                 
-                // 4. MAIN SCROLLABLE CONTENT (Quick Mart 2-column grid + Aisles)
-                ScrollView {
-                    VStack(spacing: 12) {
-                        // PROMO BANNER
-                        ZStack {
-                            LinearGradient(
-                                colors: [Color(red: 0.02, green: 0.59, blue: 0.41), Color(red: 0.05, green: 0.58, blue: 0.53)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
+                if !groceryViewModel.searchQuery.isEmpty {
+                    // SEARCH RESULTS MODE (Full-width 2-column grid across entire catalog)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 10) {
                             HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("🥛 MORNING ESSENTIALS")
-                                        .font(.system(size: 9, weight: .black))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 3)
-                                        .background(Color.white.opacity(0.2))
-                                        .clipShape(Capsule())
-                                    
-                                    Text("Fresh DDC Milk & Bakery")
-                                        .font(.system(size: 15, weight: .bold))
-                                        .foregroundColor(.white)
-                                    
-                                    Text("Free delivery on orders above Rs. 1,000")
-                                        .font(.system(size: 11))
-                                        .foregroundColor(.white.opacity(0.85))
-                                }
+                                Text("Search results for \"\(groceryViewModel.searchQuery)\"")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.evrryDarkCharcoal)
                                 Spacer()
-                                Text("🥬").font(.system(size: 36))
+                                Text("\(filteredProducts.count) items")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.evrryMutedText)
                             }
-                            .padding(14)
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                        
-                        // AISLES HORIZONTAL SCROLLER
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("EXPLORE AISLES")
-                                .font(.system(size: 11, weight: .black))
-                                .foregroundColor(.evrryMutedText)
-                                .padding(.horizontal, 16)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(GroceryCatalogData.categories) { cat in
-                                        let isSelected = groceryViewModel.selectedCategoryId == cat.id
-                                        Button(action: { groceryViewModel.selectCategory(cat.id) }) {
-                                            HStack(spacing: 6) {
-                                                Text(cat.emoji).font(.system(size: 14))
-                                                Text(cat.name)
-                                                    .font(.system(size: 12, weight: isSelected ? .bold : .semibold))
-                                                    .foregroundColor(isSelected ? .white : .evrryDarkCharcoal)
-                                            }
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 8)
-                                            .background(isSelected ? Color(red: 0.02, green: 0.47, blue: 0.34) : Color.white)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(isSelected ? Color(red: 0.02, green: 0.47, blue: 0.34) : Color.evrrySubtleBorder, lineWidth: 1)
-                                            )
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal, 16)
-                            }
-                        }
-                        
-                        // SUBCATEGORY PILLS
-                        if !currentCategoryObj.subcategories.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 6) {
-                                    ForEach(currentCategoryObj.subcategories, id: \.self) { subCat in
-                                        let isSubSelected = groceryViewModel.selectedSubCategory == subCat
-                                        Button(action: { groceryViewModel.selectSubCategory(subCat) }) {
-                                            Text(subCat)
-                                                .font(.system(size: 11, weight: isSubSelected ? .bold : .medium))
-                                                .foregroundColor(isSubSelected ? Color(red: 0.02, green: 0.47, blue: 0.34) : .evrryDarkCharcoal)
-                                                .padding(.horizontal, 10)
-                                                .padding(.vertical, 5)
-                                                .background(isSubSelected ? Color(red: 0.93, green: 0.99, blue: 0.96) : Color.white)
-                                                .clipShape(Capsule())
-                                                .overlay(
-                                                    Capsule()
-                                                        .stroke(isSubSelected ? Color(red: 0.06, green: 0.73, blue: 0.51) : Color.evrrySubtleBorder, lineWidth: 1)
-                                                )
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal, 16)
-                            }
-                        }
-                        
-                        // COUNT HEADER
-                        HStack {
-                            Text("\(currentCategoryObj.name) (\(filteredProducts.count))")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.evrryDarkCharcoal)
-                            Spacer()
-                            Text("⚡ 12m dispatch")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 4)
-                        
-                        // 2-COLUMN PRODUCT GRID
-                        LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(filteredProducts) { product in
-                                GroceryProductCardView(
-                                    product: product,
-                                    activeHub: activeHub,
-                                    groceryViewModel: groceryViewModel,
-                                    exploreViewModel: exploreViewModel
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        
-                        // 4B. DID YOU FORGET ANYTHING? (Quick Mart Pre-Checkout Impulse Additions)
-                        let cartItemIds = Set(exploreViewModel.cart.items.map { $0.item.id })
-                        let impulseItems = groceryViewModel.getImpulseAdditions(cartItemIds: cartItemIds)
-                        if !impulseItems.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("DID YOU FORGET ANYTHING? ⚡")
-                                        .font(.system(size: 11, weight: .black))
-                                        .foregroundColor(.evrryMutedText)
-                                    Spacer()
-                                    Text("Quick Add")
-                                        .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
-                                }
-                                .padding(.horizontal, 16)
-                                
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 10) {
-                                        ForEach(impulseItems) { item in
-                                            let catalogItem = CatalogItem(
-                                                id: item.id,
-                                                vertical: "grocery",
-                                                title: item.title,
-                                                subtitle: "\(item.packSize) • \(item.brand)",
-                                                priceNpr: item.priceNpr,
-                                                originalPriceNpr: item.mrpNpr,
-                                                vendorName: activeHub.name,
-                                                vendorId: activeHub.id,
-                                                rating: 4.9,
-                                                etaMinutes: activeHub.etaMinutes,
-                                                tags: item.tags
-                                            )
-                                            
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                ZStack {
-                                                    Color(red: 0.95, green: 0.96, blue: 0.98)
-                                                    Text(getEmoji(for: item.categoryId))
-                                                        .font(.system(size: 26))
-                                                }
-                                                .frame(width: 130, height: 65)
-                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                
-                                                Text(item.packSize)
-                                                    .font(.system(size: 9, weight: .bold))
-                                                    .foregroundColor(.evrryMutedText)
-                                                
-                                                Text(item.title)
-                                                    .font(.system(size: 11, weight: .bold))
-                                                    .foregroundColor(.evrryDarkCharcoal)
-                                                    .lineLimit(1)
-                                                
-                                                HStack {
-                                                    Text("Rs \(Int(item.priceNpr))")
-                                                        .font(.system(size: 12, weight: .black))
-                                                        .foregroundColor(.evrryDarkCharcoal)
-                                                    Spacer()
-                                                    Button(action: {
-                                                        if exploreViewModel.hasConflict(vendorId: activeHub.id, vertical: "grocery") {
-                                                            exploreViewModel.clearAndAdd(catalogItem)
-                                                        } else {
-                                                            _ = exploreViewModel.addToCart(catalogItem)
-                                                        }
-                                                    }) {
-                                                        Text("+ ADD")
-                                                            .font(.system(size: 10, weight: .black))
-                                                            .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
-                                                            .padding(.horizontal, 6)
-                                                            .padding(.vertical, 3)
-                                                            .background(Color.white)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                                                            .overlay(
-                                                                RoundedRectangle(cornerRadius: 6)
-                                                                    .stroke(Color(red: 0.02, green: 0.47, blue: 0.34), lineWidth: 1)
-                                                            )
-                                                    }
-                                                }
-                                            }
-                                            .padding(10)
-                                            .frame(width: 145)
-                                            .background(Color.white)
-                                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 14)
-                                                    .stroke(Color.evrrySubtleBorder, lineWidth: 1)
-                                            )
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
-                                }
-                            }
+                            .padding(.horizontal, 16)
                             .padding(.top, 8)
+                            
+                            if filteredProducts.isEmpty {
+                                VStack(spacing: 10) {
+                                    Text("🔍").font(.system(size: 42))
+                                    Text("No products found matching \"\(groceryViewModel.searchQuery)\"")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(.evrryDarkCharcoal)
+                                    Text("Try searching for milk, eggs, wai wai, atta, or fruits")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.evrryMutedText)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 50)
+                            } else {
+                                LazyVGrid(columns: columns, spacing: 10) {
+                                    ForEach(filteredProducts) { product in
+                                        GroceryProductCardView(
+                                            product: product,
+                                            activeHub: activeHub,
+                                            groceryViewModel: groceryViewModel,
+                                            exploreViewModel: exploreViewModel
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                            }
+                            
+                            Spacer()
+                                .frame(height: exploreViewModel.cart.itemCount > 0 ? 120 : 30)
                         }
+                    }
+                } else {
+                    // BLINKIT SIGNATURE DUAL-PANE PLP ARCHITECTURE
+                    // Left: Vertical Category Sidebar / Rail (82pt)
+                    // Right: Sticky Subcategory Chips + 2-Column Product Grid
+                    HStack(alignment: .top, spacing: 0) {
+                        // 1. LEFT CATEGORY SIDEBAR RAIL
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 0) {
+                                ForEach(GroceryCatalogData.categories) { cat in
+                                    let isSelected = groceryViewModel.selectedCategoryId == cat.id
+                                    Button(action: { groceryViewModel.selectCategory(cat.id) }) {
+                                        HStack(spacing: 3) {
+                                            // Left Active Green Indicator Strip
+                                            RoundedRectangle(cornerRadius: 3)
+                                                .fill(isSelected ? Color(red: 0.02, green: 0.47, blue: 0.34) : Color.clear)
+                                                .frame(width: 3.5, height: 34)
+                                            
+                                            VStack(spacing: 4) {
+                                                ZStack {
+                                                    Circle()
+                                                        .fill(isSelected ? Color(red: 0.93, green: 0.99, blue: 0.96) : Color.white)
+                                                        .frame(width: 42, height: 42)
+                                                        .overlay(
+                                                            Circle()
+                                                                .stroke(isSelected ? Color(red: 0.65, green: 0.95, blue: 0.82) : Color.evrrySubtleBorder, lineWidth: 1)
+                                                        )
+                                                    Text(cat.emoji)
+                                                        .font(.system(size: 20))
+                                                }
+                                                
+                                                Text(cat.name)
+                                                    .font(.system(size: 9.5, weight: isSelected ? .bold : .medium))
+                                                    .foregroundColor(isSelected ? Color(red: 0.02, green: 0.47, blue: 0.34) : .evrryDarkCharcoal)
+                                                    .multilineTextAlignment(.center)
+                                                    .lineLimit(2)
+                                                    .frame(maxWidth: .infinity)
+                                            }
+                                            .padding(.trailing, 4)
+                                        }
+                                        .padding(.vertical, 8)
+                                        .background(isSelected ? Color.white : Color.clear)
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    Divider()
+                                        .background(Color.evrrySubtleBorder.opacity(0.4))
+                                }
+                                
+                                Spacer()
+                                    .frame(height: exploreViewModel.cart.itemCount > 0 ? 120 : 30)
+                            }
+                        }
+                        .frame(width: 82)
+                        .background(Color(red: 0.97, green: 0.98, blue: 0.99))
+                        .overlay(
+                            Rectangle()
+                                .fill(Color.evrrySubtleBorder)
+                                .frame(width: 1),
+                            alignment: .trailing
+                        )
                         
-                        Spacer()
-                            .frame(height: exploreViewModel.cart.itemCount > 0 ? 120 : 30)
+                        // 2. RIGHT PRODUCT LISTING PANE
+                        VStack(alignment: .leading, spacing: 6) {
+                            // Sticky Subcategory Chips
+                            if !currentCategoryObj.subcategories.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 6) {
+                                        ForEach(currentCategoryObj.subcategories, id: \.self) { subCat in
+                                            let isSubSelected = groceryViewModel.selectedSubCategory == subCat
+                                            Button(action: { groceryViewModel.selectSubCategory(subCat) }) {
+                                                Text(subCat)
+                                                    .font(.system(size: 11, weight: isSubSelected ? .bold : .medium))
+                                                    .foregroundColor(isSubSelected ? Color(red: 0.02, green: 0.47, blue: 0.34) : .evrryDarkCharcoal)
+                                                    .padding(.horizontal, 10)
+                                                    .padding(.vertical, 5)
+                                                    .background(isSubSelected ? Color(red: 0.93, green: 0.99, blue: 0.96) : Color.white)
+                                                    .clipShape(Capsule())
+                                                    .overlay(
+                                                        Capsule()
+                                                            .stroke(isSubSelected ? Color(red: 0.06, green: 0.73, blue: 0.51) : Color.evrrySubtleBorder, lineWidth: 1)
+                                                    )
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.top, 4)
+                                }
+                            }
+                            
+                            // Aisle Header & ETA
+                            HStack {
+                                Text("\(currentCategoryObj.name) (\(filteredProducts.count))")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.evrryDarkCharcoal)
+                                Spacer()
+                                Text("⚡ 10-12m dispatch")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
+                            }
+                            .padding(.horizontal, 8)
+                            
+                            if filteredProducts.isEmpty {
+                                VStack(spacing: 8) {
+                                    Text("🛍️").font(.system(size: 36))
+                                    Text("No products in this subcategory")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(.evrryDarkCharcoal)
+                                    Text("Select 'All' or browse another aisle")
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.evrryMutedText)
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .padding(.vertical, 40)
+                            } else {
+                                ScrollView {
+                                    VStack(spacing: 8) {
+                                        LazyVGrid(columns: columns, spacing: 8) {
+                                            ForEach(filteredProducts) { product in
+                                                GroceryProductCardView(
+                                                    product: product,
+                                                    activeHub: activeHub,
+                                                    groceryViewModel: groceryViewModel,
+                                                    exploreViewModel: exploreViewModel
+                                                )
+                                            }
+                                        }
+                                        .padding(.horizontal, 6)
+                                        
+                                        // 4B. DID YOU FORGET ANYTHING? (Quick Mart Pre-Checkout Impulse Additions)
+                                        let cartItemIds = Set(exploreViewModel.cart.items.map { $0.item.id })
+                                        let impulseItems = groceryViewModel.getImpulseAdditions(cartItemIds: cartItemIds)
+                                        if !impulseItems.isEmpty {
+                                            VStack(alignment: .leading, spacing: 6) {
+                                                HStack {
+                                                    Text("DID YOU FORGET ANYTHING? ⚡")
+                                                        .font(.system(size: 10, weight: .black))
+                                                        .foregroundColor(.evrryMutedText)
+                                                    Spacer()
+                                                    Text("Quick Add")
+                                                        .font(.system(size: 10, weight: .bold))
+                                                        .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
+                                                }
+                                                .padding(.horizontal, 8)
+                                                
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 8) {
+                                                        ForEach(impulseItems) { item in
+                                                            let catalogItem = CatalogItem(
+                                                                id: item.id,
+                                                                vertical: "grocery",
+                                                                title: item.title,
+                                                                subtitle: "\(item.packSize) • \(item.brand)",
+                                                                priceNpr: item.priceNpr,
+                                                                originalPriceNpr: item.mrpNpr,
+                                                                vendorName: activeHub.name,
+                                                                vendorId: activeHub.id,
+                                                                rating: 4.9,
+                                                                etaMinutes: activeHub.etaMinutes,
+                                                                tags: item.tags
+                                                            )
+                                                            
+                                                            VStack(alignment: .leading, spacing: 3) {
+                                                                ZStack {
+                                                                    Color(red: 0.95, green: 0.96, blue: 0.98)
+                                                                    Text(getEmoji(for: item.categoryId))
+                                                                        .font(.system(size: 24))
+                                                                }
+                                                                .frame(width: 120, height: 54)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                
+                                                                Text(item.packSize)
+                                                                    .font(.system(size: 9, weight: .bold))
+                                                                    .foregroundColor(.evrryMutedText)
+                                                                
+                                                                Text(item.title)
+                                                                    .font(.system(size: 11, weight: .bold))
+                                                                    .foregroundColor(.evrryDarkCharcoal)
+                                                                    .lineLimit(1)
+                                                                
+                                                                HStack {
+                                                                    Text("Rs \(Int(item.priceNpr))")
+                                                                        .font(.system(size: 11, weight: .black))
+                                                                        .foregroundColor(.evrryDarkCharcoal)
+                                                                    Spacer()
+                                                                    Button(action: {
+                                                                        if exploreViewModel.hasConflict(vendorId: activeHub.id, vertical: "grocery") {
+                                                                            exploreViewModel.clearAndAdd(catalogItem)
+                                                                        } else {
+                                                                            _ = exploreViewModel.addToCart(catalogItem)
+                                                                        }
+                                                                    }) {
+                                                                        Text("+ ADD")
+                                                                            .font(.system(size: 9, weight: .black))
+                                                                            .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
+                                                                            .padding(.horizontal, 6)
+                                                                            .padding(.vertical, 3)
+                                                                            .background(Color.white)
+                                                                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                                                                            .overlay(
+                                                                                RoundedRectangle(cornerRadius: 6)
+                                                                                    .stroke(Color(red: 0.02, green: 0.47, blue: 0.34), lineWidth: 1)
+                                                                            )
+                                                                    }
+                                                                }
+                                                            }
+                                                            .padding(8)
+                                                            .frame(width: 130)
+                                                            .background(Color.white)
+                                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                            .overlay(
+                                                                RoundedRectangle(cornerRadius: 12)
+                                                                    .stroke(Color.evrrySubtleBorder, lineWidth: 1)
+                                                            )
+                                                        }
+                                                    }
+                                                    .padding(.horizontal, 8)
+                                                }
+                                            }
+                                            .padding(.top, 6)
+                                        }
+                                        
+                                        Spacer()
+                                            .frame(height: exploreViewModel.cart.itemCount > 0 ? 120 : 30)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -731,8 +788,26 @@ struct GroceryProductCardView: View {
             // Thumbnail Container
             ZStack {
                 Color(red: 0.95, green: 0.96, blue: 0.98)
-                Text(getEmoji(for: product.categoryId))
-                    .font(.system(size: 38))
+                if let img = product.imageUrl, !img.isEmpty {
+                    let fullUrl = img.hasPrefix("http") ? img : "https://vsdkaijsiuzommgqibse.supabase.co/storage/v1/object/public/catalog/\(img)"
+                    if let u = URL(string: fullUrl) {
+                        AsyncImage(url: u) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image.resizable().aspectRatio(contentMode: .fit).padding(4)
+                            case .failure, .empty:
+                                Text(getEmoji(for: product.categoryId)).font(.system(size: 38))
+                            @unknown default:
+                                Text(getEmoji(for: product.categoryId)).font(.system(size: 38))
+                            }
+                        }
+                    } else {
+                        Text(getEmoji(for: product.categoryId)).font(.system(size: 38))
+                    }
+                } else {
+                    Text(getEmoji(for: product.categoryId))
+                        .font(.system(size: 38))
+                }
                 
                 if currentDiscount > 0 {
                     VStack {
@@ -751,12 +826,32 @@ struct GroceryProductCardView: View {
                     .padding(6)
                 }
                 
+                // Blinkit 10m Delivery ETA Tag
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text("⚡ 10m")
+                            .font(.system(size: 8.5, weight: .bold))
+                            .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(Color.white.opacity(0.9))
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(Color(red: 0.65, green: 0.95, blue: 0.82), lineWidth: 0.5)
+                            )
+                    }
+                    Spacer()
+                }
+                .padding(4)
+                
                 if isLowStock {
                     VStack {
                         Spacer()
                         HStack {
                             Text("Only \(currentStock) left")
-                                .font(.system(size: 9, weight: .bold))
+                                .font(.system(size: 8.5, weight: .bold))
                                 .foregroundColor(Color(red: 0.71, green: 0.33, blue: 0.04))
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 2)
@@ -765,10 +860,10 @@ struct GroceryProductCardView: View {
                             Spacer()
                         }
                     }
-                    .padding(6)
+                    .padding(4)
                 }
             }
-            .frame(height: 100)
+            .frame(height: 88)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             
             // Pack Size Badge or Variant Selector Pills (Express Quick Mart Single-Card Variant Switcher)

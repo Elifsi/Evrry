@@ -31,7 +31,7 @@ data class UnregisterTokenParams(
 
 @Singleton
 class EvrryPushService @Inject constructor(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient = io.github.jan.supabase.DefaultSupabaseClient()
 ) {
     /**
      * Register or refresh Android FCM registration token.

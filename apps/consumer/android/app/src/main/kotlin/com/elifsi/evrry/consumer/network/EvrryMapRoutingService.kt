@@ -76,7 +76,7 @@ data class SnapResponsePayload(
 
 @Singleton
 class EvrryMapRoutingService @Inject constructor(
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient = io.github.jan.supabase.DefaultSupabaseClient()
 ) {
     /**
      * Calculates the turn-by-turn driving route and encoded polyline between two locations.

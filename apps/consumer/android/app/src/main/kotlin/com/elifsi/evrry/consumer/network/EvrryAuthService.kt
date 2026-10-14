@@ -43,7 +43,7 @@ typealias SendSmsResponse = SendOtpResponse
 
 @Singleton
 class EvrryAuthService @Inject constructor(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient = io.github.jan.supabase.DefaultSupabaseClient()
 ) {
     /**
      * Request a 6-digit WhatsApp OTP verification code for a Nepal mobile number.

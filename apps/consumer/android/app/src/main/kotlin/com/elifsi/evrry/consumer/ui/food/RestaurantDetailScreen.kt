@@ -18,9 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.elifsi.evrry.consumer.model.*
 import com.elifsi.evrry.consumer.ui.theme.*
 import com.elifsi.evrry.consumer.viewmodel.ExploreViewModel
@@ -625,10 +627,19 @@ private fun MenuItemRow(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFEDD5))
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = if (item.veg) "🥗" else "🍗",
-                            fontSize = 26.sp
-                        )
+                        if (!item.imageUrl.isNullOrBlank()) {
+                            AsyncImage(
+                                model = if (item.imageUrl.startsWith("http")) item.imageUrl else "https://vsdkaijsiuzommgqibse.supabase.co/storage/v1/object/public/catalog/${item.imageUrl}",
+                                contentDescription = item.title,
+                                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text(
+                                text = if (item.veg) "🥗" else "🍗",
+                                fontSize = 26.sp
+                            )
+                        }
                     }
                 }
 

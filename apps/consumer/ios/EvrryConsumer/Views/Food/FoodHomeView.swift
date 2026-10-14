@@ -337,6 +337,26 @@ public struct RestaurantCardView: View {
                     )
                     .frame(height: 90)
                     
+                    if let img = restaurant.imageUrl, !img.isEmpty {
+                        let fullUrl = img.hasPrefix("http") ? img : "https://vsdkaijsiuzommgqibse.supabase.co/storage/v1/object/public/catalog/\(img)"
+                        if let u = URL(string: fullUrl) {
+                            AsyncImage(url: u) { phase in
+                                if let image = phase.image {
+                                    image.resizable().aspectRatio(contentMode: .fill)
+                                }
+                            }
+                            .frame(height: 90)
+                            .clipped()
+                            
+                            LinearGradient(
+                                colors: [Color.black.opacity(0.45), Color.black.opacity(0.2)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 90)
+                        }
+                    }
+                    
                     HStack {
                         if restaurant.isPureVeg {
                             Text("PURE VEG")

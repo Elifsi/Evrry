@@ -58,6 +58,23 @@ fun PhoneInputScreen(
     var passwordInput by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
 
+    // Forgot Password Dialog State
+    var showForgotPasswordDialog by remember { mutableStateOf(false) }
+    var forgotPasswordInput by remember { mutableStateOf("") }
+    var forgotPasswordStatus by remember { mutableStateOf<String?>(null) }
+    var isResettingPassword by remember { mutableStateOf(false) }
+
+    // Prevent app from abruptly exiting on Back press in Email or Login mode
+    androidx.activity.compose.BackHandler(enabled = isEmailAuth || !isSignUp || showForgotPasswordDialog) {
+        if (showForgotPasswordDialog) {
+            showForgotPasswordDialog = false
+        } else if (isEmailAuth) {
+            isEmailAuth = false
+        } else if (!isSignUp) {
+            isSignUp = true
+        }
+    }
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -220,7 +237,29 @@ fun PhoneInputScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(22.dp))
+                if (!isSignUp) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        TextButton(
+                            onClick = {
+                                forgotPasswordInput = phoneInput
+                                forgotPasswordStatus = null
+                                showForgotPasswordDialog = true
+                            },
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "Forgot Password?",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = EvrryPrimaryBlue
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(22.dp))
+                }
 
                 // PRIMARY CTA: Triggers WhatsApp OTP verification on phone number
                 val isPhoneValid = phoneInput.length == 10 && passwordInput.length >= 6
@@ -324,7 +363,29 @@ fun PhoneInputScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(22.dp))
+                if (!isSignUp) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        TextButton(
+                            onClick = {
+                                forgotPasswordInput = emailInput
+                                forgotPasswordStatus = null
+                                showForgotPasswordDialog = true
+                            },
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "Forgot Password?",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = EvrryPrimaryBlue
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(22.dp))
+                }
 
                 // PRIMARY CTA FOR EMAIL
                 val isEmailValid = emailInput.contains("@") && emailInput.contains(".") && passwordInput.length >= 6
@@ -513,5 +574,96 @@ fun PhoneInputScreen(
                 color = EvrryMutedText
             )
         }
+    }
+
+    if (showForgotPasswordDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showForgotPasswordDialog = false
+                forgotPasswordStatus = null
+            },
+            title = {
+                Text(
+                    text = "Reset Your Password",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = EvrryDarkCharcoal
+                )
+            },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Enter your registered phone number or email address. We'll send an OTP verification link to reset your account password.",
+                        fontSize = 13.sp,
+                        color = EvrryMutedText,
+                        lineHeight = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                    OutlinedTextField(
+                        value = forgotPasswordInput,
+                        onValueChange = { forgotPasswordInput = it },
+                        placeholder = { Text("98XXXXXXXX or name@example.com", fontSize = 13.sp, color = Color(0xFF94A3B8)) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.White,
+                            focusedContainerColor = Color.White,
+                            unfocusedBorderColor = EvrrySubtleBorder,
+                            focusedBorderColor = EvrryPrimaryBlue
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (forgotPasswordStatus != null) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Surface(
+                            color = Color(0xFFECFDF5),
+                            shape = RoundedCornerShape(8.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFA7F3D0)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = forgotPasswordStatus ?: "",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF047857),
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        isResettingPassword = true
+                        viewModel.requestPasswordReset(forgotPasswordInput) { msg ->
+                            isResettingPassword = false
+                            forgotPasswordStatus = msg
+                        }
+                    },
+                    enabled = forgotPasswordInput.isNotBlank() && !isResettingPassword,
+                    colors = ButtonDefaults.buttonColors(containerColor = EvrryPrimaryBlue),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    if (isResettingPassword) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text("Send Reset Link", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showForgotPasswordDialog = false
+                        forgotPasswordStatus = null
+                    }
+                ) {
+                    Text("Close", color = EvrryMutedText, fontSize = 13.sp)
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(20.dp)
+        )
     }
 }

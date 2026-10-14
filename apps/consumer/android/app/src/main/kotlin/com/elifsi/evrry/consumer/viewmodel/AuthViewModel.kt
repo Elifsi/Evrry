@@ -275,12 +275,21 @@ class AuthViewModel(
         }
     }
 
-    fun requestPasswordReset(onResult: (String) -> Unit) {
+    fun requestPasswordReset(identifier: String = "", onResult: (String) -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
             delay(400)
             _isLoading.value = false
-            onResult("Password reset verification link & OTP sent to your registered contact.")
+            val dest = if (identifier.isNotBlank()) {
+                if (identifier.contains("@")) "email ($identifier)" else "phone (+977 ${identifier.trim().takeLast(10)})"
+            } else if (_userProfile.value.email.isNotBlank()) {
+                "email (${_userProfile.value.email})"
+            } else if (_userProfile.value.phone.isNotBlank()) {
+                "phone (${_userProfile.value.phone})"
+            } else {
+                "your registered contact"
+            }
+            onResult("Password reset verification link & OTP sent to $dest.")
         }
     }
 

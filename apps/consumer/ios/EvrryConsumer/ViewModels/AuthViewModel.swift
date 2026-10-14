@@ -335,11 +335,20 @@ public final class AuthViewModel: ObservableObject {
         }
     }
 
-    public func requestPasswordReset(onResult: @escaping (Bool, String) -> Void) {
+    public func requestPasswordReset(identifier: String = "", onResult: @escaping (Bool, String) -> Void) {
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
-            let target = userProfile.email.isEmpty ? userProfile.phone : userProfile.email
-            onResult(true, "Password reset instructions sent to \(target)!")
+            let target: String
+            if !identifier.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                target = identifier
+            } else if !userProfile.email.isEmpty {
+                target = userProfile.email
+            } else {
+                target = userProfile.phone
+            }
+            let isEmail = target.contains("@")
+            let dest = isEmail ? "email (\(target))" : "phone (+977 \(target.suffix(10)))"
+            onResult(true, "Password reset instructions sent to \(dest)!")
         }
     }
 

@@ -23,6 +23,12 @@ public struct PhoneInputView: View {
     @State private var passwordInput: String = ""
     @State private var showPassword: Bool = false
     
+    // Forgot Password State
+    @State private var showForgotPasswordSheet: Bool = false
+    @State private var forgotPasswordInput: String = ""
+    @State private var forgotPasswordStatus: String? = nil
+    @State private var isResetting: Bool = false
+    
     public init(viewModel: AuthViewModel, onContinue: @escaping () -> Void) {
         self.viewModel = viewModel
         self.onContinue = onContinue
@@ -135,7 +141,24 @@ public struct PhoneInputView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1.2))
                         
-                        Spacer().frame(height: 22)
+                        if !isSignUp {
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    forgotPasswordInput = viewModel.phoneNumber
+                                    forgotPasswordStatus = nil
+                                    showForgotPasswordSheet = true
+                                }) {
+                                    Text("Forgot Password?")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(.evrryPrimaryBlue)
+                                }
+                            }
+                            .padding(.top, 6)
+                            Spacer().frame(height: 12)
+                        } else {
+                            Spacer().frame(height: 22)
+                        }
                         
                         // PRIMARY CTA: Sends WhatsApp OTP on phone number
                         let isPhoneValid = viewModel.phoneNumber.count == 10 && passwordInput.count >= 6
@@ -214,7 +237,24 @@ public struct PhoneInputView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.evrrySubtleBorder, lineWidth: 1.2))
                         
-                        Spacer().frame(height: 22)
+                        if !isSignUp {
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    forgotPasswordInput = emailInput
+                                    forgotPasswordStatus = nil
+                                    showForgotPasswordSheet = true
+                                }) {
+                                    Text("Forgot Password?")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(.evrryPrimaryBlue)
+                                }
+                            }
+                            .padding(.top, 6)
+                            Spacer().frame(height: 12)
+                        } else {
+                            Spacer().frame(height: 22)
+                        }
                         
                         let isEmailValid = emailInput.contains("@") && emailInput.contains(".") && passwordInput.count >= 6
                         Button(action: {
@@ -362,5 +402,72 @@ public struct PhoneInputView: View {
             }
         }
         .background(Color.evrryBgTop.ignoresSafeArea())
+        .sheet(isPresented: $showForgotPasswordSheet) {
+            NavigationView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Enter your registered mobile number or email address. We'll send an OTP verification link to reset your account password.")
+                        .font(.system(size: 13))
+                        .foregroundColor(.evrryMutedText)
+                        .lineSpacing(3)
+                    
+                    TextField("98XXXXXXXX or name@example.com", text: $forgotPasswordInput)
+                        .padding()
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.evrrySubtleBorder, lineWidth: 1))
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                    
+                    if let status = forgotPasswordStatus {
+                        HStack {
+                            Text(status)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Color(red: 0.02, green: 0.47, blue: 0.34))
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(red: 0.93, green: 0.99, blue: 0.96))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                    
+                    Button(action: {
+                        isResetting = true
+                        viewModel.requestPasswordReset(identifier: forgotPasswordInput) { _, msg in
+                            isResetting = false
+                            forgotPasswordStatus = msg
+                        }
+                    }) {
+                        HStack {
+                            if isResetting {
+                                ProgressView().tint(.white)
+                            } else {
+                                Text("Send Reset Instructions")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(forgotPasswordInput.trimmingCharacters(in: .whitespaces).isEmpty ? Color.evrryPrimaryBlue.opacity(0.4) : Color.evrryPrimaryBlue)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .disabled(forgotPasswordInput.trimmingCharacters(in: .whitespaces).isEmpty || isResetting)
+                    
+                    Spacer()
+                }
+                .padding(20)
+                .navigationTitle("Reset Password")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") {
+                            showForgotPasswordSheet = false
+                            forgotPasswordStatus = nil
+                        }
+                        .foregroundColor(.evrryPrimaryBlue)
+                    }
+                }
+            }
+        }
     }
 }

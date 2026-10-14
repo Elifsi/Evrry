@@ -83,7 +83,7 @@ data class PaymentVerifyResponse(
 
 @Singleton
 class EvrryPaymentService @Inject constructor(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient = io.github.jan.supabase.DefaultSupabaseClient()
 ) {
     /**
      * Request gateway payment session (eSewa HMAC, Khalti pidx, or Fonepay QR).

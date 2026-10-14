@@ -77,7 +77,7 @@ data class SendEmailResponse(
 
 @Singleton
 class EvrryEmailService @Inject constructor(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient = io.github.jan.supabase.DefaultSupabaseClient()
 ) {
     /**
      * Request an order invoice email to be dispatched to the customer.
