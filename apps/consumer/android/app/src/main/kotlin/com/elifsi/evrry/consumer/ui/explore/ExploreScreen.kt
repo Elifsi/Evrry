@@ -244,33 +244,9 @@ fun ExploreScreen(
             }
         }
 
-        // 4. "AVAILABLE NOW" SECTION HEADER
+        // 4. Spacer before verticals
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "AVAILABLE NOW",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    color = EvrryMutedText,
-                    letterSpacing = 1.sp
-                )
-                Surface(
-                    color = Color(0xFFEFF6FF),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = "Live",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = EvrryPrimaryBlue,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(4.dp))
         }
 
         // 5. VERTICAL 1: CITY RIDES (Car Icon, Blue/Indigo Gradient)
@@ -338,7 +314,7 @@ fun ExploreScreen(
                                 }
                             }
                             Text(
-                                text = "Pathao & Uber style · Bike, Auto & Cab",
+                                text = "Bike, Auto & Cab across Kathmandu",
                                 fontSize = 11.sp,
                                 color = EvrryMutedText,
                                 modifier = Modifier.padding(top = 1.dp)
@@ -600,65 +576,6 @@ fun ExploreScreen(
             }
         }
 
-        // 8. SECONDARY SERVICES (COMING SOON)
-        item {
-            Column(modifier = Modifier.padding(top = 6.dp)) {
-                Text(
-                    text = "MORE SERVICES COMING SOON",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = EvrryMutedText,
-                    letterSpacing = 0.5.sp,
-                    modifier = Modifier.padding(bottom = 10.dp)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    val secondary = listOf(
-                        Triple("Electronics", "Gadgets", Icons.Default.Computer),
-                        Triple("Fashion", "Apparel", Icons.Default.Checkroom),
-                        Triple("Services", "Repairs", Icons.Default.Build)
-                    )
-
-                    secondary.forEach { (title, subtitle, icon) ->
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = Color.White,
-                            shadowElevation = 1.dp,
-                            modifier = Modifier
-                                .weight(1f)
-                                .border(1.dp, EvrrySubtleBorder, RoundedCornerShape(16.dp))
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(12.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = title,
-                                    tint = EvrryMutedText,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = title,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = EvrryDarkCharcoal
-                                )
-                                Text(
-                                    text = subtitle,
-                                    fontSize = 9.sp,
-                                    color = EvrryMutedText
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     if (showLocationPicker) {

@@ -76,7 +76,7 @@ This document describes the comprehensive system architecture of the **evrry** S
 - **Purpose**: Dedicated to merchant onboarding, catalog & inventory management, order fulfillment, kitchen printing, earnings tracking, and administrative governance.
 
 ### D. Centralized Shared Backend — `supabase/`
-- **Status**: ✅ **100% Implemented** (20 SQL Migrations, 11 Edge Functions, PostGIS, Storage, pg_cron).
+- **Status**: ✅ **100% Implemented** (23 SQL Migrations, 12 Edge Functions, PostGIS, Storage, pg_cron).
 - Centralized shared backend providing PostgreSQL, Authentication, Row Level Security, Realtime channels, and Edge Functions for all production clients.
 
 ---

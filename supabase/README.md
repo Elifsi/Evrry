@@ -31,9 +31,9 @@ Partner Web ───────────┤    ├── PostgreSQL Databas
 
 ---
 
-## Core Domain Models (100% Implemented — 20 Migrations)
+## Core Domain Models (100% Implemented — 23 Migrations)
 
-All 20 forward-only migrations are active in [`migrations/`](./migrations/):
+All 23 forward-only migrations are active in [`migrations/`](./migrations/):
 1. **Extensions & Enums** (`0001`): PostGIS, pgcrypto, btree_gist, pgvector, role enums.
 2. **Administrative Spine of Nepal** (`0002`): 7 provinces, 77 districts, 753 municipalities & wards.
 3. **Identity, Partners & Multi-Store** (`0003`): 1:N multi-business profiles, bank accounts, KYC docs.
@@ -54,6 +54,9 @@ All 20 forward-only migrations are active in [`migrations/`](./migrations/):
 18. **Updated Delivery & Ledger Pricing** (`0018`): Rs 1000 free threshold, Rs 50 3km base, Rs 15/km, Rs 40 driver payout + 80% split, Rs 10 platform fee, marketing subsidy.
 19. **WhatsApp Cloud API OTP** (`0019`): Primary WhatsApp OTP dispatch with automatic domestic SMS failover.
 20. **Automated pg_cron Schedules** (`0020`): Midnight ConnectIPS bank settlement & automated cleanup cron jobs.
+21. **Call Logs** (`0021`): WebRTC voice/video call logging with duration, status, and signaling metadata.
+22. **Chat Wallpapers & Stickers** (`0022`): Per-chat wallpaper URLs, sticker/animated emoji message types.
+23. **Grocery Supermarket Extensions** (`0023`): Grocery-specific inventory, catalog, and supermarket fulfillment schema extensions.
    - `auth.users` linked to `public.profiles` (consumers) and `public.partner_profiles` (businesses).
    - `public.partner_members` mapping staff members to partner entities with RBAC roles.
 

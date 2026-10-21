@@ -19,9 +19,9 @@ The **Consumer Mobile Applications** deliver the customer-facing **evrry** Super
 
 ### A. Dual Native Parallel Architecture
 Android and iOS native apps share a strict 1:1 structural parity across their domain models, network services, ViewModels, and UI layouts:
-- **Models**: `AuthState`, `CatalogItem`, `CartState`, `FoodModels` (`Restaurant`, `FoodMenuItem`), `RideBooking`, `VoiceModel`.
-- **Services**: `EvrryAuthService`, `EvrryAiService`, `EvrryMapRoutingService`, `EvrryPaymentService`, `EvrryPushService`, `EvrryEmailService`.
-- **ViewModels**: `AuthViewModel`, `HomeViewModel`, `ExploreViewModel`, `FoodViewModel`, `RideViewModel`, `ActivityViewModel`.
+- **Models**: `AuthState`, `CatalogItem`, `CartState`, `FoodModels`, `GroceryModels`, `RideBooking`, `VoiceModel`, `SocialChatModels`, `SnapModels`, `CallModels`, `LoyaltyModels`, `PaymentMethodModels`, `BackupAndSettingsModels`, `LocationModels`, `OnboardingPage`.
+- **Services**: `EvrryAuthService`, `EvrryAiService`, `EvrryMapRoutingService`, `EvrryPaymentService`, `EvrryPushService`, `EvrryEmailService`, `EvrryE2EEManager`, `LocationService`, `SavedAddressRepository`/`SavedAddressService`.
+- **ViewModels**: `AuthViewModel`, `HomeViewModel`, `ExploreViewModel`, `FoodViewModel`, `GroceryViewModel`, `RideViewModel`, `ActivityViewModel`, `ChatViewModel`, `CallViewModel`, `CameraViewModel`, `LoyaltyViewModel`.
 - **Navigation Hosts**: `EvrryConsumerNavHost` (Android Jetpack Navigation) $\longleftrightarrow$ `MainCoordinatorView` (iOS SwiftUI NavigationStack).
 
 ### B. Full Food Delivery Vertical (Deliverr & Enatega Architecture)
@@ -93,6 +93,19 @@ The AI Concierge features an authentic, clean ChatGPT-style model switch without
 | **Emoji & Sticker Sheet** | `EmojiStickerSheet` / `EmojiStickerSheetView` | 3-tab sheet (Unicode Emojis, Google Noto Animated GIFs, Twemoji SVGs) |
 | **Chat Wallpaper Picker** | `WallpaperPickerSheet` / `WallpaperPickerView` | 12 presets + "My Photos" device gallery picker with 20% dark scrim |
 | **Activity** | `ActivityScreen` / `ActivityView` | Active orders filter, clickable cards opening `OrderDetailsScreen`, live status badges |
+| **Splash** | `SplashScreen` / `SplashView` | Animated brand splash with auto-transition to onboarding or auth |
+| **Onboarding** | `OnboardingScreen` / `OnboardingView` | 3-page swipeable intro carousel with skip and continue |
+| **Grocery Home** | `GroceryHomeScreen` / `GroceryHomeView` | Blinkit-style dual-pane PLP, category browser, search, delivery ETA |
+| **Grocery Store Detail** | `GroceryStoreDetailScreen` / `GroceryStoreDetailView` | Store inventory grid, item cards, add-to-cart, category filters |
+| **Location Picker** | `LocationPickerSheet` / `LocationPickerSheetView` | Map-based address selection with search and saved address integration |
+| **Profile** | `ProfileScreen` / `ProfileView` | User avatar with tier ring, account details, address book, payment methods, loyalty, vouchers, privacy |
+| **Account Details** | `AccountDetailsScreen` | Phone verification, name editing, email, profile photo |
+| **Address Book** | `AddressBookScreen` / `AddressBookView` | Saved delivery addresses (Home, Work, custom) with add/edit/delete |
+| **Payment Methods** | `PaymentMethodsScreen` / `PaymentMethodsView` | Linked eSewa, Khalti accounts and payment preferences |
+| **Vouchers & Referrals** | `VouchersReferralsScreen` / `VouchersReferralsView` | Active promo codes, referral sharing, earned credits |
+| **Loyalty Rewards** | `LoyaltyRewardsScreen` / `LoyaltyRewardsView` | Points balance, league tier, streak tracking, redeemable rewards |
+| **Privacy & Security** | `PrivacySecurityScreen` / `PrivacySecurityView` | Change password, two-factor, data export, account deletion |
+| **Live Tracking Map** | `EvrryLiveTrackingMap` / `EvrryLiveTrackingMapView` | Animated route polyline, vehicle marker, ETA updates for orders and rides |
 | **Settings** | `SettingsScreen` / `SettingsView` | Profile info, Ellie Mini / Ellie Pro model selector, dark mode toggle, terms & logout |
 
 ---

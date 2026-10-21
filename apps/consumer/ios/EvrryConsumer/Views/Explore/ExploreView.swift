@@ -159,21 +159,7 @@ public struct ExploreView: View {
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.evrrySubtleBorder, lineWidth: 1))
                 .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
 
-                // 4. "AVAILABLE NOW" SECTION HEADER
-                HStack {
-                    Text("AVAILABLE NOW")
-                        .font(.system(size: 11, weight: .black))
-                        .foregroundColor(.evrryMutedText)
-                        .tracking(1.0)
-                    Spacer()
-                    Text("Live")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.evrryPrimaryBlue)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color(red: 0.94, green: 0.96, blue: 1.0))
-                        .clipShape(Capsule())
-                }
+                Spacer().frame(height: 4)
 
                 // 5. VERTICAL 1: CITY RIDES
                 Button(action: onNavigateToRides) {
@@ -204,7 +190,7 @@ public struct ExploreView: View {
                                     .background(Color(red: 0.94, green: 0.96, blue: 1.0))
                                     .clipShape(RoundedRectangle(cornerRadius: 6))
                             }
-                            Text("Pathao & Uber style · Bike, Auto & Cab")
+                            Text("Bike, Auto & Cab across Kathmandu")
                                 .font(.system(size: 11))
                                 .foregroundColor(.evrryMutedText)
                             Text("Rs 65 base · Tap to book")
@@ -255,7 +241,7 @@ public struct ExploreView: View {
                                     .background(Color(red: 1.0, green: 0.95, blue: 0.93))
                                     .clipShape(RoundedRectangle(cornerRadius: 6))
                             }
-                            Text("DoorDash & Bhojdeals style · 40+ restaurants")
+                            Text("40+ restaurants near you")
                                 .font(.system(size: 11))
                                 .foregroundColor(.evrryMutedText)
                             Text("Momos, Burgers & Newari sets")
@@ -306,7 +292,7 @@ public struct ExploreView: View {
                                     .background(Color(red: 0.92, green: 0.98, blue: 0.95))
                                     .clipShape(RoundedRectangle(cornerRadius: 6))
                             }
-                            Text("Blinkit style · 500+ daily essentials")
+                            Text("500+ daily essentials")
                                 .font(.system(size: 11))
                                 .foregroundColor(.evrryMutedText)
                             Text("Milk, eggs, vegetables & staples")
@@ -329,22 +315,7 @@ public struct ExploreView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
 
-                // 8. SECONDARY SERVICES (Teasers for upcoming expansion)
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("MORE SERVICES COMING SOON")
-                        .font(.system(size: 11, weight: .black))
-                        .foregroundColor(.evrryMutedText)
-                        .tracking(1.0)
-
-                    HStack(spacing: 10) {
-                        ServiceTeaserPill(emoji: "📱", title: "Electronics")
-                        ServiceTeaserPill(emoji: "👕", title: "Fashion")
-                        ServiceTeaserPill(emoji: "🧹", title: "Home Care")
-                    }
-                }
-                .padding(.top, 4)
-
-                // 9. POPULAR ITEMS
+                // 8. POPULAR ITEMS
                 VStack(alignment: .leading, spacing: 12) {
                     Text("POPULAR PICKS")
                         .font(.system(size: 11, weight: .black))
@@ -428,22 +399,3 @@ public struct ExploreView: View {
     }
 }
 
-private struct ServiceTeaserPill: View {
-    let emoji: String
-    let title: String
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Text(emoji)
-                .font(.system(size: 14))
-            Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.evrryMutedText)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.evrrySubtleBorder, lineWidth: 1))
-    }
-}

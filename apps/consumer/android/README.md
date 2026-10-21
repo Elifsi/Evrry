@@ -47,7 +47,18 @@ apps/consumer/android/
             │   ├── CartState.kt      # DeliveryAddress, DefaultAddresses, special instructions, breakdown
             │   ├── RideBooking.kt    # Ride options (Moto, Cab, Comfort), status & OTP
             │   ├── SocialChatModels.kt # SocialMessage (stickerUrl), SocialChat (wallpaperUrl), MessageContentType
-            │   └── SnapModels.kt     # SnapItem, MemoryTab, QrScanResult, QrParser, CameraFilterLens
+            │   ├── SnapModels.kt     # SnapItem, MemoryTab, QrScanResult, QrParser, CameraFilterLens
+            │   ├── CallModels.kt     # Voice/video call state, WebRTC session models
+            │   ├── GroceryModels.kt  # GroceryStore, GroceryCategory, GroceryItem, inventory models
+            │   ├── LoyaltyModels.kt  # League tiers, points balance, streak tracking, rewards
+            │   ├── PaymentMethodModels.kt # Linked payment accounts (eSewa, Khalti), payment preferences
+            │   └── BackupAndSettingsModels.kt # Chat backup, app settings, notification preferences
+            ├── location/
+            │   ├── LocationModel.kt          # Address, coordinates, and geocoding models
+            │   ├── LocationService.kt        # FusedLocationProvider GPS service
+            │   └── SavedAddressRepository.kt # Persisted address CRUD (Home, Work, custom)
+            ├── security/
+            │   └── EvrryE2EEManager.kt       # Signal-grade ECDH P-256 key exchange and encryption
             ├── network/
             │   ├── EvrryAuthService.kt       # Nepal phone + WhatsApp OTP & SMS fallback
             │   ├── EvrryAiService.kt         # WebRTC voice room & AI concierge proxy
@@ -63,7 +74,10 @@ apps/consumer/android/
             │   ├── RideViewModel.kt      # Vehicle selection, fare estimate, ride OTP
             │   ├── ActivityViewModel.kt  # Orders & rides progress stepper, driver HUD, receipts, addOrder
             │   ├── ChatViewModel.kt      # E2EE chat, stickers, voice notes, wallpaper StateFlow, sendImage
-            │   └── CameraViewModel.kt    # Snapchat camera state, lenses, 3-tab memories, PIN vault
+            │   ├── CameraViewModel.kt    # Snapchat camera state, lenses, 3-tab memories, PIN vault
+            │   ├── CallViewModel.kt      # WebRTC call state, VoIP session management
+            │   ├── GroceryViewModel.kt   # Grocery store browsing, category filtering, cart integration
+            │   └── LoyaltyViewModel.kt   # Points tracking, league progression, reward redemption
             └── ui/
                 ├── theme/
                 │   └── Color.kt          # EvrryNavy, EvrryBlue, EvrryEmerald, EvrryPaper tokens
@@ -72,34 +86,54 @@ apps/consumer/android/
                 ├── navigation/
                 │   └── EvrryConsumerNavHost.kt # NavHost with 5 tabs + food + camera + memories routes
                 ├── auth/
+                │   ├── SplashScreen.kt     # Animated brand splash with auto-transition
                 │   ├── PhoneInputScreen.kt # +977 phone input, WhatsApp/SMS toggle
                 │   └── OtpVerifyScreen.kt  # 6-box OTP entry, resend timer, in-app back '<'
+                ├── onboarding/
+                │   ├── OnboardingPage.kt   # Individual onboarding page model
+                │   └── OnboardingScreen.kt # 3-page swipeable intro carousel with skip and continue
                 ├── camera/
                 │   ├── CameraScreen.kt     # Viewfinder, vertical tool dock, QR reticle, lenses, shutter
                 │   ├── MemoriesScreen.kt   # 3 tabs (Snaps, Roll, My Locker with PIN keypad), photo modal
                 │   └── SnapReviewScreen.kt # Caption overlay, save to memories, story, WhatsApp friend share
                 ├── home/
                 │   └── HomeAgentScreen.kt  # Minimal model switcher [Ellie Mini ▾], voice orb
+                ├── location/
+                │   └── LocationPickerSheet.kt # Map-based address selection with search
                 ├── explore/
                 │   └── ExploreScreen.kt    # Multi-vendor grid, food banner, floating cart bar
                 ├── food/
                 │   ├── FoodHomeScreen.kt   # Cuisines scroller, quick filters, restaurant cards
                 │   ├── RestaurantDetailScreen.kt # Menu sections, veg dots, conflict alert, customize trigger
-                │   └── FoodItemCustomizationSheet.kt # Modal sheet with options, addons, notes, stepper
+                │   ├── FoodItemCustomizationSheet.kt # Modal sheet with options, addons, notes, stepper
+                │   └── FoodSpecializedSheets.kt # Cuisine filter sheets, dietary preference selectors
                 ├── chat/
                 │   ├── ConversationListScreen.kt # WhatsApp-grade chat hub, 24-hr status carousel, camera shortcut
                 │   ├── StoryViewerDialog.kt    # Fullscreen 5s story viewer with press-to-pause, reactions, delete, and reply
                 │   ├── ChatRoomScreen.kt       # 1:1 chat, wallpaper container with 20% scrim, borderless stickers
-                │   ├── CallScreen.kt           # WebRTC 1:1 voice & video calling HUD
+                │   ├── VoiceCallScreen.kt      # WebRTC 1:1 voice calling HUD with duration timer
+                │   ├── VideoCallScreen.kt      # WebRTC 1:1 video calling with camera/mic toggles
                 │   ├── EmojiStickerSheet.kt    # 3-tab sheet (Unicode Emojis, Noto GIFs, Twemoji SVGs via Coil)
                 │   └── WallpaperPickerSheet.kt # 12 presets + "My Photos" gallery picker via GetContent()
                 ├── orders/
                 │   ├── OrderSuccessScreen.kt # Animated confirmation badge, order ID, ETA, track CTA
                 │   └── OrderDetailsScreen.kt # 5-stage stepper, live route map, driver HUD, itemized receipt
                 ├── rides/
-                │   └── RideBookingScreen.kt# Fare cards, ride confirmation, driver status, OTP 1234
+                │   ├── RideBookingScreen.kt# Fare cards, ride confirmation, driver status, OTP 1234
+                │   └── RideRatingSheet.kt  # Post-ride driver rating and feedback sheet
                 ├── cart/
                 │   └── CartCheckoutScreen.kt # Address selector, notes, platform fee, direct eSewa/Khalti/COD
+                ├── grocery/
+                │   ├── GroceryHomeScreen.kt      # Blinkit-style dual-pane PLP, category browser
+                │   └── GroceryStoreDetailScreen.kt # Store inventory grid, item cards, category filters
+                ├── profile/
+                │   ├── ProfileScreen.kt          # User avatar, tier ring, sub-screen navigation
+                │   ├── AccountDetailsScreen.kt   # Phone verification, name editing, email, photo
+                │   ├── AddressBookScreen.kt      # Saved delivery addresses (Home, Work, custom)
+                │   ├── PaymentMethodsScreen.kt   # Linked eSewa, Khalti accounts
+                │   ├── VouchersReferralsScreen.kt # Promo codes, referral sharing
+                │   ├── LoyaltyRewardsScreen.kt   # Points, league tier, streak, rewards
+                │   └── PrivacySecurityScreen.kt  # Change password, 2FA, data export
                 ├── activity/
                 │   └── ActivityScreen.kt   # Active orders filter, clickable cards opening OrderDetailsScreen
                 └── settings/

@@ -4,7 +4,7 @@ This directory is designated for server-side TypeScript Edge Functions running o
 
 ## Status
 
-✅ **Active Production Functions (100% Implemented — 11 Functions)**:
+✅ **Active Production Functions (100% Implemented — 12 Functions)**:
 - `send-otp/`: Primary Meta WhatsApp Cloud API OTP dispatcher with automatic Sparrow/Aakash domestic SMS failover.
 - `send-sms/`: Domestic Nepal SMS OTP engine supporting Sparrow SMS, Aakash SMS, and Dev Mock Mode.
 - `whatsapp-webhook/`: Meta WhatsApp Cloud API webhook handler for real-time delivery status receipts (sent, delivered, read) and inbound responses.
@@ -61,10 +61,9 @@ This directory is designated for server-side TypeScript Edge Functions running o
 
 ---
 
-## 3. Other Planned Edge Functions
+## 3. Additional Active Edge Functions
 
-* **`ai-concierge-chat/`**: Server-side tool execution loop for catalog queries and order drafting (protects Gemini / Claude / OpenRouter API keys).
-* **`push-notify/`**: High-priority push notifications to Android (FCM) and iOS (APNs) clients for new incoming orders and driver updates.
+* **`create-call-session/`**: WebRTC call session creator for 1:1 voice and video calling, generating room tokens and managing call state transitions.
 
 ---
 

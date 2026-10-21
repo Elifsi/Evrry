@@ -15,10 +15,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 > | `prototype/Phone/` | Mobile Phone Experience Prototype (Next.js — reference only, NOT the active dev target) | ✅ Reference |
 > | `apps/consumer/android/` | **🎯 Consumer Android App** (Kotlin · Jetpack Compose · Hilt · Google Maps SDK) | ✅ Fully Wired & Compiling |
 > | `apps/consumer/ios/` | **🎯 Consumer iOS App** (Swift · SwiftUI · CoreLocation · Google Maps SDK) | ✅ Fully Wired |
-> | `apps/partner/android/` | **🎯 Partner Android App** (Kotlin · Jetpack Compose · Unified Adaptive 4-Role App) | 🚀 4-Phase Dev Blueprint |
-> | `apps/partner/ios/` | **🎯 Partner iOS App** (Swift · SwiftUI · Unified Adaptive 4-Role App) | 🚀 4-Phase Dev Blueprint |
+> | `apps/partner/android/` | **🎯 Partner Android App** (Kotlin · Jetpack Compose · Unified Adaptive 4-Role App) | ✅ Fully Wired & Compiling |
+> | `apps/partner/ios/` | **🎯 Partner iOS App** (Swift · SwiftUI · Unified Adaptive 4-Role App) | ✅ Fully Wired |
 > | `apps/web/` | Production web applications (`consumer/`, `partner/`, `admin/`, shared `common/`; MapLibre GL maps) | 🔮 Planned |
-> | `supabase/` | Centralized shared backend (22 Migrations, 11 Edge Functions, PostGIS, Storage, pg_cron) | ✅ 100% Implemented |
+> | `supabase/` | Centralized shared backend (23 Migrations, 12 Edge Functions, PostGIS, Storage, pg_cron) | ✅ 100% Implemented |
 >
 > **⚠️ 4-PARTNER UNIFIED ADAPTIVE APP ARCHITECTURE:**
 > The Partner app (`apps/partner/android/` & `apps/partner/ios/`) is **ONE unified adaptive application** featuring shared Phone+OTP auth, a visual Role Selection screen on onboarding, and a top-bar 1-tap Role Switcher for multi-venture Nepali operators:

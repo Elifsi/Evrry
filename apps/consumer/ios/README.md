@@ -30,18 +30,27 @@ apps/consumer/ios/EvrryConsumer/
 │   ├── AuthState.swift       # Auth state machine, OTP status, zero-wallet user profile
 │   ├── VoiceModel.swift      # ChatGPT models: Ellie Mini & Ellie Pro
 │   ├── FoodModels.swift      # Restaurant, FoodMenuItem, options, addons & Nepal catalog
+│   ├── GroceryModels.swift   # GroceryStore, GroceryCategory, GroceryItem, inventory models
 │   ├── CatalogItem.swift     # Multi-vendor catalog items & services
 │   ├── CartState.swift       # DeliveryAddress, DefaultAddresses, special instructions, cart breakdown
 │   ├── RideBooking.swift     # Vehicle types (Moto, Cab, Comfort), status & OTP
 │   ├── SocialChatModels.swift # SocialMessage (stickerUrl), SocialChat (wallpaperUrl), MessageContentType
-│   └── SnapModels.swift      # SnapItem, MemoryTab, QrScanResult, CameraFilterLens, QrParser
+│   ├── SnapModels.swift      # SnapItem, MemoryTab, QrScanResult, CameraFilterLens, QrParser
+│   ├── CallModels.swift      # Voice/video call state, WebRTC session models
+│   ├── LocationModels.swift  # Address, coordinates, and geocoding models
+│   ├── LoyaltyModels.swift   # League tiers, points balance, streak tracking, rewards
+│   ├── PaymentMethodModels.swift # Linked payment accounts and preferences
+│   └── OnboardingPage.swift  # Individual onboarding page model
 ├── Services/
 │   ├── EvrryAuthService.swift       # Phone OTP & WhatsApp/SMS dispatch
 │   ├── EvrryAiService.swift         # WebRTC voice room & Ellie concierge
 │   ├── EvrryMapRoutingService.swift # OSRM routing & ETA calculations
 │   ├── EvrryPaymentService.swift    # eSewa, Khalti, Fonepay payment intents
 │   ├── EvrryPushService.swift       # APNs / FCM token registration
-│   └── EvrryEmailService.swift      # Resend notification gateway proxy
+│   ├── EvrryEmailService.swift      # Resend notification gateway proxy
+│   ├── EvrryE2EEManager.swift       # Signal-grade ECDH P-256 key exchange
+│   ├── LocationService.swift        # CoreLocation CLLocationManager GPS service
+│   └── SavedAddressService.swift    # Persisted address CRUD (Home, Work, custom)
 ├── ViewModels/
 │   ├── AuthViewModel.swift      # Phone validation, 45s cooldown, OTP verification (zero wallet)
 │   ├── HomeViewModel.swift      # ChatGPT Ellie model switcher, orb state, transcripts
@@ -50,14 +59,20 @@ apps/consumer/ios/EvrryConsumer/
 │   ├── RideViewModel.swift      # Vehicle selection, fare estimate, ride OTP
 │   ├── ActivityViewModel.swift  # Orders & rides progress stepper, driver HUD, receipts, addOrder
 │   ├── ChatViewModel.swift      # E2EE chat, stickers, voice notes, wallpaperByChat, sendImage
-│   └── CameraViewModel.swift    # Snapchat camera state, lenses, 3-tab memories, PIN vault
+│   ├── CameraViewModel.swift    # Snapchat camera state, lenses, 3-tab memories, PIN vault
+│   ├── CallViewModel.swift      # WebRTC call state, VoIP session management
+│   ├── GroceryViewModel.swift   # Grocery store browsing, category filtering, cart integration
+│   └── LoyaltyViewModel.swift   # Points tracking, league progression, reward redemption
 └── Views/
     ├── Theme/
     │   ├── EvrryColors.swift     # Brand navy, blue, emerald, paper, slate
-    │   └── EvrryComponents.swift # EvrryTopBar with in-app back '<' (44x44 pt), BottomNavBar, Buttons
+    │   ├── EvrryComponents.swift # EvrryTopBar with in-app back '<' (44x44 pt), BottomNavBar, Buttons
+    │   └── EvrryLiveTrackingMapView.swift # Animated route polyline, vehicle marker, ETA updates
     ├── Navigation/
     │   └── MainCoordinatorView.swift # SwiftUI NavigationStack coordinating all routes & order flows
     ├── Auth/
+    │   ├── SplashView.swift      # Animated brand splash with auto-transition
+    │   ├── OnboardingView.swift  # 3-page swipeable intro carousel with skip and continue
     │   ├── PhoneInputView.swift  # +977 phone input, WhatsApp/SMS toggle
     │   └── OtpVerifyView.swift   # 6-box OTP entry, resend timer, in-app back '<'
     ├── Camera/
@@ -68,24 +83,39 @@ apps/consumer/ios/EvrryConsumer/
     │   └── HomeAgentView.swift   # Minimal model switcher [Ellie Mini ▾], voice orb
     ├── Explore/
     │   └── ExploreView.swift     # Multi-vendor grid, food banner, floating cart bar
+    ├── Location/
+    │   └── LocationPickerSheetView.swift # Map-based address selection with search
     ├── Food/
     │   ├── FoodHomeView.swift    # Cuisines scroller, quick filters, restaurant cards
     │   ├── RestaurantDetailView.swift # Menu sections, veg dots, conflict alert, customize trigger
-    │   └── FoodItemCustomizationSheet.swift # Modal sheet with options, addons, notes, stepper
+    │   ├── FoodItemCustomizationSheet.swift # Modal sheet with options, addons, notes, stepper
+    │   └── FoodSpecializedSheets.swift # Cuisine filter sheets, dietary preference selectors
+    ├── Grocery/
+    │   ├── GroceryHomeView.swift       # Blinkit-style dual-pane PLP, category browser
+    │   └── GroceryStoreDetailView.swift # Store inventory grid, item cards, category filters
     ├── Chat/
     │   ├── ConversationListView.swift   # WhatsApp-grade chat hub, 24-hr status carousel, camera shortcut
     │   ├── StoryViewerView.swift        # Fullscreen 5s story viewer with press-to-pause, reactions, delete, and reply
     │   ├── ChatRoomView.swift           # 1:1 chat, wallpaper container with 20% scrim, borderless stickers
-    │   ├── CallView.swift               # WebRTC 1:1 voice & video calling view
+    │   ├── VoiceCallView.swift           # WebRTC 1:1 voice calling with duration timer
+    │   ├── VideoCallView.swift           # WebRTC 1:1 video calling with camera/mic toggles
     │   ├── EmojiStickerSheetView.swift  # 3-tab sheet (Unicode Emojis, Noto GIFs, Twemoji SVGs)
     │   └── WallpaperPickerView.swift    # 12 presets + "My Photos" gallery picker via PhotosUI
     ├── Orders/
     │   ├── OrderSuccessView.swift# Animated confirmation badge, order ID, ETA, track CTA
     │   └── OrderDetailsView.swift# 5-stage stepper, live route map, driver HUD, itemized receipt
     ├── Rides/
-    │   └── RideBookingView.swift # Fare cards, ride confirmation, driver status
+    │   ├── RideBookingView.swift # Fare cards, ride confirmation, driver status
+    │   └── RideRatingSheetView.swift # Post-ride driver rating and feedback sheet
     ├── Cart/
     │   └── CartCheckoutView.swift# Address selector, notes, platform fee, direct eSewa/Khalti/COD
+    ├── Profile/
+    │   ├── ProfileView.swift           # User avatar, tier ring, sub-screen navigation
+    │   ├── AddressBookView.swift       # Saved delivery addresses (Home, Work, custom)
+    │   ├── PaymentMethodsView.swift    # Linked eSewa, Khalti accounts
+    │   ├── VouchersReferralsView.swift # Promo codes, referral sharing
+    │   ├── LoyaltyRewardsView.swift    # Points, league tier, streak, rewards
+    │   └── PrivacySecurityView.swift   # Change password, 2FA, data export
     ├── Activity/
     │   └── ActivityView.swift    # Active orders filter, clickable cards opening OrderDetailsView
     └── Settings/

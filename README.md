@@ -17,9 +17,9 @@
 > | **Super App Specification** | [`docs/architecture/superapp-specification.md`](./docs/architecture/superapp-specification.md) | 📐 **Architecture Blueprint** | Full multi-vertical specification, tech stack protocols, and official repository reference matrix. |
 > | **Mobile Phone Prototype** | [`prototype/Phone/`](./prototype/Phone/) | ✅ **Current & Runnable** | Mobile phone UX simulation & smartphone UI golden master (Next.js 16) with catalog, voice AI concierge, E2EE chat, WebRTC, and ride/order simulations. |
 > | **Consumer Mobile Apps** | [`apps/consumer/`](./apps/consumer/) | ✅ **Implemented** | Parallel native apps: [Android (Kotlin/Compose)](./apps/consumer/android/) and [iOS (Swift/SwiftUI)](./apps/consumer/ios/) with unified UI, in-app `<` navigation, Nepal WhatsApp OTP, and Ellie voice agent. |
-> | **Partner / Merchant Apps** | [`apps/partner/`](./apps/partner/) | 🔮 Planned | Production business apps: [Android (KDS/POS)](./apps/partner/android/) and [iOS (Merchant)](./apps/partner/ios/). |
+> | **Partner / Merchant Apps** | [`apps/partner/`](./apps/partner/) | ✅ **Implemented** | Unified adaptive 4-role native apps: [Android (Kotlin/Compose)](./apps/partner/android/) and [iOS (Swift/SwiftUI)](./apps/partner/ios/) with Driver, Restaurant KDS, Grocery Supermarket, and Courier roles. |
 > | **Production Web Portals** | [`apps/web/`](./apps/web/) | 🔮 Planned | Production responsive web apps: [Consumer](./apps/web/consumer/) (MapLibre GL maps), [Partner Ops](./apps/web/partner/), [Superadmin Console](./apps/web/admin/), and [Shared SDK](./apps/web/common/). |
-> | **Centralized Shared Backend** | [`supabase/`](./supabase/) | ✅ **100% Implemented** | Shared Supabase backend: [22 Migrations](./supabase/migrations/), [11 Edge Functions](./supabase/functions/), PostGIS, Storage, and pg_cron. |
+> | **Centralized Shared Backend** | [`supabase/`](./supabase/) | ✅ **100% Implemented** | Shared Supabase backend: [23 Migrations](./supabase/migrations/), [12 Edge Functions](./supabase/functions/), PostGIS, Storage, and pg_cron. |
 > | **Mapping & 3D Tracking** | [`docs/architecture/mapping-routing-and-vehicle-tracking.md`](./docs/architecture/mapping-routing-and-vehicle-tracking.md) | 📚 Complete | Google Maps SDK + 3D isometric vehicles on mobile; zero-cost MapLibre GL on web; self-hosted OSRM routing. |
 > | **Self-Hosting & Hardware Sizing** | [`docs/architecture/self-hosting-and-infrastructure-guide.md`](./docs/architecture/self-hosting-and-infrastructure-guide.md) | 📚 Complete | Docker architecture, resource sizing (RAM, CPU, NVMe), image storage, and backup disaster recovery. |
 > | **Unified Mobile UI & Navigation** | [`docs/architecture/unified-mobile-ui-and-ios-navigation.md`](./docs/architecture/unified-mobile-ui-and-ios-navigation.md) | 📚 Complete | Strict 1:1 UI parity between Android and iOS with mandatory iOS in-app back buttons. |
@@ -80,9 +80,9 @@ Evrry/
 │   │   ├── ios/               # Native iOS app (Swift + SwiftUI + Food Delivery)
 │   │   └── README.md          # Consumer architecture & requirements
 │   │
-│   ├── partner/               # Business & merchant applications
-│   │   ├── android/           # Native Android app (KDS, POS, Rider mode)
-│   │   ├── ios/               # Native iOS app (iPad merchant counter)
+│   ├── partner/               # Business & merchant applications (✅ Fully Implemented)
+│   │   ├── android/           # Native Android app (Unified 4-Role: Driver, KDS, Grocery, Courier)
+│   │   ├── ios/               # Native iOS app (Unified 4-Role: Driver, KDS, Grocery, Courier)
 │   │   └── README.md          # Partner capabilities & workflows
 │   │
 │   └── web/                   # Production web portals
@@ -95,8 +95,8 @@ Evrry/
 ├── supabase/                  ← ✅ SHARED BACKEND INFRASTRUCTURE (100% Implemented)
 │   ├── config.toml            # Local Supabase CLI configuration
 │   ├── seed.sql               # Local development seed data
-│   ├── migrations/            # 22 version-controlled SQL migrations with strict RLS
-│   └── functions/             # 11 server-side Edge Functions (payments, payouts, AI, routing)
+│   ├── migrations/            # 23 version-controlled SQL migrations with strict RLS
+│   └── functions/             # 12 server-side Edge Functions (payments, payouts, AI, routing, calls)
 │
 ├── docs/                      ← 📚 PLATFORM DOCUMENTATION
 │   ├── architecture/          # System, Consumer, Partner, Payments, Payouts
